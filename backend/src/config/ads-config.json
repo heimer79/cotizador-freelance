@@ -1,0 +1,52 @@
+{
+  "espacios": [
+    {
+      "id": "banner-superior-cotizaciones",
+      "tipo": "pauta_directa",
+      "ubicacion": "lista-cotizaciones",
+      "posicion": "superior",
+      "activo": true,
+      "anunciante": null,
+      "fallback": "adsense"
+    },
+    {
+      "id": "adsense-editor-cotizacion",
+      "tipo": "adsense",
+      "ubicacion": "editor-cotizacion",
+      "posicion": "entre-contenido",
+      "activo": true,
+      "anunciante": null,
+      "fallback": "adsense",
+      "adsense_slot": null
+    },
+    {
+      "id": "entre-contenido-catalogo",
+      "tipo": "pauta_directa",
+      "ubicacion": "catalogo-servicios",
+      "posicion": "entre-contenido",
+      "activo": true,
+      "anunciante": null,
+      "fallback": "oculto"
+    },
+    {
+      "id": "adsense-clientes",
+      "tipo": "adsense",
+      "ubicacion": "gestion-clientes",
+      "posicion": "superior",
+      "activo": true,
+      "anunciante": null,
+      "fallback": "adsense",
+      "adsense_slot": null
+    },
+    {
+      "id": "adsense-perfil",
+      "tipo": "adsense",
+      "ubicacion": "perfil",
+      "posicion": "superior",
+      "activo": true,
+      "anunciante": null,
+      "fallback": "adsense",
+      "adsense_slot": null
+    }
+  ]
+}
