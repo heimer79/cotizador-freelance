@@ -1,6 +1,6 @@
 # Contrato: API HTTP del backend (Express)
 
-El frontend (sin framework) habla con el backend exclusivamente por esta
+El frontend (Vue 3 + Vite) habla con el backend exclusivamente por esta
 API. No hay autenticación (una instalación = un freelancer, sin cuentas de
 usuario, según la spec) ni versión de API (`v1` implícito, no se expone en
 la URL porque no hay necesidad de convivir con una versión anterior).
@@ -44,6 +44,11 @@ GET    /api/presupuestos               → 200 Presupuesto[] (resumen: numero, f
 GET    /api/presupuestos/:id           → 200 Presupuesto completo (con lineas[] y totales calculados)
 POST   /api/presupuestos               body: NuevoPresupuesto           → 201 Presupuesto creado (con numero ya asignado)
 PUT    /api/presupuestos/:id           body: PresupuestoEditable        → 200 Presupuesto actualizado (recalcula totales)
+
+PresupuestoEditable: { clienteTipo?, retencionActivada?, retencionPorcentaje? }
+  - clienteTipo: "empresa" o "particular" (actualiza la copia congelada del tipo de cliente en el presupuesto; permite corregir el tipo sin crear uno nuevo — Historia 1, escenario 3)
+  - retencionActivada: true/false
+  - retencionPorcentaje: 11 o 10
 POST   /api/presupuestos/:id/lineas    body: { descripcion, cantidad, precioUnitario, origen, servicioId? } → 201 línea creada + totales recalculados
 PUT    /api/presupuestos/:id/lineas/:lineaId   body: idem                → 200 línea actualizada + totales recalculados
 DELETE /api/presupuestos/:id/lineas/:lineaId   → 204 + totales recalculados

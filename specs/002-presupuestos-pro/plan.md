@@ -6,7 +6,7 @@
 
 ## Summary
 
-PresupuestosPro v1 es una aplicación web que un freelancer colombiano abre en
+PresupuestosPro v0 es una aplicación web que un freelancer colombiano abre en
 su navegador —móvil o escritorio— para crear presupuestos con cálculo
 automático de IVA y retención en la fuente, numerarlos por año y descargarlos
 como PDF. Por decisión explícita del usuario, el backend se construye con
@@ -214,14 +214,18 @@ tests/
 ```
 
 **Structure Decision**: `backend/` y `frontend/` son carpetas de código
-separadas por claridad, pero se despliegan como **un único servicio**: el
-propio Express sirve los ficheros estáticos de `frontend/` con
-`express.static`, además de exponer la API bajo `/api/*`. No hay un segundo
-proceso, ni un segundo hosting, ni nada que coordinar en el despliegue — es
-el mismo patrón de "un solo servicio (servidor+frontend)" validado como
-simple. `backend/calculo.js` se mantiene sin dependencias de Express ni de
-la base de datos para poder probarse con `node --test` de forma aislada.
+separadas por claridad, pero se despliegan como **un único servicio**: en
+producción, Express sirve el build estático generado por Vite
+(`frontend/dist/`) con `express.static`, además de exponer la API bajo
+`/api/*`. No hay un segundo proceso, ni un segundo hosting, ni nada que
+coordinar en el despliegue — es el mismo patrón de "un solo servicio
+(servidor+frontend)" validado como simple, solo que ahora el frontend tiene
+un paso de build previo (Vite) en vez de ser servido tal cual.
+`backend/calculo.js` se mantiene sin dependencias de Express ni de la base
+de datos para poder probarse con `node --test` de forma aislada.
 
 ## Complexity Tracking
 
-*Sin violaciones de la constitution; esta sección no aplica.*
+| Violación | Por qué es necesaria | Alternativa más simple descartada |
+|---|---|---|
+| Frontend con framework (Vue 3) y build step (Vite) en vez de HTML/JS plano | Decisión explícita del usuario tras valorar los frameworks de frontend mejor valorados (ver research.md, sección 4); prioriza mantenibilidad y reactividad de la UI sobre la mínima pieza posible, de forma análoga a cuando ya priorizó backend con base de datos sobre `localStorage`. | HTML/CSS/JS vanilla sin build (decisión original del plan) — se descartó porque el usuario pidió explícitamente un framework de frontend bien valorado. |

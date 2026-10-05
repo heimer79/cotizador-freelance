@@ -105,7 +105,7 @@ Como freelancer, quiero mantener un catálogo de mis servicios habituales con un
 - **FR-007**: El sistema MUST numerar los presupuestos automáticamente con el formato AAAA-NNN (por ejemplo, 2026-001) en el momento de crear/guardar el presupuesto por primera vez (no al generar el PDF), reiniciando el contador cada año natural.
 - **FR-008**: El sistema MUST mostrar en cada presupuesto la fecha de emisión y una fecha de validez de 30 días naturales desde la emisión.
 - **FR-009**: El sistema MUST permitir editar o eliminar cualquier línea de un presupuesto mientras no se haya generado su PDF, y también después, recalculando los importes.
-- **FR-010**: El sistema MUST generar un PDF descargable con el logo (o su estado por defecto), los datos del freelancer y del cliente, el número de presupuesto, la fecha de emisión, la fecha de validez, la tabla de líneas y el desglose de base imponible, IVA, retención (si aplica) y total.
+- **FR-010**: El sistema MUST generar un PDF descargable con el logo (o, si no hay logo, el nombre del freelancer como cabecera de texto), los datos del freelancer y del cliente, el número de presupuesto, la fecha de emisión, la fecha de validez, la tabla de líneas y el desglose de base imponible, IVA, retención (si aplica) y total.
 - **FR-011**: El sistema MUST impedir la generación del PDF de un presupuesto sin líneas y MUST avisar al freelancer del motivo.
 - **FR-012**: El sistema MUST conservar el perfil, el catálogo y todos los presupuestos entre sesiones, de forma que sigan disponibles la próxima vez que el freelancer abra la aplicación.
 - **FR-013**: El sistema MUST mantener fijos, sin posibilidad de edición en esta versión, el tipo de IVA (19 %) y las dos opciones de retención en la fuente (11 % y 10 %).

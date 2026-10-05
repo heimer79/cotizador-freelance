@@ -59,12 +59,12 @@ referenciar al catálogo en vivo.
 | numero | TEXT (`AAAA-NNN`) | Sí, único | Asignado de forma inmutable al crear la fila (FR-007, FR-014); nunca se actualiza después |
 | fecha_emision | TEXT (ISO date) | Sí | Fecha de creación/guardado inicial |
 | fecha_validez | TEXT (ISO date) | Sí | `fecha_emision + 30 días naturales` (FR-008) |
-| cliente_id | INTEGER | Sí | Referencia a `clientes.id` (para poder reabrir el presupuesto desde el listado y enlazarlo con su cliente original) |
+| cliente_id | INTEGER | Sí | Referencia lógica a `clientes.id` (para poder reabrir el presupuesto desde el listado y enlazarlo con su cliente original). **Sin constraint FOREIGN KEY** en el esquema: el borrado de un cliente (`DELETE /api/clientes/:id`) devuelve `204` sin que SQLite lo impida, y el presupuesto conserva la referencia como valor histórico junto con las columnas `cliente_*` copiadas |
 | cliente_nombre | TEXT | Sí | Copia congelada del cliente en el momento de crear (FR-003) |
 | cliente_contacto | TEXT | No | Copia congelada |
-| cliente_tipo | TEXT | Sí | Copia congelada (`'empresa'` o `'particular'`) — esta columna, no la tabla `clientes`, es la que usa el cálculo de retención |
+| cliente_tipo | TEXT | Sí | Copia inicial desde `clientes.tipo` al crear el presupuesto; editable después mediante `PUT /api/presupuestos/:id` con `clienteTipo` para permitir el cambio de tipo sin crear un presupuesto nuevo (Historia 1, escenario 3). Esta columna, no la tabla `clientes`, es la que usa el cálculo de retención |
 | retencion_activada | INTEGER (0/1) | Sí | Casilla del freelancer; se ignora si `cliente_tipo = 'particular'` (FR-006) |
-| retencion_porcentaje | INTEGER (`11` o `10`) | Sí si `retencion_activada = 1` | Las dos únicas opciones fijas (FR-013) |
+| retencion_porcentaje | INTEGER (`11` o `10`) DEFAULT `11` | Sí | Siempre presente; cuando `retencion_activada = 0` se almacena igualmente (por defecto `11`) pero el cálculo lo ignora. Las dos únicas opciones fijas (FR-013) |
 
 **Totales** (no se guardan como columnas; se recalculan en cada lectura con
 `backend/calculo.js` a partir de `lineas_presupuesto`, para que editar una

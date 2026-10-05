@@ -9,9 +9,9 @@ criterios de éxito (SC-001 a SC-005 de spec.md).
   pruebas automáticas.
 - Un navegador moderno (Chrome, Safari, Firefox o Edge), de escritorio o
   móvil.
-- No se necesita ninguna cuenta ni servicio externo de pago. El único
-  recurso de red es la librería de PDF, cargada desde un CDN público la
-  primera vez que se abre la app.
+- No se necesita ninguna cuenta ni servicio externo de pago. La librería
+  de PDF (jsPDF) se instala como dependencia npm del frontend y se
+  empaqueta con Vite; no se carga desde un CDN.
 
 ## 1. Instalar e iniciar el backend
 
@@ -28,7 +28,7 @@ npm start
 ## 2. (Opcional/técnico) Verificar el motor de cálculo y la API
 
 ```bash
-node --test backend/tests/calculo.test.js backend/tests/api.test.js
+node --test tests/calculo.test.js tests/api.test.js
 ```
 
 **Resultado esperado**: todos los casos de `contracts/calculo.md` en verde,
