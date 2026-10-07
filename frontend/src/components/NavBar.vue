@@ -25,6 +25,7 @@ function iniciales(nombre) {
       <button v-if="usuario" :class="{ activa: vistaActiva === 'dashboard' }" @click="emit('cambiarVista', 'dashboard')">Mis cotizaciones</button>
       <button v-if="usuario" :class="{ activa: vistaActiva === 'clientes' }" @click="emit('cambiarVista', 'clientes')">Clientes</button>
       <button v-if="usuario" :class="{ activa: vistaActiva === 'catalogo' }" @click="emit('cambiarVista', 'catalogo')">Catálogo</button>
+      <button v-if="usuario" :class="{ activa: vistaActiva === 'perfil' }" @click="emit('cambiarVista', 'perfil')">Perfil</button>
     </div>
 
     <div class="navbar-actions">
