@@ -38,6 +38,10 @@ function crearApp(db, opciones = {}) {
     res.status(404).json({ error: 'Ruta no encontrada' });
   });
 
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
+  });
+
   app.use((err, req, res, next) => {
     console.error(err);
     res.status(500).json({ error: 'Error inesperado del servidor' });
