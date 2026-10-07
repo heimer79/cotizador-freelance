@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node app/backend/server.js",
     "install:all": "cd app/backend && npm install && cd ../frontend && npm install",
-    "build": "cd app/frontend && npm run build"
+    "build": "cd app/frontend && npm run build",
+    "postinstall": "cd backend && npm install"
   }
 }
