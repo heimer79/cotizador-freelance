@@ -41,9 +41,9 @@ onMounted(async () => {
   <section class="donacion">
     <h3>Donación voluntaria</h3>
     <p class="nota">
-      Quotizador es gratuito. Si te sirve, puedes apoyarlo con una donación voluntaria. Es no reembolsable y no
-      implica beneficios adicionales.
+      Quotizador es gratuito. Si te sirve, puedes apoyarlo con una donación voluntaria.
     </p>
+    <p class="aviso-no-reembolso">⚠ Las donaciones no son reembolsables y no implican beneficios adicionales.</p>
 
     <p v-if="retorno === 'exitosa'" class="exito">¡Gracias por tu donación! Te enviamos la confirmación por correo.</p>
     <p v-else-if="retorno === 'pendiente'" class="nota">Estamos confirmando tu pago. Revisa el historial en unos minutos.</p>

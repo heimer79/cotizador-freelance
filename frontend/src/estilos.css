@@ -600,6 +600,15 @@ table.lineas th {
 .error { color: var(--color-peligro); }
 .exito { color: var(--color-exito); }
 .nota { color: var(--color-texto-secundario); font-size: 0.9rem; }
+.aviso-no-reembolso {
+  font-size: 0.85rem;
+  color: var(--color-texto-secundario);
+  background: var(--color-fondo-page);
+  border-left: 3px solid var(--color-peligro);
+  padding: 6px 10px;
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+  margin: 8px 0;
+}
 
 .aviso-global {
   background: var(--color-fondo-page);
@@ -720,6 +729,15 @@ table.lineas th {
 
   .ad-banner {
     height: 50px;
+  }
+
+  .ad-slot {
+    max-height: 25vh;
+  }
+
+  .ad-slot img {
+    max-height: 25vh;
+    height: auto;
   }
 
   table.lineas, table.lineas thead, table.lineas tbody, table.lineas tr, table.lineas th, table.lineas td {

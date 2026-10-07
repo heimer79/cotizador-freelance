@@ -229,6 +229,13 @@ With multiple developers:
 ## Notas de implementación (estado actual)
 
 - **Pendiente de verificación manual**: T029–T032 (tiempos de carga, responsividad a 360 px, PDF sin publicidad, escenarios de quickstart). Requieren navegador y credenciales reales de Wompi, Resend y AdSense; no se han ejecutado todavía.
+
+---
+
+## Phase 7: Convergence
+
+- [X] T033 Add `max-height: 25vh` on `.ad-slot` and `max-height: 25vh; height: auto` on `.ad-slot img` inside the `@media (max-width: 768px)` block in `frontend/src/estilos.css` to enforce the 25 %-of-visible-area mobile cap per FR-003 (partial)
+- [X] T034 Replace the non-refundable disclaimer in `frontend/src/components/donations/DonationForm.vue` (currently an inline sentence in the `.nota` intro paragraph) with a dedicated, visually distinct warning element (e.g. `<p class="aviso-no-reembolso">`) so the "donación no reembolsable" notice is clearly perceptible before the confirm button per FR-010 (partial)
 - **Rutas reales del proyecto**: el código existente vive en `backend/` plano (`rutas/`, `db.js`, `calculo.js`) y en `frontend/src/vistas/`. Donde las tareas dicen `backend/src/…` y `frontend/src/pages/…`, se respetó la ruta de la tarea para los ficheros nuevos de monetización, y las vistas se integraron en `frontend/src/vistas/`.
 - **Pauta directa**: los dos espacios `pauta_directa` están configurados sin anunciante (`anunciante: null`), así que muestran el relleno de AdSense o se ocultan. No se publican anunciantes de ejemplo. Para contratar un espacio, rellena `anunciante` en `backend/src/config/ads-config.json`.
 - **Unidades de AdSense**: el campo `adsense_slot` de cada espacio `adsense` está en `null`; el anuncio no se renderiza hasta que se pegue el identificador real de la unidad.
