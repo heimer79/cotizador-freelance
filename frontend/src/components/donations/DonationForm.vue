@@ -41,7 +41,7 @@ onMounted(async () => {
   <section class="donacion">
     <h3>Donación voluntaria</h3>
     <p class="nota">
-      PresupuestosPro es gratuito. Si te sirve, puedes apoyarlo con una donación voluntaria. Es no reembolsable y no
+      Quotizador es gratuito. Si te sirve, puedes apoyarlo con una donación voluntaria. Es no reembolsable y no
       implica beneficios adicionales.
     </p>
 

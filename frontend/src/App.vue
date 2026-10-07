@@ -1,10 +1,11 @@
 <script setup>
 import { ref, provide, onMounted, onBeforeUnmount } from 'vue';
+import NavBar from './components/NavBar.vue';
+import LoginModal from './components/LoginModal.vue';
 import CotizacionesView from './vistas/CotizacionesView.vue';
 import ClientesView from './vistas/ClientesView.vue';
 import CatalogoView from './vistas/CatalogoView.vue';
 import PerfilView from './vistas/PerfilView.vue';
-import AuthView from './vistas/AuthView.vue';
 import CookieConsent from './components/privacy/CookieConsent.vue';
 import { useCookieConsent } from './composables/useCookieConsent.js';
 import { auth } from './api.js';
@@ -13,16 +14,21 @@ const usuario = ref(null);
 const cargando = ref(true);
 const vistaActiva = ref('cotizaciones');
 const mensaje = ref('');
+const mostrarLogin = ref(false);
+const mostrarDonacion = ref(false);
 const tokenRestablecer = ref(null);
+const accionPendiente = ref(null);
 
-// Estado de consentimiento compartido: AdSlot lo inyecta para decidir si carga AdSense.
 const { estado: consentimientoAds } = useCookieConsent();
 provide('cookieConsent', consentimientoAds);
 
 const params = new URLSearchParams(window.location.search);
 const tokenVerificar = params.get('verificar');
 const tokenParam = params.get('restablecer');
-if (tokenParam) tokenRestablecer.value = tokenParam;
+if (tokenParam) {
+  tokenRestablecer.value = tokenParam;
+  mostrarLogin.value = true;
+}
 
 async function verificarCorreo() {
   try {
@@ -44,14 +50,44 @@ async function reenviarVerificacion() {
   }
 }
 
+function requireLogin(accion) {
+  if (usuario.value) {
+    if (accion) accion();
+    return true;
+  }
+  accionPendiente.value = accion;
+  mostrarLogin.value = true;
+  return false;
+}
+
+provide('requireLogin', requireLogin);
+
+function onAutenticado(u) {
+  usuario.value = u;
+  mostrarLogin.value = false;
+  if (accionPendiente.value) {
+    accionPendiente.value();
+    accionPendiente.value = null;
+  }
+}
+
 async function cerrarSesion() {
   await auth.logout();
   usuario.value = null;
+  vistaActiva.value = 'cotizaciones';
 }
 
 function sesionExpirada() {
   usuario.value = null;
   mensaje.value = 'Tu sesión expiró. Vuelve a iniciar sesión.';
+}
+
+function cambiarVista(vista) {
+  if (vista === 'cotizaciones') {
+    vistaActiva.value = vista;
+    return;
+  }
+  requireLogin(() => { vistaActiva.value = vista; });
 }
 
 onMounted(async () => {
@@ -73,38 +109,38 @@ onBeforeUnmount(() => window.removeEventListener('sesion-expirada', sesionExpira
 </script>
 
 <template>
-  <header v-if="usuario" class="cabecera">
-    <nav class="tabs">
-      <button :class="{ activa: vistaActiva === 'cotizaciones' }" @click="vistaActiva = 'cotizaciones'">Cotizaciones</button>
-      <button :class="{ activa: vistaActiva === 'clientes' }" @click="vistaActiva = 'clientes'">Clientes</button>
-      <button :class="{ activa: vistaActiva === 'catalogo' }" @click="vistaActiva = 'catalogo'">Catálogo</button>
-      <button :class="{ activa: vistaActiva === 'perfil' }" @click="vistaActiva = 'perfil'">Perfil</button>
-    </nav>
-    <div class="sesion">
-      <span>{{ usuario.nombre }}</span>
-      <button class="secundario" @click="cerrarSesion">Salir</button>
-    </div>
-  </header>
+  <NavBar
+    :usuario="usuario"
+    :vista-activa="vistaActiva"
+    @cambiar-vista="cambiarVista"
+    @login="mostrarLogin = true"
+    @logout="cerrarSesion"
+    @donar="mostrarDonacion = !mostrarDonacion"
+  />
 
-  <p v-if="mensaje" class="aviso-global" role="status">{{ mensaje }}</p>
+  <p v-if="mensaje" class="aviso-global page-container" role="status" style="margin-top: 12px">{{ mensaje }}</p>
 
-  <p v-if="cargando" class="nota">Cargando…</p>
-
-  <template v-else-if="!usuario">
-    <AuthView :token-restablecer="tokenRestablecer" @autenticado="(u) => (usuario = u)" />
-  </template>
+  <p v-if="cargando" class="nota page-container">Cargando…</p>
 
   <main v-else>
-    <aside v-if="!usuario.verificado" class="aviso-verificacion" role="status">
-      <p>Confirma tu correo electrónico para poder crear cotizaciones, clientes y configurar tu perfil.</p>
-      <button class="secundario" @click="reenviarVerificacion">Reenviar correo de confirmación</button>
+    <aside v-if="usuario && !usuario.verificado" class="aviso-verificacion page-container" role="status" style="margin-top: 12px">
+      <p style="margin: 0">Confirma tu correo electrónico para poder crear cotizaciones, clientes y configurar tu perfil.</p>
+      <button class="btn btn-secondary btn-sm" @click="reenviarVerificacion">Reenviar correo de confirmación</button>
     </aside>
 
     <CotizacionesView v-if="vistaActiva === 'cotizaciones'" />
+    <CotizacionesView v-else-if="vistaActiva === 'dashboard'" modo="lista" />
     <ClientesView v-else-if="vistaActiva === 'clientes'" />
     <CatalogoView v-else-if="vistaActiva === 'catalogo'" />
     <PerfilView v-else-if="vistaActiva === 'perfil'" />
   </main>
+
+  <LoginModal
+    v-if="mostrarLogin"
+    :token-restablecer="tokenRestablecer"
+    @autenticado="onAutenticado"
+    @cerrar="mostrarLogin = false; accionPendiente = null"
+  />
 
   <CookieConsent />
 </template>

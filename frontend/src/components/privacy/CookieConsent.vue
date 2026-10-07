@@ -19,7 +19,7 @@ function responder(aceptaPublicidad) {
   <aside v-if="visible" class="consent-banner" role="dialog" aria-label="Preferencias de cookies">
     <p>
       Usamos cookies de publicidad de Google AdSense para mostrar anuncios. Puedes aceptarlas o rechazarlas;
-      PresupuestosPro funciona igual en ambos casos. Los anuncios de pauta directa no usan cookies de terceros.
+      Quotizador funciona igual en ambos casos. Los anuncios de pauta directa no usan cookies de terceros.
     </p>
     <div class="consent-acciones">
       <button class="secundario" @click="responder(false)">Rechazar</button>
