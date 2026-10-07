@@ -50,13 +50,11 @@ function crearApp(db, opciones = {}) {
   return app;
 }
 
-if (require.main === module) {
-  const db = abrirBaseDatos();
-  const app = crearApp(db);
-  const puerto = process.env.PORT || 3000;
-  app.listen(puerto, () => {
-    console.log(`PresupuestosPro escuchando en el puerto ${puerto}`);
-  });
-}
+const db = abrirBaseDatos();
+const app = crearApp(db);
+const puerto = process.env.PORT || 3000;
+app.listen(puerto, () => {
+  console.log(`PresupuestosPro escuchando en el puerto ${puerto}`);
+});
 
 module.exports = { crearApp };
