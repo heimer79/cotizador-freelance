@@ -7,6 +7,7 @@
     "dev:backend": "node app/backend/server.js",
     "dev:frontend": "cd app/frontend && npm run dev",
     "build": "cd app/frontend && npm run build",
-    "setup": "cd app/backend && npm install && cd ../frontend && npm install && npm run build"
+    "setup": "cd app/backend && npm install && cd ../frontend && npm install && npm run build",
+    "postinstall": "cd app/backend && npm install && cd ../frontend && npm install && npm run build"
   }
 }
