@@ -1,7 +1,8 @@
 <!--
 Sync Impact Report
-- Version change: (sin versión previa) → 1.0.0
-- Modified principles: N/A (primera ratificación; plantilla sin rellenar)
+- Version change: 1.0.0 → 1.1.0
+- Modified principles: II. Idioma y mercado — ampliado para permitir precios
+  informativos en USD cuando la spec lo requiera explícitamente (FR-019, FR-025)
 - Added sections:
   - Core Principles: I. Simplicidad ante todo, II. Idioma y mercado,
     III. Cero alcance fantasma, IV. Verificable por una persona no técnica,
@@ -33,11 +34,15 @@ común de que un v1 nunca se termine.
 ### II. Idioma y mercado
 Todo el producto — interfaz, mensajes, textos legales, PDFs generados y
 comunicaciones al usuario — se escribe en español de Colombia. La moneda
-de la aplicación es el peso colombiano (COP); no se muestran ni calculan
-montos en otras monedas.
+de la aplicación es el peso colombiano (COP). Se permite mostrar precios
+informativos en USD (ejemplo: $20 USD/año con equivalencia en COP) cuando
+la spec lo requiera explícitamente; los cálculos y cobros los realiza la
+pasarela de pago, no la aplicación.
 
 **Razón**: PresupuestosPro se dirige a freelancers colombianos; mezclar
-idiomas o monedas confunde al usuario final y no aporta valor en v1.
+idiomas o monedas confunde al usuario final y no aporta valor en v1. La
+excepción para USD informativo permite comunicar precios de referencia
+internacionales sin que la app manipule montos en divisas.
 
 ### III. Cero alcance fantasma
 No se implementa ninguna funcionalidad que no esté escrita explícitamente
@@ -92,4 +97,4 @@ verificación explícita de que no viola ninguno de estos principios antes
 de pasar a tasks. Cualquier desviación debe justificarse por escrito en
 el propio plan.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-29 | **Last Amended**: 2026-08-29
+**Version**: 1.1.0 | **Ratified**: 2026-08-29 | **Last Amended**: 2026-10-07

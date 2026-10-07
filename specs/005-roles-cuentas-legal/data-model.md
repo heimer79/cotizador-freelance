@@ -66,7 +66,7 @@ Historial de suscripciones premium de un usuario. Controla la vigencia, el perí
 | estado | TEXT | NOT NULL, CHECK (IN 'activa','vencida','cancelada','gracia','retencion') | 'activa' | Estado actual |
 | modalidad | TEXT | NOT NULL, CHECK (IN 'automatica','manual') | — | Renovación automática o pago manual (FR-019) |
 | referencia_pasarela | TEXT | — | — | Referencia de la transacción de pago |
-| pasarela | TEXT | NOT NULL, CHECK (IN 'mercadopago','paypal') | — | Pasarela usada para el pago |
+| pasarela | TEXT | NOT NULL, CHECK (IN 'mercadopago') | 'mercadopago' | Pasarela usada para el pago (solo MercadoPago para suscripciones) |
 | fecha_creacion | TEXT | NOT NULL | strftime('%Y-%m-%dT%H:%M:%fZ', 'now') | Timestamp de creación del registro |
 
 **State transitions**:

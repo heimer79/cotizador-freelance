@@ -21,7 +21,6 @@ function crearApp(db, opciones = {}) {
 
   app.use(express.json({ limit: '2mb' }));
 
-  // Públicas: autenticación, configuración de publicidad y webhook de la pasarela (valida su firma).
   app.use('/api/auth', crearRutasAuth(db, correo));
   app.use('/api/config', crearRutasConfigAds());
   app.use('/api/donaciones/webhook', crearRutasWebhookDonaciones(db, correo));
@@ -50,11 +49,18 @@ function crearApp(db, opciones = {}) {
   return app;
 }
 
-const db = abrirBaseDatos();
-const app = crearApp(db);
-const puerto = process.env.PORT || 3000;
-app.listen(puerto, () => {
-  console.log(`PresupuestosPro escuchando en el puerto ${puerto}`);
+async function iniciar() {
+  const db = await abrirBaseDatos();
+  const app = crearApp(db);
+  const puerto = process.env.PORT || 3000;
+  app.listen(puerto, () => {
+    console.log(`PresupuestosPro escuchando en el puerto ${puerto}`);
+  });
+}
+
+iniciar().catch((err) => {
+  console.error('Error al iniciar la aplicación:', err);
+  process.exit(1);
 });
 
 module.exports = { crearApp };

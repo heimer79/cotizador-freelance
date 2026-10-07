@@ -17,7 +17,7 @@ async function crearCotizacion(base, cookie, clienteId, extra = {}) {
 
 test('la copia del cliente en la cotización queda congelada tras editar el cliente', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const cliente = await crearCliente(base, cookie);
     const cot = await crearCotizacion(base, cookie, cliente.id);
     assert.strictEqual(cot.status, 201);
@@ -36,7 +36,7 @@ test('la copia del cliente en la cotización queda congelada tras editar el clie
 
 test('la copia del cliente sobrevive al borrado del cliente', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const cliente = await crearCliente(base, cookie, { nombre: 'Beta Ltda' });
     const cot = await crearCotizacion(base, cookie, cliente.id);
 
@@ -51,8 +51,8 @@ test('la copia del cliente sobrevive al borrado del cliente', async () => {
 
 test('el número de cotización es consecutivo por usuario y año, y AAAA-NNN', async () => {
   await conServidor(async (base, db) => {
-    const ana = usuarioVerificado(db);
-    const beto = usuarioVerificado(db);
+    const ana = await usuarioVerificado(db);
+    const beto = await usuarioVerificado(db);
     const clienteAna = await crearCliente(base, ana.cookie);
     const clienteBeto = await crearCliente(base, beto.cookie);
 
@@ -69,7 +69,7 @@ test('el número de cotización es consecutivo por usuario y año, y AAAA-NNN', 
 
 test('un número de borrador eliminado no se reutiliza', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const cliente = await crearCliente(base, cookie);
     const primera = await crearCotizacion(base, cookie, cliente.id);
     await json(`${base}/api/cotizaciones/${primera.cuerpo.id}`, { method: 'DELETE', cookie });
@@ -80,7 +80,7 @@ test('un número de borrador eliminado no se reutiliza', async () => {
 
 test('una cotización emitida es de solo lectura y no se puede eliminar', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const cliente = await crearCliente(base, cookie);
     const cot = await crearCotizacion(base, cookie, cliente.id);
     const url = `${base}/api/cotizaciones/${cot.cuerpo.id}`;
@@ -105,7 +105,7 @@ test('una cotización emitida es de solo lectura y no se puede eliminar', async 
 
 test('la retención se rechaza para persona natural con explicación (EC3)', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const natural = await crearCliente(base, cookie, { tipo: 'persona_natural', agenteRetenedor: false });
     const r = await crearCotizacion(base, cookie, natural.id, {
       retencion: { activada: true, concepto: 'honorarios', porcentaje: 11 }
@@ -117,7 +117,7 @@ test('la retención se rechaza para persona natural con explicación (EC3)', asy
 
 test('la emisión conserva los datos del emisor; un borrador los refresca desde el perfil', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const cliente = await crearCliente(base, cookie);
     const cot = await crearCotizacion(base, cookie, cliente.id);
     const url = `${base}/api/cotizaciones/${cot.cuerpo.id}`;
@@ -139,8 +139,8 @@ test('la emisión conserva los datos del emisor; un borrador los refresca desde 
 
 test('cada usuario solo ve y modifica sus propios datos', async () => {
   await conServidor(async (base, db) => {
-    const ana = usuarioVerificado(db);
-    const beto = usuarioVerificado(db);
+    const ana = await usuarioVerificado(db);
+    const beto = await usuarioVerificado(db);
     const cliente = await crearCliente(base, ana.cookie);
     const cot = await crearCotizacion(base, ana.cookie, cliente.id);
 
@@ -164,8 +164,8 @@ test('sin sesión la API responde 401', async () => {
 
 test('con sesión pero correo sin verificar, las escrituras responden 403 y las lecturas siguen', async () => {
   await conServidor(async (base, db) => {
-    const { cookie, id } = usuarioVerificado(db);
-    db.prepare('UPDATE usuarios SET email_verificado = 0 WHERE id = ?').run(id);
+    const { cookie, id } = await usuarioVerificado(db);
+    await db.run('UPDATE usuarios SET email_verificado = 0 WHERE id = ?', [id]);
 
     const escritura = await json(`${base}/api/clientes`, { method: 'POST', cookie, body: { nombre: 'X', tipo: 'persona_natural' } });
     assert.strictEqual(escritura.status, 403);
@@ -209,7 +209,7 @@ test('registro envía correo de verificación; verificar con el enlace habilita 
 
 test('login con contraseña incorrecta responde 401 con mensaje genérico', async () => {
   await conServidor(async (base, db) => {
-    usuarioVerificado(db, 'ana@ejemplo.com');
+    await usuarioVerificado(db, 'ana@ejemplo.com');
     const malo = await json(`${base}/api/auth/login`, { method: 'POST', body: { email: 'ana@ejemplo.com', password: 'nope-nope' } });
     const inexistente = await json(`${base}/api/auth/login`, { method: 'POST', body: { email: 'nadie@ejemplo.com', password: 'nope-nope' } });
     assert.strictEqual(malo.status, 401);
@@ -219,7 +219,7 @@ test('login con contraseña incorrecta responde 401 con mensaje genérico', asyn
 
 test('restablecer contraseña con enlace válido cierra las sesiones abiertas', async () => {
   await conServidor(async (base, db, correo) => {
-    const { id, cookie } = usuarioVerificado(db, 'ana@ejemplo.com');
+    const { id, cookie } = await usuarioVerificado(db, 'ana@ejemplo.com');
     await json(`${base}/api/auth/olvide`, { method: 'POST', body: { email: 'ana@ejemplo.com' } });
     const token = correo.enviados[0].texto.match(/restablecer=([\w-]+)/)[1];
 
@@ -231,7 +231,8 @@ test('restablecer contraseña con enlace válido cierra las sesiones abiertas', 
 
     const login = await json(`${base}/api/auth/login`, { method: 'POST', body: { email: 'ana@ejemplo.com', password: 'nueva-clave-1' } });
     assert.strictEqual(login.status, 200);
-    assert.ok(db.prepare('SELECT id FROM usuarios WHERE id = ?').get(id));
+    const usuario = await db.get('SELECT id FROM usuarios WHERE id = ?', [id]);
+    assert.ok(usuario);
   });
 });
 

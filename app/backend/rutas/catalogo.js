@@ -17,44 +17,43 @@ function validarServicio(body) {
 function crearRutasCatalogo(db) {
   const router = express.Router();
 
-  router.get('/', (req, res) => {
-    const filas = db.prepare('SELECT * FROM catalogo WHERE usuario_id = ? ORDER BY nombre').all(req.usuario.id);
+  router.get('/', async (req, res) => {
+    const filas = await db.all('SELECT * FROM catalogo WHERE usuario_id = ? ORDER BY nombre', [req.usuario.id]);
     res.json(filas.map(aFormatoApi));
   });
 
-  router.post('/', (req, res) => {
+  router.post('/', async (req, res) => {
     const error = validarServicio(req.body);
     if (error) return res.status(400).json({ error });
 
-    const resultado = db
-      .prepare('INSERT INTO catalogo (usuario_id, nombre, precio_defecto) VALUES (?, ?, ?)')
-      .run(req.usuario.id, req.body.nombre.trim(), req.body.precioDefecto);
+    const resultado = await db.run(
+      'INSERT INTO catalogo (usuario_id, nombre, precio_defecto) VALUES (?, ?, ?)',
+      [req.usuario.id, req.body.nombre.trim(), req.body.precioDefecto]
+    );
 
-    const creado = db.prepare('SELECT * FROM catalogo WHERE id = ?').get(resultado.lastInsertRowid);
+    const creado = await db.get('SELECT * FROM catalogo WHERE id = ?', [resultado.insertId]);
     res.status(201).json(aFormatoApi(creado));
   });
 
-  router.put('/:id', (req, res) => {
-    const fila = db.prepare('SELECT * FROM catalogo WHERE id = ? AND usuario_id = ?').get(req.params.id, req.usuario.id);
+  router.put('/:id', async (req, res) => {
+    const fila = await db.get('SELECT * FROM catalogo WHERE id = ? AND usuario_id = ?', [req.params.id, req.usuario.id]);
     if (!fila) return res.status(404).json({ error: 'Servicio no encontrado' });
 
     const error = validarServicio(req.body);
     if (error) return res.status(400).json({ error });
 
-    db.prepare('UPDATE catalogo SET nombre = ?, precio_defecto = ? WHERE id = ? AND usuario_id = ?').run(
-      req.body.nombre.trim(),
-      req.body.precioDefecto,
-      req.params.id,
-      req.usuario.id
+    await db.run(
+      'UPDATE catalogo SET nombre = ?, precio_defecto = ? WHERE id = ? AND usuario_id = ?',
+      [req.body.nombre.trim(), req.body.precioDefecto, req.params.id, req.usuario.id]
     );
 
-    const actualizado = db.prepare('SELECT * FROM catalogo WHERE id = ?').get(req.params.id);
+    const actualizado = await db.get('SELECT * FROM catalogo WHERE id = ?', [req.params.id]);
     res.json(aFormatoApi(actualizado));
   });
 
-  router.delete('/:id', (req, res) => {
-    const resultado = db.prepare('DELETE FROM catalogo WHERE id = ? AND usuario_id = ?').run(req.params.id, req.usuario.id);
-    if (resultado.changes === 0) return res.status(404).json({ error: 'Servicio no encontrado' });
+  router.delete('/:id', async (req, res) => {
+    const resultado = await db.run('DELETE FROM catalogo WHERE id = ? AND usuario_id = ?', [req.params.id, req.usuario.id]);
+    if (resultado.affectedRows === 0) return res.status(404).json({ error: 'Servicio no encontrado' });
     res.status(204).end();
   });
 

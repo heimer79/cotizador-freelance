@@ -51,7 +51,7 @@ function crearRutasAuth(db, correo) {
   const requiereSesion = crearMiddlewareSesion(db);
 
   async function enviarVerificacion(usuario) {
-    const token = crearTokenCorreo(db, usuario.id, 'verificacion');
+    const token = await crearTokenCorreo(db, usuario.id, 'verificacion');
     const mensaje = correoVerificacion(usuario.nombre_completo, token);
     await correo.enviar({ para: usuario.email, ...mensaje });
   }
@@ -76,31 +76,30 @@ function crearRutasAuth(db, correo) {
     }
 
     const emailNormalizado = email.trim().toLowerCase();
-    if (db.prepare('SELECT id FROM usuarios WHERE email = ?').get(emailNormalizado)) {
+    const existente = await db.get('SELECT id FROM usuarios WHERE email = ?', [emailNormalizado]);
+    if (existente) {
       return res.status(409).json({ error: 'Ya existe una cuenta con ese correo electrónico' });
     }
 
     const nombre = nombreCompleto.trim();
     const documento = String(numeroDocumento).trim();
 
-    const usuarioId = db
-      .transaction(() => {
-        const resultado = db
-          .prepare(
-            `INSERT INTO usuarios (nombre_completo, email, tipo_documento, numero_documento, password_hash)
-             VALUES (?, ?, ?, ?, ?)`
-          )
-          .run(nombre, emailNormalizado, tipoDocumento, documento, hashPassword(password));
-        db.prepare('INSERT INTO perfil (usuario_id, nombre, nit) VALUES (?, ?, ?)').run(
-          resultado.lastInsertRowid,
-          nombre,
-          documento
-        );
-        return resultado.lastInsertRowid;
-      })();
+    const usuarioId = await db.transaction(async (tx) => {
+      const resultado = await tx.run(
+        `INSERT INTO usuarios (nombre_completo, email, tipo_documento, numero_documento, password_hash)
+         VALUES (?, ?, ?, ?, ?)`,
+        [nombre, emailNormalizado, tipoDocumento, documento, hashPassword(password)]
+      );
+      await tx.run('INSERT INTO perfil (usuario_id, nombre, nit) VALUES (?, ?, ?)', [
+        resultado.insertId,
+        nombre,
+        documento
+      ]);
+      return resultado.insertId;
+    });
 
-    const usuario = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(usuarioId);
-    emitirCookieSesion(res, crearSesion(db, usuarioId));
+    const usuario = await db.get('SELECT * FROM usuarios WHERE id = ?', [usuarioId]);
+    emitirCookieSesion(res, await crearSesion(db, usuarioId));
 
     try {
       await enviarVerificacion(usuario);
@@ -111,44 +110,44 @@ function crearRutasAuth(db, correo) {
     res.status(201).json({ usuario: datosPublicos(usuario) });
   });
 
-  router.post('/login', (req, res) => {
+  router.post('/login', async (req, res) => {
     const { email, password } = req.body;
-    const usuario = db
-      .prepare('SELECT * FROM usuarios WHERE email = ?')
-      .get(String(email || '').trim().toLowerCase());
+    const usuario = await db.get(
+      'SELECT * FROM usuarios WHERE email = ?',
+      [String(email || '').trim().toLowerCase()]
+    );
 
-    // Mismo mensaje exista o no el correo, para no revelar cuentas registradas.
     if (!usuario || typeof password !== 'string' || !verificarPassword(password, usuario.password_hash)) {
       return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
     }
 
-    emitirCookieSesion(res, crearSesion(db, usuario.id));
+    emitirCookieSesion(res, await crearSesion(db, usuario.id));
     res.json({ usuario: datosPublicos(usuario) });
   });
 
-  router.post('/logout', (req, res) => {
+  router.post('/logout', async (req, res) => {
     const token = leerCookie(req, NOMBRE_COOKIE);
-    if (token) db.prepare('DELETE FROM sesiones WHERE token_hash = ?').run(hashToken(token));
+    if (token) await db.run('DELETE FROM sesiones WHERE token_hash = ?', [hashToken(token)]);
     res.clearCookie(NOMBRE_COOKIE, { path: '/' });
     res.status(204).end();
   });
 
-  router.get('/me', requiereSesion, (req, res) => {
-    const usuario = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(req.usuario.id);
+  router.get('/me', requiereSesion, async (req, res) => {
+    const usuario = await db.get('SELECT * FROM usuarios WHERE id = ?', [req.usuario.id]);
     res.json({ usuario: datosPublicos(usuario) });
   });
 
-  router.post('/verificar', (req, res) => {
-    const usuarioId = consumirTokenCorreo(db, String(req.body.token || ''), 'verificacion');
+  router.post('/verificar', async (req, res) => {
+    const usuarioId = await consumirTokenCorreo(db, String(req.body.token || ''), 'verificacion');
     if (!usuarioId) {
       return res.status(400).json({ error: 'El enlace de verificación no es válido o ya venció. Pide uno nuevo.' });
     }
-    db.prepare('UPDATE usuarios SET email_verificado = 1 WHERE id = ?').run(usuarioId);
+    await db.run('UPDATE usuarios SET email_verificado = 1 WHERE id = ?', [usuarioId]);
     res.json({ ok: true });
   });
 
   router.post('/reenviar-verificacion', requiereSesion, async (req, res) => {
-    const usuario = db.prepare('SELECT * FROM usuarios WHERE id = ?').get(req.usuario.id);
+    const usuario = await db.get('SELECT * FROM usuarios WHERE id = ?', [req.usuario.id]);
     if (usuario.email_verificado) {
       return res.status(409).json({ error: 'Tu correo ya está verificado' });
     }
@@ -161,14 +160,14 @@ function crearRutasAuth(db, correo) {
     res.json({ ok: true });
   });
 
-  // Responde siempre igual para no revelar qué correos están registrados.
   router.post('/olvide', async (req, res) => {
-    const usuario = db
-      .prepare('SELECT * FROM usuarios WHERE email = ?')
-      .get(String(req.body.email || '').trim().toLowerCase());
+    const usuario = await db.get(
+      'SELECT * FROM usuarios WHERE email = ?',
+      [String(req.body.email || '').trim().toLowerCase()]
+    );
 
     if (usuario) {
-      const token = crearTokenCorreo(db, usuario.id, 'restablecer');
+      const token = await crearTokenCorreo(db, usuario.id, 'restablecer');
       const mensaje = correoRestablecer(usuario.nombre_completo, token);
       try {
         await correo.enviar({ para: usuario.email, ...mensaje });
@@ -179,22 +178,21 @@ function crearRutasAuth(db, correo) {
     res.json({ ok: true });
   });
 
-  router.post('/restablecer', (req, res) => {
+  router.post('/restablecer', async (req, res) => {
     const { token, password } = req.body;
     if (typeof password !== 'string' || password.length < MIN_PASSWORD) {
       return res.status(400).json({ error: `La contraseña debe tener al menos ${MIN_PASSWORD} caracteres` });
     }
 
-    const usuarioId = consumirTokenCorreo(db, String(token || ''), 'restablecer');
+    const usuarioId = await consumirTokenCorreo(db, String(token || ''), 'restablecer');
     if (!usuarioId) {
       return res.status(400).json({ error: 'El enlace para restablecer la contraseña no es válido o ya venció.' });
     }
 
-    db.transaction(() => {
-      db.prepare('UPDATE usuarios SET password_hash = ? WHERE id = ?').run(hashPassword(password), usuarioId);
-      // Al cambiar la contraseña se cierran todas las sesiones abiertas.
-      db.prepare('DELETE FROM sesiones WHERE usuario_id = ?').run(usuarioId);
-    })();
+    await db.transaction(async (tx) => {
+      await tx.run('UPDATE usuarios SET password_hash = ? WHERE id = ?', [hashPassword(password), usuarioId]);
+      await tx.run('DELETE FROM sesiones WHERE usuario_id = ?', [usuarioId]);
+    });
 
     res.json({ ok: true });
   });

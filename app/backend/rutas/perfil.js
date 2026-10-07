@@ -15,12 +15,12 @@ function aFormatoApi(fila) {
 function crearRutasPerfil(db) {
   const router = express.Router();
 
-  router.get('/', (req, res) => {
-    const fila = db.prepare('SELECT * FROM perfil WHERE usuario_id = ?').get(req.usuario.id);
+  router.get('/', async (req, res) => {
+    const fila = await db.get('SELECT * FROM perfil WHERE usuario_id = ?', [req.usuario.id]);
     res.json(aFormatoApi(fila || {}));
   });
 
-  router.put('/', (req, res) => {
+  router.put('/', async (req, res) => {
     const { nombre, nit, contacto, logoBase64, regimen } = req.body;
 
     if (regimen && !REGIMENES.includes(regimen)) {
@@ -30,18 +30,19 @@ function crearRutasPerfil(db) {
       return res.status(400).json({ error: 'El logo debe ser una imagen' });
     }
 
-    db.prepare(
+    await db.run(
       `INSERT INTO perfil (usuario_id, nombre, nit, contacto, logo_base64, regimen)
        VALUES (?, ?, ?, ?, ?, ?)
-       ON CONFLICT(usuario_id) DO UPDATE SET
-         nombre = excluded.nombre,
-         nit = excluded.nit,
-         contacto = excluded.contacto,
-         logo_base64 = excluded.logo_base64,
-         regimen = excluded.regimen`
-    ).run(req.usuario.id, nombre || null, nit || null, contacto || null, logoBase64 || null, regimen || null);
+       ON DUPLICATE KEY UPDATE
+         nombre = VALUES(nombre),
+         nit = VALUES(nit),
+         contacto = VALUES(contacto),
+         logo_base64 = VALUES(logo_base64),
+         regimen = VALUES(regimen)`,
+      [req.usuario.id, nombre || null, nit || null, contacto || null, logoBase64 || null, regimen || null]
+    );
 
-    const guardado = db.prepare('SELECT * FROM perfil WHERE usuario_id = ?').get(req.usuario.id);
+    const guardado = await db.get('SELECT * FROM perfil WHERE usuario_id = ?', [req.usuario.id]);
     res.json(aFormatoApi(guardado));
   });
 

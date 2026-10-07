@@ -20,7 +20,7 @@ function configuracionWompi() {
 function crearRutasDonaciones(db) {
   const router = express.Router();
 
-  router.post('/', (req, res) => {
+  router.post('/', async (req, res) => {
     const monto = req.body.monto;
 
     const wompi = configuracionWompi();
@@ -32,7 +32,7 @@ function crearRutasDonaciones(db) {
 
     let donacion;
     try {
-      donacion = crearDonacion(db, {
+      donacion = await crearDonacion(db, {
         profesionalId: req.usuario.id,
         monto,
         referencia: generarReferencia()
@@ -60,11 +60,11 @@ function crearRutasDonaciones(db) {
     });
   });
 
-  router.get('/', (req, res) => {
+  router.get('/', async (req, res) => {
     const pagina = Math.max(1, parseInt(req.query.pagina, 10) || 1);
     const porPagina = Math.min(50, Math.max(1, parseInt(req.query.por_pagina, 10) || 20));
 
-    const { filas, total } = listarDonaciones(db, req.usuario.id, pagina, porPagina);
+    const { filas, total } = await listarDonaciones(db, req.usuario.id, pagina, porPagina);
     res.json({ donaciones: filas.map(aFormatoApi), total, pagina, por_pagina: porPagina });
   });
 

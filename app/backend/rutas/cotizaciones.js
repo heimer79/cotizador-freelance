@@ -4,17 +4,16 @@ const { calcularCotizacion, validarRetencion, TARIFAS_IVA } = require('../calcul
 
 const VIGENCIA_DIAS = 30;
 
-function obtenerLineas(db, cotizacionId) {
-  return db
-    .prepare(
-      `SELECT id, descripcion, cantidad, precio_unitario AS precioUnitario, origen, servicio_id AS servicioId
-       FROM lineas_cotizacion WHERE cotizacion_id = ? ORDER BY id`
-    )
-    .all(cotizacionId);
+async function obtenerLineas(db, cotizacionId) {
+  return db.all(
+    `SELECT id, descripcion, cantidad, precio_unitario AS precioUnitario, origen, servicio_id AS servicioId
+     FROM lineas_cotizacion WHERE cotizacion_id = ? ORDER BY id`,
+    [cotizacionId]
+  );
 }
 
-function construirCotizacion(db, fila) {
-  const lineas = obtenerLineas(db, fila.id);
+async function construirCotizacion(db, fila) {
+  const lineas = await obtenerLineas(db, fila.id);
   const totales = calcularCotizacion({
     lineas,
     ivaTarifa: fila.iva_tarifa,
@@ -75,7 +74,6 @@ function validarLinea(body) {
   return null;
 }
 
-// Lee la configuración de IVA y retención del body, o devuelve el error de validación.
 function leerConfiguracionFiscal(body, cliente) {
   const ivaTarifa = body.ivaTarifa === undefined ? 19 : body.ivaTarifa;
   if (!TARIFAS_IVA.includes(ivaTarifa)) {
@@ -103,17 +101,16 @@ function leerConfiguracionFiscal(body, cliente) {
   };
 }
 
-function obtenerCotizacion(db, id, usuarioId) {
-  return db.prepare('SELECT * FROM cotizaciones WHERE id = ? AND usuario_id = ?').get(id, usuarioId);
+async function obtenerCotizacion(db, id, usuarioId) {
+  return db.get('SELECT * FROM cotizaciones WHERE id = ? AND usuario_id = ?', [id, usuarioId]);
 }
 
-function obtenerCliente(db, clienteId, usuarioId) {
-  return db.prepare('SELECT * FROM clientes WHERE id = ? AND usuario_id = ?').get(clienteId, usuarioId);
+async function obtenerCliente(db, clienteId, usuarioId) {
+  return db.get('SELECT * FROM clientes WHERE id = ? AND usuario_id = ?', [clienteId, usuarioId]);
 }
 
-// Copia de los datos del emisor. Se refresca mientras es borrador; una cotización emitida conserva la suya (FR-016).
-function datosEmisor(db, usuarioId) {
-  const perfil = db.prepare('SELECT * FROM perfil WHERE usuario_id = ?').get(usuarioId) || {};
+async function datosEmisor(db, usuarioId) {
+  const perfil = (await db.get('SELECT * FROM perfil WHERE usuario_id = ?', [usuarioId])) || {};
   return {
     emisor_nombre: perfil.nombre || null,
     emisor_documento: perfil.nit || null,
@@ -126,89 +123,89 @@ function datosEmisor(db, usuarioId) {
 function crearRutasCotizaciones(db) {
   const router = express.Router();
 
-  function responderCotizacion(res, id, codigo = 200) {
-    const fila = db.prepare('SELECT * FROM cotizaciones WHERE id = ?').get(id);
-    res.status(codigo).json(construirCotizacion(db, fila));
+  async function responderCotizacion(res, id, codigo = 200) {
+    const fila = await db.get('SELECT * FROM cotizaciones WHERE id = ?', [id]);
+    res.status(codigo).json(await construirCotizacion(db, fila));
   }
 
-  router.get('/', (req, res) => {
-    const filas = db
-      .prepare('SELECT * FROM cotizaciones WHERE usuario_id = ? ORDER BY id DESC')
-      .all(req.usuario.id);
-    res.json(
-      filas.map((fila) => {
-        const completa = construirCotizacion(db, fila);
-        return {
-          id: completa.id,
-          numero: completa.numero,
-          estado: completa.estado,
-          fechaEmision: completa.fechaEmision,
-          cliente: { nombre: completa.cliente.nombre, tipo: completa.cliente.tipo },
-          total: completa.totales.total
-        };
-      })
+  router.get('/', async (req, res) => {
+    const filas = await db.all(
+      'SELECT * FROM cotizaciones WHERE usuario_id = ? ORDER BY id DESC',
+      [req.usuario.id]
     );
+    const resultados = [];
+    for (const fila of filas) {
+      const completa = await construirCotizacion(db, fila);
+      resultados.push({
+        id: completa.id,
+        numero: completa.numero,
+        estado: completa.estado,
+        fechaEmision: completa.fechaEmision,
+        cliente: { nombre: completa.cliente.nombre, tipo: completa.cliente.tipo },
+        total: completa.totales.total
+      });
+    }
+    res.json(resultados);
   });
 
-  router.get('/:id', (req, res) => {
-    const fila = obtenerCotizacion(db, req.params.id, req.usuario.id);
+  router.get('/:id', async (req, res) => {
+    const fila = await obtenerCotizacion(db, req.params.id, req.usuario.id);
     if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
-    res.json(construirCotizacion(db, fila));
+    res.json(await construirCotizacion(db, fila));
   });
 
-  router.post('/', (req, res) => {
-    const cliente = obtenerCliente(db, req.body.clienteId, req.usuario.id);
+  router.post('/', async (req, res) => {
+    const cliente = await obtenerCliente(db, req.body.clienteId, req.usuario.id);
     if (!cliente) return res.status(400).json({ error: 'El cliente indicado no existe' });
 
     const fiscal = leerConfiguracionFiscal(req.body, cliente);
     if (fiscal.error) return res.status(422).json({ error: fiscal.error });
 
     const ahora = new Date();
-    const cotizacionId = db
-      .transaction(() => {
-        const numero = siguienteNumero(db, req.usuario.id, ahora);
-        const resultado = db
-          .prepare(
-            `INSERT INTO cotizaciones (
-              usuario_id, numero, estado, fecha_emision, fecha_vigencia,
-              cliente_id, cliente_nombre, cliente_documento, cliente_contacto, cliente_tipo, cliente_agente_retenedor,
-              emisor_nombre, emisor_documento, emisor_contacto, emisor_regimen, emisor_logo_base64,
-              iva_tarifa, retencion_activada, retencion_concepto, retencion_porcentaje
-            ) VALUES (?, ?, 'borrador', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-          )
-          .run(
-            req.usuario.id,
-            numero,
-            formatoFecha(ahora),
-            formatoFecha(sumarDias(ahora, VIGENCIA_DIAS)),
-            cliente.id,
-            cliente.nombre,
-            cliente.documento,
-            cliente.contacto,
-            cliente.tipo,
-            cliente.agente_retenedor,
-            ...Object.values(datosEmisor(db, req.usuario.id)),
-            fiscal.valor.ivaTarifa,
-            fiscal.valor.retencionActivada,
-            fiscal.valor.retencionConcepto,
-            fiscal.valor.retencionPorcentaje
-          );
-        return resultado.lastInsertRowid;
-      })();
+    const emisor = await datosEmisor(db, req.usuario.id);
 
-    responderCotizacion(res, cotizacionId, 201);
+    const cotizacionId = await db.transaction(async (tx) => {
+      const numero = await siguienteNumero(tx, req.usuario.id, ahora);
+      const resultado = await tx.run(
+        `INSERT INTO cotizaciones (
+          usuario_id, numero, estado, fecha_emision, fecha_vigencia,
+          cliente_id, cliente_nombre, cliente_documento, cliente_contacto, cliente_tipo, cliente_agente_retenedor,
+          emisor_nombre, emisor_documento, emisor_contacto, emisor_regimen, emisor_logo_base64,
+          iva_tarifa, retencion_activada, retencion_concepto, retencion_porcentaje
+        ) VALUES (?, ?, 'borrador', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          req.usuario.id,
+          numero,
+          formatoFecha(ahora),
+          formatoFecha(sumarDias(ahora, VIGENCIA_DIAS)),
+          cliente.id,
+          cliente.nombre,
+          cliente.documento,
+          cliente.contacto,
+          cliente.tipo,
+          cliente.agente_retenedor,
+          ...Object.values(emisor),
+          fiscal.valor.ivaTarifa,
+          fiscal.valor.retencionActivada,
+          fiscal.valor.retencionConcepto,
+          fiscal.valor.retencionPorcentaje
+        ]
+      );
+      return resultado.insertId;
+    });
+
+    await responderCotizacion(res, cotizacionId, 201);
   });
 
-  // Solo los borradores son editables (FR-014a).
-  router.put('/:id', (req, res) => {
-    const fila = obtenerCotizacion(db, req.params.id, req.usuario.id);
+  router.put('/:id', async (req, res) => {
+    const fila = await obtenerCotizacion(db, req.params.id, req.usuario.id);
     if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
     if (fila.estado === 'emitida') {
       return res.status(409).json({ error: 'Esta cotización está emitida y no se puede modificar' });
     }
 
     const cliente = req.body.clienteId !== undefined
-      ? obtenerCliente(db, req.body.clienteId, req.usuario.id)
+      ? await obtenerCliente(db, req.body.clienteId, req.usuario.id)
       : { id: fila.cliente_id, nombre: fila.cliente_nombre, documento: fila.cliente_documento, contacto: fila.cliente_contacto, tipo: fila.cliente_tipo, agente_retenedor: fila.cliente_agente_retenedor };
     if (!cliente) return res.status(400).json({ error: 'El cliente indicado no existe' });
 
@@ -220,56 +217,58 @@ function crearRutasCotizaciones(db) {
     );
     if (fiscal.error) return res.status(422).json({ error: fiscal.error });
 
-    db.prepare(
+    const emisor = await datosEmisor(db, req.usuario.id);
+    await db.run(
       `UPDATE cotizaciones SET
         cliente_id = ?, cliente_nombre = ?, cliente_documento = ?, cliente_contacto = ?, cliente_tipo = ?, cliente_agente_retenedor = ?,
         iva_tarifa = ?, retencion_activada = ?, retencion_concepto = ?, retencion_porcentaje = ?,
         emisor_nombre = ?, emisor_documento = ?, emisor_contacto = ?, emisor_regimen = ?, emisor_logo_base64 = ?
-       WHERE id = ?`
-    ).run(
-      cliente.id,
-      cliente.nombre,
-      cliente.documento,
-      cliente.contacto,
-      cliente.tipo,
-      cliente.agente_retenedor,
-      fiscal.valor.ivaTarifa,
-      fiscal.valor.retencionActivada,
-      fiscal.valor.retencionConcepto,
-      fiscal.valor.retencionPorcentaje,
-      ...Object.values(datosEmisor(db, req.usuario.id)),
-      fila.id
+       WHERE id = ?`,
+      [
+        cliente.id,
+        cliente.nombre,
+        cliente.documento,
+        cliente.contacto,
+        cliente.tipo,
+        cliente.agente_retenedor,
+        fiscal.valor.ivaTarifa,
+        fiscal.valor.retencionActivada,
+        fiscal.valor.retencionConcepto,
+        fiscal.valor.retencionPorcentaje,
+        ...Object.values(emisor),
+        fila.id
+      ]
     );
 
-    responderCotizacion(res, fila.id);
+    await responderCotizacion(res, fila.id);
   });
 
-  // Emitir la cotización la vuelve de solo lectura y fija su fecha de emisión y vigencia (FR-014b).
-  router.post('/:id/emitir', (req, res) => {
-    const fila = obtenerCotizacion(db, req.params.id, req.usuario.id);
+  router.post('/:id/emitir', async (req, res) => {
+    const fila = await obtenerCotizacion(db, req.params.id, req.usuario.id);
     if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
     if (fila.estado === 'emitida') return res.status(409).json({ error: 'La cotización ya está emitida' });
 
-    if (obtenerLineas(db, fila.id).length === 0) {
+    const lineas = await obtenerLineas(db, fila.id);
+    if (lineas.length === 0) {
       return res.status(422).json({ error: 'Agrega al menos una línea antes de emitir la cotización' });
     }
 
     const ahora = new Date();
-    db.prepare(
-      `UPDATE cotizaciones SET estado = 'emitida', fecha_emision = ?, fecha_vigencia = ? WHERE id = ?`
-    ).run(formatoFecha(ahora), formatoFecha(sumarDias(ahora, VIGENCIA_DIAS)), fila.id);
+    await db.run(
+      `UPDATE cotizaciones SET estado = 'emitida', fecha_emision = ?, fecha_vigencia = ? WHERE id = ?`,
+      [formatoFecha(ahora), formatoFecha(sumarDias(ahora, VIGENCIA_DIAS)), fila.id]
+    );
 
-    responderCotizacion(res, fila.id);
+    await responderCotizacion(res, fila.id);
   });
 
-  // Solo se eliminan borradores; el número consumido no se reutiliza (FR-014c).
-  router.delete('/:id', (req, res) => {
-    const fila = obtenerCotizacion(db, req.params.id, req.usuario.id);
+  router.delete('/:id', async (req, res) => {
+    const fila = await obtenerCotizacion(db, req.params.id, req.usuario.id);
     if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
     if (fila.estado === 'emitida') {
       return res.status(409).json({ error: 'Las cotizaciones emitidas no se pueden eliminar' });
     }
-    db.prepare('DELETE FROM cotizaciones WHERE id = ?').run(fila.id);
+    await db.run('DELETE FROM cotizaciones WHERE id = ?', [fila.id]);
     res.status(204).end();
   });
 
@@ -281,8 +280,8 @@ function crearRutasCotizaciones(db) {
     return false;
   }
 
-  router.post('/:id/lineas', (req, res) => {
-    const fila = obtenerCotizacion(db, req.params.id, req.usuario.id);
+  router.post('/:id/lineas', async (req, res) => {
+    const fila = await obtenerCotizacion(db, req.params.id, req.usuario.id);
     if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
     if (bloquearSiEmitida(fila, res)) return;
 
@@ -290,42 +289,45 @@ function crearRutasCotizaciones(db) {
     if (error) return res.status(400).json({ error });
 
     const { descripcion, cantidad, precioUnitario, origen, servicioId } = req.body;
-    db.prepare(
+    await db.run(
       `INSERT INTO lineas_cotizacion (cotizacion_id, descripcion, cantidad, precio_unitario, origen, servicio_id)
-       VALUES (?, ?, ?, ?, ?, ?)`
-    ).run(fila.id, descripcion, cantidad, precioUnitario, origen || 'manual', servicioId || null);
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [fila.id, descripcion, cantidad, precioUnitario, origen || 'manual', servicioId || null]
+    );
 
-    responderCotizacion(res, fila.id, 201);
+    await responderCotizacion(res, fila.id, 201);
   });
 
-  router.put('/:id/lineas/:lineaId', (req, res) => {
-    const fila = obtenerCotizacion(db, req.params.id, req.usuario.id);
+  router.put('/:id/lineas/:lineaId', async (req, res) => {
+    const fila = await obtenerCotizacion(db, req.params.id, req.usuario.id);
     if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
     if (bloquearSiEmitida(fila, res)) return;
 
-    const linea = db
-      .prepare('SELECT id FROM lineas_cotizacion WHERE id = ? AND cotizacion_id = ?')
-      .get(req.params.lineaId, fila.id);
+    const linea = await db.get(
+      'SELECT id FROM lineas_cotizacion WHERE id = ? AND cotizacion_id = ?',
+      [req.params.lineaId, fila.id]
+    );
     if (!linea) return res.status(404).json({ error: 'Línea no encontrada' });
 
     const error = validarLinea(req.body);
     if (error) return res.status(400).json({ error });
 
     const { descripcion, cantidad, precioUnitario, origen, servicioId } = req.body;
-    db.prepare(
+    await db.run(
       `UPDATE lineas_cotizacion SET descripcion = ?, cantidad = ?, precio_unitario = ?, origen = ?, servicio_id = ?
-       WHERE id = ?`
-    ).run(descripcion, cantidad, precioUnitario, origen || 'manual', servicioId || null, req.params.lineaId);
+       WHERE id = ?`,
+      [descripcion, cantidad, precioUnitario, origen || 'manual', servicioId || null, req.params.lineaId]
+    );
 
-    responderCotizacion(res, fila.id);
+    await responderCotizacion(res, fila.id);
   });
 
-  router.delete('/:id/lineas/:lineaId', (req, res) => {
-    const fila = obtenerCotizacion(db, req.params.id, req.usuario.id);
+  router.delete('/:id/lineas/:lineaId', async (req, res) => {
+    const fila = await obtenerCotizacion(db, req.params.id, req.usuario.id);
     if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
     if (bloquearSiEmitida(fila, res)) return;
 
-    db.prepare('DELETE FROM lineas_cotizacion WHERE id = ? AND cotizacion_id = ?').run(req.params.lineaId, fila.id);
+    await db.run('DELETE FROM lineas_cotizacion WHERE id = ? AND cotizacion_id = ?', [req.params.lineaId, fila.id]);
     res.status(204).end();
   });
 

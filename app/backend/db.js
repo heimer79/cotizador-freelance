@@ -1,136 +1,204 @@
-const fs = require('fs');
-const path = require('path');
-const Database = require('better-sqlite3');
-const { crearEsquemaDonaciones } = require('./src/models/donacion');
+const mysql = require('mysql2/promise');
 
-const TABLAS_V0 = ['perfil', 'clientes', 'catalogo', 'presupuestos', 'lineas_presupuesto', 'contador_presupuestos'];
+let pool;
 
-function tablaExiste(db, nombre) {
-  return !!db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?").get(nombre);
-}
-
-// El esquema v0 (un único espacio de datos, sin usuarios) no es compatible con la spec 003.
-// Sus tablas se renombran con sufijo _v0 para conservar los datos sin mezclarlos con los nuevos.
-function apartarEsquemaV0(db) {
-  if (!tablaExiste(db, 'clientes')) return;
-  const columnas = db.prepare('PRAGMA table_info(clientes)').all();
-  if (columnas.some((c) => c.name === 'usuario_id')) return;
-
-  for (const tabla of TABLAS_V0) {
-    if (tablaExiste(db, tabla)) {
-      db.exec(`ALTER TABLE ${tabla} RENAME TO ${tabla}_v0`);
+const db = {
+  async get(sql, params = []) {
+    const [rows] = await pool.execute(sql, params);
+    return rows[0] || null;
+  },
+  async all(sql, params = []) {
+    const [rows] = await pool.execute(sql, params);
+    return rows;
+  },
+  async run(sql, params = []) {
+    const [result] = await pool.execute(sql, params);
+    return { insertId: result.insertId, affectedRows: result.affectedRows };
+  },
+  async transaction(fn) {
+    const conn = await pool.getConnection();
+    const tx = {
+      async get(sql, params = []) { const [rows] = await conn.execute(sql, params); return rows[0] || null; },
+      async all(sql, params = []) { const [rows] = await conn.execute(sql, params); return rows; },
+      async run(sql, params = []) { const [result] = await conn.execute(sql, params); return { insertId: result.insertId, affectedRows: result.affectedRows }; }
+    };
+    try {
+      await conn.beginTransaction();
+      const result = await fn(tx);
+      await conn.commit();
+      return result;
+    } catch (e) {
+      await conn.rollback();
+      throw e;
+    } finally {
+      conn.release();
     }
   }
+};
+
+async function crearEsquema() {
+  const conn = await pool.getConnection();
+  try {
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS usuarios (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nombre_completo VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        tipo_documento VARCHAR(20) NOT NULL,
+        numero_documento VARCHAR(50) NOT NULL,
+        password_hash VARCHAR(255),
+        email_verificado TINYINT(1) NOT NULL DEFAULT 0,
+        fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS sesiones (
+        token_hash VARCHAR(64) PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        expira_en DATETIME NOT NULL,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS tokens_correo (
+        token_hash VARCHAR(64) PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        tipo VARCHAR(20) NOT NULL,
+        expira_en DATETIME NOT NULL,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS perfil (
+        usuario_id INT PRIMARY KEY,
+        nombre VARCHAR(255),
+        nit VARCHAR(50),
+        contacto VARCHAR(500),
+        logo_base64 LONGTEXT,
+        regimen VARCHAR(30),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS clientes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        nombre VARCHAR(255) NOT NULL,
+        documento VARCHAR(50),
+        contacto VARCHAR(500),
+        tipo VARCHAR(30) NOT NULL,
+        agente_retenedor TINYINT(1) NOT NULL DEFAULT 0,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS catalogo (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        nombre VARCHAR(255) NOT NULL,
+        precio_defecto INT NOT NULL,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS cotizaciones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        numero VARCHAR(20) NOT NULL,
+        estado VARCHAR(20) NOT NULL DEFAULT 'borrador',
+        fecha_emision VARCHAR(10) NOT NULL,
+        fecha_vigencia VARCHAR(10) NOT NULL,
+        cliente_id INT,
+        cliente_nombre VARCHAR(255) NOT NULL,
+        cliente_documento VARCHAR(50),
+        cliente_contacto VARCHAR(500),
+        cliente_tipo VARCHAR(30) NOT NULL,
+        cliente_agente_retenedor TINYINT(1) NOT NULL DEFAULT 0,
+        emisor_nombre VARCHAR(255),
+        emisor_documento VARCHAR(50),
+        emisor_contacto VARCHAR(500),
+        emisor_regimen VARCHAR(30),
+        emisor_logo_base64 LONGTEXT,
+        iva_tarifa INT NOT NULL DEFAULT 19,
+        retencion_activada TINYINT(1) NOT NULL DEFAULT 0,
+        retencion_concepto VARCHAR(100),
+        retencion_porcentaje DECIMAL(5,2),
+        UNIQUE KEY uq_usuario_numero (usuario_id, numero),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS lineas_cotizacion (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        cotizacion_id INT NOT NULL,
+        descripcion VARCHAR(500) NOT NULL,
+        cantidad INT NOT NULL,
+        precio_unitario INT NOT NULL,
+        origen VARCHAR(20) NOT NULL,
+        servicio_id INT,
+        FOREIGN KEY (cotizacion_id) REFERENCES cotizaciones(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS contador_cotizaciones (
+        usuario_id INT NOT NULL,
+        anio VARCHAR(4) NOT NULL,
+        ultimo_numero INT NOT NULL,
+        PRIMARY KEY (usuario_id, anio),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS donacion (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        profesional_id INT NOT NULL,
+        monto INT NOT NULL,
+        estado VARCHAR(20) NOT NULL,
+        referencia_pasarela VARCHAR(100) UNIQUE,
+        pasarela VARCHAR(30) NOT NULL,
+        fecha_creacion DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+        fecha_confirmacion DATETIME(3),
+        email_enviado TINYINT(1) NOT NULL DEFAULT 0,
+        FOREIGN KEY (profesional_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    const [indexes] = await conn.query(`SHOW INDEX FROM donacion WHERE Key_name = 'idx_donacion_profesional_fecha'`);
+    if (indexes.length === 0) {
+      await conn.query(`CREATE INDEX idx_donacion_profesional_fecha ON donacion (profesional_id, fecha_creacion)`);
+    }
+    const [indexes2] = await conn.query(`SHOW INDEX FROM donacion WHERE Key_name = 'idx_donacion_referencia'`);
+    if (indexes2.length === 0) {
+      await conn.query(`CREATE INDEX idx_donacion_referencia ON donacion (referencia_pasarela)`);
+    }
+  } finally {
+    conn.release();
+  }
 }
 
-function abrirBaseDatos(ruta = path.join(__dirname, 'datos', 'presupuestospro.sqlite')) {
-  if (ruta !== ':memory:') {
-    const directorio = path.dirname(ruta);
-    fs.mkdirSync(directorio, { recursive: true });
-  }
+async function abrirBaseDatos() {
+  pool = mysql.createPool({
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '3306', 10),
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'presupuestospro',
+    waitForConnections: true,
+    connectionLimit: 10,
+    charset: 'utf8mb4'
+  });
 
-  const db = new Database(ruta);
-  db.pragma('foreign_keys = ON');
-
-  apartarEsquemaV0(db);
-
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS usuarios (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nombre_completo TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
-      tipo_documento TEXT NOT NULL CHECK (tipo_documento IN ('CC', 'NIT', 'CE', 'pasaporte')),
-      numero_documento TEXT NOT NULL,
-      password_hash TEXT NOT NULL,
-      email_verificado INTEGER NOT NULL DEFAULT 0,
-      fecha_registro TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-
-    CREATE TABLE IF NOT EXISTS sesiones (
-      token_hash TEXT PRIMARY KEY,
-      usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-      expira_en TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS tokens_correo (
-      token_hash TEXT PRIMARY KEY,
-      usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-      tipo TEXT NOT NULL CHECK (tipo IN ('verificacion', 'restablecer')),
-      expira_en TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS perfil (
-      usuario_id INTEGER PRIMARY KEY REFERENCES usuarios(id) ON DELETE CASCADE,
-      nombre TEXT,
-      nit TEXT,
-      contacto TEXT,
-      logo_base64 TEXT,
-      regimen TEXT CHECK (regimen IS NULL OR regimen IN ('ordinario', 'simple', 'no_responsable_iva'))
-    );
-
-    CREATE TABLE IF NOT EXISTS clientes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-      nombre TEXT NOT NULL,
-      documento TEXT,
-      contacto TEXT,
-      tipo TEXT NOT NULL CHECK (tipo IN ('persona_natural', 'persona_juridica')),
-      agente_retenedor INTEGER NOT NULL DEFAULT 0
-    );
-
-    CREATE TABLE IF NOT EXISTS catalogo (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-      nombre TEXT NOT NULL,
-      precio_defecto INTEGER NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS cotizaciones (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-      numero TEXT NOT NULL,
-      estado TEXT NOT NULL DEFAULT 'borrador' CHECK (estado IN ('borrador', 'emitida')),
-      fecha_emision TEXT NOT NULL,
-      fecha_vigencia TEXT NOT NULL,
-      cliente_id INTEGER,
-      cliente_nombre TEXT NOT NULL,
-      cliente_documento TEXT,
-      cliente_contacto TEXT,
-      cliente_tipo TEXT NOT NULL,
-      cliente_agente_retenedor INTEGER NOT NULL DEFAULT 0,
-      emisor_nombre TEXT,
-      emisor_documento TEXT,
-      emisor_contacto TEXT,
-      emisor_regimen TEXT,
-      emisor_logo_base64 TEXT,
-      iva_tarifa INTEGER NOT NULL DEFAULT 19 CHECK (iva_tarifa IN (19, 5, 0)),
-      retencion_activada INTEGER NOT NULL DEFAULT 0,
-      retencion_concepto TEXT,
-      retencion_porcentaje REAL,
-      UNIQUE (usuario_id, numero)
-    );
-
-    CREATE TABLE IF NOT EXISTS lineas_cotizacion (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      cotizacion_id INTEGER NOT NULL REFERENCES cotizaciones(id) ON DELETE CASCADE,
-      descripcion TEXT NOT NULL,
-      cantidad INTEGER NOT NULL,
-      precio_unitario INTEGER NOT NULL,
-      origen TEXT NOT NULL CHECK (origen IN ('catalogo', 'manual')),
-      servicio_id INTEGER
-    );
-
-    CREATE TABLE IF NOT EXISTS contador_cotizaciones (
-      usuario_id INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-      anio TEXT NOT NULL,
-      ultimo_numero INTEGER NOT NULL,
-      PRIMARY KEY (usuario_id, anio)
-    );
-  `);
-
-  crearEsquemaDonaciones(db);
-
+  await crearEsquema();
   return db;
 }
 
-module.exports = { abrirBaseDatos };
+module.exports = { abrirBaseDatos, db };

@@ -38,12 +38,12 @@ Ampliar PresupuestosPro con un sistema de roles (usuario normal / administrador)
 | Principio | ¿Se cumple? | Justificación |
 |-----------|-------------|---------------|
 | I. Simplicidad ante todo | ✅ SÍ | Se extiende el stack existente (Express, SQLite, Vue) sin introducir frameworks nuevos ni abstracciones innecesarias. Passport.js es la librería estándar mínima para OAuth. MercadoPago Checkout Pro usa redirect (sin SDK pesado). No se diseña para multi-tenant ni escala futura. |
-| II. Idioma y mercado | ⚠️ DESVIACIÓN JUSTIFICADA | Toda la UI y textos legales siguen en español de Colombia. **Desviación**: el precio de la suscripción premium se muestra en USD ($20 USD/año) además de la equivalencia aproximada en COP, porque la spec lo requiere explícitamente (FR-025). No se hacen cálculos en USD; la conversión la maneja la pasarela de pago. |
+| II. Idioma y mercado | ✅ SÍ | Toda la UI y textos legales en español de Colombia. El precio de la suscripción se muestra en USD informativamente con equivalencia COP, conforme al Principio II enmendado (v1.1.0). La conversión la maneja la pasarela de pago. |
 | III. Cero alcance fantasma | ✅ SÍ | Todas las funcionalidades están listadas explícitamente en la spec (FR-001 a FR-056). No se añade nada fuera de spec. |
 | IV. Verificable por persona no técnica | ✅ SÍ | Cada criterio de éxito (SC-001 a SC-011) se verifica usando la aplicación: hacer clic, rellenar formularios, verificar visualmente. |
 | V. Datos del usuario con respeto | ✅ SÍ | Solo se recopilan datos imprescindibles. Credenciales OAuth, claves API y secretos van en variables de entorno o en tabla de configuración encriptada, nunca en código. El administrador no accede a cotizaciones ni datos de clientes (FR-007). |
 
-**Desviación registrada**: Principio II — Precio en USD requerido por spec FR-025 y FR-019. No contradice el principio: la moneda de la aplicación sigue siendo COP; el precio USD es informativo junto con equivalencia COP.
+**Sin desviaciones**: El Principio II (v1.1.0) permite precios informativos en USD cuando la spec lo requiere explícitamente.
 
 ## Project Structure
 
@@ -122,6 +122,5 @@ tests/
 
 | Desviación | Por qué se necesita | Alternativa más simple rechazada porque |
 |-----------|---------------------|----------------------------------------|
-| Precio en USD (Principio II) | FR-019 y FR-025 lo exigen explícitamente | Mostrar solo COP no cumple la spec |
 | Passport.js como dependencia nueva | OAuth social requiere flujos estándar OpenID/OAuth2 | Implementar OAuth desde cero es más complejo y propenso a errores de seguridad |
 | Gmail API como servicio alternativo de correo | FR-038 requiere que el admin configure Gmail API | Resend ya existe pero la spec pide Gmail API configurable por admin |

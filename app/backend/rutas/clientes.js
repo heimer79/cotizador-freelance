@@ -26,48 +26,47 @@ function validarCliente(body) {
 function crearRutasClientes(db) {
   const router = express.Router();
 
-  router.get('/', (req, res) => {
-    const filas = db.prepare('SELECT * FROM clientes WHERE usuario_id = ? ORDER BY nombre').all(req.usuario.id);
+  router.get('/', async (req, res) => {
+    const filas = await db.all('SELECT * FROM clientes WHERE usuario_id = ? ORDER BY nombre', [req.usuario.id]);
     res.json(filas.map(aFormatoApi));
   });
 
-  router.post('/', (req, res) => {
+  router.post('/', async (req, res) => {
     const error = validarCliente(req.body);
     if (error) return res.status(400).json({ error });
 
     const { nombre, documento, contacto, tipo, agenteRetenedor } = req.body;
-    const resultado = db
-      .prepare(
-        `INSERT INTO clientes (usuario_id, nombre, documento, contacto, tipo, agente_retenedor)
-         VALUES (?, ?, ?, ?, ?, ?)`
-      )
-      .run(req.usuario.id, nombre.trim(), documento || null, contacto || null, tipo, agenteRetenedor ? 1 : 0);
+    const resultado = await db.run(
+      `INSERT INTO clientes (usuario_id, nombre, documento, contacto, tipo, agente_retenedor)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [req.usuario.id, nombre.trim(), documento || null, contacto || null, tipo, agenteRetenedor ? 1 : 0]
+    );
 
-    const creado = db.prepare('SELECT * FROM clientes WHERE id = ?').get(resultado.lastInsertRowid);
+    const creado = await db.get('SELECT * FROM clientes WHERE id = ?', [resultado.insertId]);
     res.status(201).json(aFormatoApi(creado));
   });
 
-  router.put('/:id', (req, res) => {
-    const fila = db.prepare('SELECT * FROM clientes WHERE id = ? AND usuario_id = ?').get(req.params.id, req.usuario.id);
+  router.put('/:id', async (req, res) => {
+    const fila = await db.get('SELECT * FROM clientes WHERE id = ? AND usuario_id = ?', [req.params.id, req.usuario.id]);
     if (!fila) return res.status(404).json({ error: 'Cliente no encontrado' });
 
     const error = validarCliente(req.body);
     if (error) return res.status(400).json({ error });
 
     const { nombre, documento, contacto, tipo, agenteRetenedor } = req.body;
-    db.prepare(
+    await db.run(
       `UPDATE clientes SET nombre = ?, documento = ?, contacto = ?, tipo = ?, agente_retenedor = ?
-       WHERE id = ? AND usuario_id = ?`
-    ).run(nombre.trim(), documento || null, contacto || null, tipo, agenteRetenedor ? 1 : 0, req.params.id, req.usuario.id);
+       WHERE id = ? AND usuario_id = ?`,
+      [nombre.trim(), documento || null, contacto || null, tipo, agenteRetenedor ? 1 : 0, req.params.id, req.usuario.id]
+    );
 
-    const actualizado = db.prepare('SELECT * FROM clientes WHERE id = ?').get(req.params.id);
+    const actualizado = await db.get('SELECT * FROM clientes WHERE id = ?', [req.params.id]);
     res.json(aFormatoApi(actualizado));
   });
 
-  // Las cotizaciones conservan una copia de los datos del cliente (FR-018), así que borrar no las afecta.
-  router.delete('/:id', (req, res) => {
-    const resultado = db.prepare('DELETE FROM clientes WHERE id = ? AND usuario_id = ?').run(req.params.id, req.usuario.id);
-    if (resultado.changes === 0) return res.status(404).json({ error: 'Cliente no encontrado' });
+  router.delete('/:id', async (req, res) => {
+    const resultado = await db.run('DELETE FROM clientes WHERE id = ? AND usuario_id = ?', [req.params.id, req.usuario.id]);
+    if (resultado.affectedRows === 0) return res.status(404).json({ error: 'Cliente no encontrado' });
     res.status(204).end();
   });
 

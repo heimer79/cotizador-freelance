@@ -5,7 +5,6 @@ const MONTO_MAXIMO = 500000;
 const MAX_DONACIONES_DIA = 3;
 const MAX_MONTO_DIA = 200000;
 const ZONA_HORARIA = 'America/Bogota';
-// Colombia no tiene horario de verano: medianoche en Bogotá equivale siempre a las 05:00 UTC.
 const DESFASE_UTC_HORAS = 5;
 
 class LimiteDonacionError extends Error {}
@@ -15,7 +14,6 @@ function diaBogota(fecha) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: ZONA_HORARIA }).format(fecha);
 }
 
-// Rango [inicio, fin) del día natural en Bogotá, en ISO UTC, para filtrar por fecha_creacion.
 function rangoDiaBogota(fecha) {
   const inicio = new Date(`${diaBogota(fecha)}T${String(DESFASE_UTC_HORAS).padStart(2, '0')}:00:00.000Z`);
   const fin = new Date(inicio.getTime() + 24 * 60 * 60 * 1000);
@@ -28,21 +26,18 @@ function validarMonto(monto) {
   }
 }
 
-// Límites antifraude (FR-015). Cuenta pendientes y exitosas. better-sqlite3 es síncrono y la
-// transacción cubre la comprobación y la inserción, así que dos peticiones simultáneas no pasan ambas.
-function crearDonacion(db, { profesionalId, monto, referencia, ahora = new Date() }) {
+async function crearDonacion(db, { profesionalId, monto, referencia, ahora = new Date() }) {
   validarMonto(monto);
 
   const { inicio, fin } = rangoDiaBogota(ahora);
-  return db.transaction(() => {
-    const resumen = db
-      .prepare(
-        `SELECT COUNT(*) AS cantidad, COALESCE(SUM(monto), 0) AS acumulado
-         FROM donacion
-         WHERE profesional_id = ? AND estado IN ('pendiente', 'exitosa')
-           AND fecha_creacion >= ? AND fecha_creacion < ?`
-      )
-      .get(profesionalId, inicio, fin);
+  return db.transaction(async (tx) => {
+    const resumen = await tx.get(
+      `SELECT COUNT(*) AS cantidad, COALESCE(SUM(monto), 0) AS acumulado
+       FROM donacion
+       WHERE profesional_id = ? AND estado IN ('pendiente', 'exitosa')
+         AND fecha_creacion >= ? AND fecha_creacion < ?`,
+      [profesionalId, inicio, fin]
+    );
 
     if (resumen.cantidad >= MAX_DONACIONES_DIA) {
       throw new LimiteDonacionError('Has alcanzado el límite de donaciones por hoy. Podrás donar nuevamente mañana.');
@@ -51,22 +46,20 @@ function crearDonacion(db, { profesionalId, monto, referencia, ahora = new Date(
       throw new LimiteDonacionError('Has alcanzado el límite de donaciones por hoy. Podrás donar nuevamente mañana.');
     }
 
-    const resultado = db
-      .prepare(
-        `INSERT INTO donacion (profesional_id, monto, estado, referencia_pasarela, pasarela, fecha_creacion)
-         VALUES (?, ?, 'pendiente', ?, 'wompi', ?)`
-      )
-      .run(profesionalId, monto, referencia, ahora.toISOString());
+    const resultado = await tx.run(
+      `INSERT INTO donacion (profesional_id, monto, estado, referencia_pasarela, pasarela, fecha_creacion)
+       VALUES (?, ?, 'pendiente', ?, 'wompi', ?)`,
+      [profesionalId, monto, referencia, ahora.toISOString()]
+    );
 
-    return db.prepare('SELECT * FROM donacion WHERE id = ?').get(resultado.lastInsertRowid);
-  })();
+    return tx.get('SELECT * FROM donacion WHERE id = ?', [resultado.insertId]);
+  });
 }
 
 function generarReferencia() {
   return `DON-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
 }
 
-// Mapeo de estados de Wompi a estados internos. Un estado final no vuelve a cambiar (idempotencia).
 const ESTADOS_WOMPI = {
   APPROVED: 'exitosa',
   DECLINED: 'fallida',
@@ -92,13 +85,13 @@ function enlaceCheckoutWompi({ publicKey, integritySecret, monto, referencia, ur
   return `https://checkout.wompi.co/p/?${parametros.toString()}`;
 }
 
-function listarDonaciones(db, profesionalId, pagina, porPagina) {
-  const total = db.prepare('SELECT COUNT(*) AS total FROM donacion WHERE profesional_id = ?').get(profesionalId).total;
-  const filas = db
-    .prepare(
-      `SELECT * FROM donacion WHERE profesional_id = ? ORDER BY fecha_creacion DESC, id DESC LIMIT ? OFFSET ?`
-    )
-    .all(profesionalId, porPagina, (pagina - 1) * porPagina);
+async function listarDonaciones(db, profesionalId, pagina, porPagina) {
+  const totalRow = await db.get('SELECT COUNT(*) AS total FROM donacion WHERE profesional_id = ?', [profesionalId]);
+  const total = totalRow ? totalRow.total : 0;
+  const filas = await db.all(
+    `SELECT * FROM donacion WHERE profesional_id = ? ORDER BY fecha_creacion DESC, id DESC LIMIT ? OFFSET ?`,
+    [profesionalId, porPagina, (pagina - 1) * porPagina]
+  );
   return { filas, total };
 }
 

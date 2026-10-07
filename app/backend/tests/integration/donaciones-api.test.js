@@ -17,7 +17,6 @@ afterEach(() => {
   process.env = anteriores;
 });
 
-// Firma de evento igual que la de Wompi: propiedades + timestamp + secreto.
 function eventoFirmado(transaccion, timestamp = 1700000000) {
   const propiedades = ['transaction.id', 'transaction.status', 'transaction.amount_in_cents'];
   const valores = propiedades.map((p) => transaccion[p.split('.')[1]]);
@@ -35,7 +34,7 @@ function eventoFirmado(transaccion, timestamp = 1700000000) {
 
 test('POST /api/donaciones crea la donación pendiente y devuelve un enlace de checkout firmado', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const r = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 10000 } });
 
     assert.strictEqual(r.status, 201);
@@ -63,7 +62,7 @@ test('POST /api/donaciones responde 401 sin sesión', async () => {
 
 test('POST /api/donaciones responde 400 con monto fuera de rango', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const r = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 1000 } });
     assert.strictEqual(r.status, 400);
     assert.match(r.cuerpo.error, /2\.000/);
@@ -72,7 +71,7 @@ test('POST /api/donaciones responde 400 con monto fuera de rango', async () => {
 
 test('el 4.º intento del día responde 429', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     for (let i = 0; i < 3; i++) {
       await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 2000 } });
     }
@@ -84,7 +83,7 @@ test('el 4.º intento del día responde 429', async () => {
 test('sin claves de Wompi configuradas responde 503 con mensaje amigable (EC3)', async () => {
   delete process.env.WOMPI_PUBLIC_KEY;
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const r = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 10000 } });
     assert.strictEqual(r.status, 503);
   });
@@ -92,8 +91,8 @@ test('sin claves de Wompi configuradas responde 503 con mensaje amigable (EC3)',
 
 test('GET /api/donaciones lista solo las donaciones del profesional, paginadas', async () => {
   await conServidor(async (base, db) => {
-    const ana = usuarioVerificado(db);
-    const beto = usuarioVerificado(db);
+    const ana = await usuarioVerificado(db);
+    const beto = await usuarioVerificado(db);
     await json(`${base}/api/donaciones`, { method: 'POST', cookie: ana.cookie, body: { monto: 5000 } });
     await json(`${base}/api/donaciones`, { method: 'POST', cookie: beto.cookie, body: { monto: 5000 } });
 
@@ -106,7 +105,7 @@ test('GET /api/donaciones lista solo las donaciones del profesional, paginadas',
 
 test('webhook APPROVED con firma válida marca la donación exitosa y envía la confirmación', async () => {
   await conServidor(async (base, db, correo) => {
-    const { cookie, id } = usuarioVerificado(db, 'donante@ejemplo.com');
+    const { cookie, id } = await usuarioVerificado(db, 'donante@ejemplo.com');
     const creada = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 20000 } });
     const referencia = new URL(creada.cuerpo.checkout_url).searchParams.get('reference');
 
@@ -120,7 +119,6 @@ test('webhook APPROVED con firma válida marca la donación exitosa y envía la 
     assert.strictEqual(confirmaciones[0].monto, 20000);
     assert.strictEqual(confirmaciones[0].para, 'donante@ejemplo.com');
 
-    // Segundo evento igual: idempotente, no reenvía correo.
     await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: evento });
     assert.strictEqual(correo.enviados.filter((m) => m.tipo === 'donacion').length, 1);
     assert.ok(id);
@@ -129,7 +127,7 @@ test('webhook APPROVED con firma válida marca la donación exitosa y envía la 
 
 test('webhook con firma inválida responde 400 y no cambia la donación', async () => {
   await conServidor(async (base, db) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const creada = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 20000 } });
     const referencia = new URL(creada.cuerpo.checkout_url).searchParams.get('reference');
 
@@ -138,14 +136,14 @@ test('webhook con firma inválida responde 400 y no cambia la donación', async 
     const r = await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: evento });
     assert.strictEqual(r.status, 400);
 
-    const estado = db.prepare('SELECT estado FROM donacion WHERE referencia_pasarela = ?').get(referencia);
+    const estado = await db.get('SELECT estado FROM donacion WHERE referencia_pasarela = ?', [referencia]);
     assert.strictEqual(estado.estado, 'pendiente');
   });
 });
 
 test('webhook DECLINED marca la donación como fallida y no envía correo', async () => {
   await conServidor(async (base, db, correo) => {
-    const { cookie } = usuarioVerificado(db);
+    const { cookie } = await usuarioVerificado(db);
     const creada = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 5000 } });
     const referencia = new URL(creada.cuerpo.checkout_url).searchParams.get('reference');
 
@@ -154,7 +152,7 @@ test('webhook DECLINED marca la donación como fallida y no envía correo', asyn
       body: eventoFirmado({ id: 'txn-3', reference: referencia, status: 'DECLINED', amount_in_cents: 500000 })
     });
 
-    const fila = db.prepare('SELECT estado FROM donacion WHERE referencia_pasarela = ?').get(referencia);
+    const fila = await db.get('SELECT estado FROM donacion WHERE referencia_pasarela = ?', [referencia]);
     assert.strictEqual(fila.estado, 'fallida');
     assert.strictEqual(correo.enviados.length, 0);
   });

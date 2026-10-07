@@ -24,7 +24,6 @@ function generarToken() {
   return crypto.randomBytes(32).toString('base64url');
 }
 
-// Los tokens se guardan solo como hash: quien lea la base de datos no puede usarlos.
 function hashToken(token) {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
@@ -48,59 +47,58 @@ function emitirCookieSesion(res, token) {
   });
 }
 
-function crearSesion(db, usuarioId) {
+async function crearSesion(db, usuarioId) {
   const token = generarToken();
   const expiraEn = new Date(Date.now() + DURACION_SESION_MS).toISOString();
-  db.prepare('INSERT INTO sesiones (token_hash, usuario_id, expira_en) VALUES (?, ?, ?)').run(
+  await db.run('INSERT INTO sesiones (token_hash, usuario_id, expira_en) VALUES (?, ?, ?)', [
     hashToken(token),
     usuarioId,
     expiraEn
-  );
+  ]);
   return token;
 }
 
-function crearTokenCorreo(db, usuarioId, tipo) {
+async function crearTokenCorreo(db, usuarioId, tipo) {
   const token = generarToken();
   const vigencia = tipo === 'verificacion' ? VIGENCIA_VERIFICACION_MS : VIGENCIA_RESTABLECER_MS;
-  db.prepare('DELETE FROM tokens_correo WHERE usuario_id = ? AND tipo = ?').run(usuarioId, tipo);
-  db.prepare('INSERT INTO tokens_correo (token_hash, usuario_id, tipo, expira_en) VALUES (?, ?, ?, ?)').run(
+  await db.run('DELETE FROM tokens_correo WHERE usuario_id = ? AND tipo = ?', [usuarioId, tipo]);
+  await db.run('INSERT INTO tokens_correo (token_hash, usuario_id, tipo, expira_en) VALUES (?, ?, ?, ?)', [
     hashToken(token),
     usuarioId,
     tipo,
     new Date(Date.now() + vigencia).toISOString()
-  );
+  ]);
   return token;
 }
 
-// Consume el token: solo funciona una vez y solo si no ha expirado.
-function consumirTokenCorreo(db, token, tipo) {
-  const fila = db
-    .prepare('SELECT usuario_id, expira_en FROM tokens_correo WHERE token_hash = ? AND tipo = ?')
-    .get(hashToken(token), tipo);
+async function consumirTokenCorreo(db, token, tipo) {
+  const fila = await db.get(
+    'SELECT usuario_id, expira_en FROM tokens_correo WHERE token_hash = ? AND tipo = ?',
+    [hashToken(token), tipo]
+  );
   if (!fila) return null;
 
-  db.prepare('DELETE FROM tokens_correo WHERE token_hash = ?').run(hashToken(token));
+  await db.run('DELETE FROM tokens_correo WHERE token_hash = ?', [hashToken(token)]);
   if (new Date(fila.expira_en) < new Date()) return null;
   return fila.usuario_id;
 }
 
 function crearMiddlewareSesion(db) {
-  return function requiereSesion(req, res, next) {
+  return async function requiereSesion(req, res, next) {
     const token = leerCookie(req, NOMBRE_COOKIE);
     if (!token) {
       return res.status(401).json({ error: 'Debes iniciar sesión para continuar' });
     }
 
-    const fila = db
-      .prepare(
-        `SELECT u.id, u.email, u.nombre_completo, u.email_verificado, s.expira_en
-         FROM sesiones s JOIN usuarios u ON u.id = s.usuario_id
-         WHERE s.token_hash = ?`
-      )
-      .get(hashToken(token));
+    const fila = await db.get(
+      `SELECT u.id, u.email, u.nombre_completo, u.email_verificado, s.expira_en
+       FROM sesiones s JOIN usuarios u ON u.id = s.usuario_id
+       WHERE s.token_hash = ?`,
+      [hashToken(token)]
+    );
 
     if (!fila || new Date(fila.expira_en) < new Date()) {
-      if (fila) db.prepare('DELETE FROM sesiones WHERE token_hash = ?').run(hashToken(token));
+      if (fila) await db.run('DELETE FROM sesiones WHERE token_hash = ?', [hashToken(token)]);
       return res.status(401).json({ error: 'Tu sesión expiró. Vuelve a iniciar sesión.' });
     }
 
@@ -114,7 +112,6 @@ function crearMiddlewareSesion(db) {
   };
 }
 
-// Las escrituras exigen correo verificado (FR-004a); las lecturas siguen disponibles.
 function soloVerificadosParaEscribir(req, res, next) {
   if (req.method === 'GET' || req.method === 'HEAD') return next();
   if (!req.usuario || !req.usuario.verificado) {

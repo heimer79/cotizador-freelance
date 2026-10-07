@@ -208,7 +208,7 @@ Como propietario de la plataforma, quiero que aparezca la atribución "Creado po
 **Configuración del administrador — correo electrónico (Gmail API)**
 
 - **FR-038**: El administrador MUST poder configurar las credenciales de Gmail API (Client ID, Client Secret) y la dirección de correo remitente autorizada desde el panel de administración.
-- **FR-039**: La plataforma MUST enviar correos transaccionales mediante Gmail API para: (a) verificación de correo electrónico al registrarse; (b) recordatorio de vencimiento de suscripción premium (antes de los 30 días de gracia); (c) confirmación de suscripción premium exitosa.
+- **FR-039**: La plataforma MUST enviar correos transaccionales mediante Gmail API para: (a) verificación de correo electrónico al registrarse; (b) recordatorio de vencimiento de suscripción premium: un primer correo 10 días antes de la fecha de vencimiento y un segundo correo 1 día antes; (c) confirmación de suscripción premium exitosa.
 - **FR-040**: Si el envío de correo falla (credenciales inválidas, cuota agotada o servicio no disponible), el sistema MUST registrar el error internamente y permitir que el usuario continúe usando la plataforma. El correo fallido MUST reintentarse automáticamente hasta 3 veces con intervalos crecientes.
 
 **Textos legales y aceptación**
@@ -325,7 +325,7 @@ El texto MUST incluir los siguientes puntos conforme a la legislación colombian
 - Se conservan los medios de monetización existentes (AdSense y donaciones) definidos en spec-004. Se añade la suscripción premium como tercer canal de ingresos.
 - El primer administrador se configura durante la instalación o despliegue inicial de la plataforma (seed en base de datos o variable de entorno).
 - El precio de la suscripción premium ($20 USD/año) se muestra en USD y con equivalencia aproximada en COP al usuario. La conversión exacta la realiza la pasarela de pago al momento del cobro.
-- Las pasarelas de pago para suscripciones premium son las mismas de donaciones (MercadoPago y PayPal). El administrador puede configurar enlaces diferentes para suscripciones y donaciones si lo desea.
+- La pasarela de pago para suscripciones premium es MercadoPago exclusivamente. Las donaciones se procesan mediante MercadoPago y PayPal (ambas opcionales para el usuario). El administrador puede configurar los enlaces de cada pasarela de forma independiente.
 - El correo electrónico es el identificador único del usuario. La vinculación de cuentas sociales se basa en coincidencia de correo electrónico.
 - Los límites de almacenamiento para premium (500 cotizaciones, 200 clientes, 50 grupos) son un punto de partida razonable para v1. El administrador no puede cambiar estos límites desde el panel.
 - Los textos legales son contenido estático versionado. El administrador no los edita desde el panel; se actualizan mediante despliegue.

@@ -3,8 +3,6 @@ const express = require('express');
 const { ESTADOS_WOMPI } = require('../services/donacion-service');
 const { aFormatoApi } = require('../models/donacion');
 
-// Wompi firma los eventos: SHA-256 de los valores de `signature.properties` (en orden),
-// seguidos de `timestamp` y del secreto de integridad.
 function firmaValida(cuerpo, secreto) {
   const firma = cuerpo.signature;
   if (!firma || !Array.isArray(firma.properties) || typeof firma.checksum !== 'string') return false;
@@ -41,16 +39,14 @@ function crearRutasWebhookDonaciones(db, correo) {
       return res.status(400).json({ error: 'Payload no reconocido' });
     }
 
-    const donacion = db
-      .prepare(
-        `SELECT d.*, u.email, u.nombre_completo FROM donacion d
-         JOIN usuarios u ON u.id = d.profesional_id
-         WHERE d.referencia_pasarela = ?`
-      )
-      .get(transaccion.reference);
+    const donacion = await db.get(
+      `SELECT d.*, u.email, u.nombre_completo FROM donacion d
+       JOIN usuarios u ON u.id = d.profesional_id
+       WHERE d.referencia_pasarela = ?`,
+      [transaccion.reference]
+    );
     if (!donacion) return res.json({ ok: true, ignorado: true });
 
-    // Idempotencia: solo se procesan donaciones aún pendientes.
     if (donacion.estado !== 'pendiente') return res.json({ ok: true, ignorado: true });
 
     const nuevoEstado = ESTADOS_WOMPI[transaccion.status];
@@ -61,9 +57,10 @@ function crearRutasWebhookDonaciones(db, correo) {
     }
 
     const ahora = new Date().toISOString();
-    db.prepare(
-      `UPDATE donacion SET estado = ?, fecha_confirmacion = ? WHERE id = ? AND estado = 'pendiente'`
-    ).run(nuevoEstado, ahora, donacion.id);
+    await db.run(
+      `UPDATE donacion SET estado = ?, fecha_confirmacion = ? WHERE id = ? AND estado = 'pendiente'`,
+      [nuevoEstado, ahora, donacion.id]
+    );
 
     if (nuevoEstado === 'exitosa' && !donacion.email_enviado) {
       try {
@@ -74,14 +71,13 @@ function crearRutasWebhookDonaciones(db, correo) {
           referencia: donacion.referencia_pasarela,
           fecha: ahora
         });
-        db.prepare('UPDATE donacion SET email_enviado = 1 WHERE id = ?').run(donacion.id);
+        await db.run('UPDATE donacion SET email_enviado = 1 WHERE id = ?', [donacion.id]);
       } catch (error) {
-        // El pago ya está confirmado; un fallo de correo no debe provocar reintentos de Wompi.
         console.error('No se pudo enviar la confirmación de donación:', error.message);
       }
     }
 
-    const actualizada = db.prepare('SELECT * FROM donacion WHERE id = ?').get(donacion.id);
+    const actualizada = await db.get('SELECT * FROM donacion WHERE id = ?', [donacion.id]);
     res.json({ ok: true, donacion: aFormatoApi(actualizada) });
   });
 
