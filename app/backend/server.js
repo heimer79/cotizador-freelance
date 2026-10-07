@@ -32,14 +32,14 @@ function crearApp(db, opciones = {}) {
   app.use('/api/perfil', ...protegidas, crearRutasPerfil(db));
   app.use('/api/donaciones', requiereSesion, crearRutasDonaciones(db));
 
-  app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
+  app.use(express.static(path.join(__dirname, 'public')));
 
   app.use('/api', (req, res) => {
     res.status(404).json({ error: 'Ruta no encontrada' });
   });
 
   app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
   });
 
   app.use((err, req, res, next) => {
