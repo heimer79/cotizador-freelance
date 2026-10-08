@@ -258,12 +258,12 @@ Las nuevas tablas y columnas se crean con `CREATE TABLE IF NOT EXISTS` y `ALTER 
 4. Crear registro en `auth_proveedores` con `proveedor = 'email'` para cada usuario existente.
 5. Asignar rol admin al usuario con email definido en `ADMIN_EMAIL` (variable de entorno).
 
-## Storage Limits (Premium)
+## Storage Limits
 
-| Entidad | Límite por usuario premium | FR |
-|---------|---------------------------|-----|
-| Cotizaciones activas | 500 | FR-021 |
-| Clientes | 200 | FR-022 |
-| Grupos de clientes | 50 | FR-023 |
+| Entidad | Límite gratuita | Límite premium | Admin | FR |
+|---------|-----------------|-----------------|-------|-----|
+| Cotizaciones activas | 20 | 500 | Sin límite | FR-015 / FR-021 |
+| Clientes | 10 | 200 | Sin límite | FR-016 / FR-022 |
+| Grupos de clientes | 0 (no disponible) | 50 | Sin límite | FR-017 / FR-023 |
 
-Los límites se verifican en el middleware antes de insertar. Usuarios gratuitos: 0 cotizaciones/clientes/grupos persistentes (se crean temporales en sesión).
+Los límites se verifican en la ruta correspondiente (`rutas/clientes.js`, `rutas/cotizaciones.js`) antes de insertar, según `usuario.tipoCuenta` y `usuario.rol` (los administradores quedan exentos). Tanto la cuenta gratuita como la premium guardan cotizaciones y clientes de forma persistente (ya no se usan registros "temporales" para la cuenta gratuita); solo los grupos de clientes siguen siendo exclusivos de premium.

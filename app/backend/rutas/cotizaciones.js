@@ -4,6 +4,12 @@ const { calcularCotizacion, validarRetencion, TARIFAS_IVA } = require('../calcul
 
 const VIGENCIA_DIAS = 30;
 
+// Límite de cotizaciones guardadas por tipo de cuenta. Los administradores no tienen límite.
+const LIMITE_COTIZACIONES = {
+  gratuita: 20,
+  premium: 500
+};
+
 async function obtenerLineas(db, cotizacionId) {
   return db.all(
     `SELECT id, descripcion, cantidad, precio_unitario AS precioUnitario, origen, servicio_id AS servicioId
@@ -164,14 +170,14 @@ function crearRutasCotizaciones(db) {
     const ahora = new Date();
     const emisor = await datosEmisor(db, req.usuario.id);
 
-    const esPremium = req.usuario.tipoCuenta === 'premium';
-    if (esPremium) {
-      const cuenta = await db.get(
-        'SELECT COUNT(*) AS cnt FROM cotizaciones WHERE usuario_id = ? AND temporal = 0',
-        [req.usuario.id]
-      );
-      if (cuenta.cnt >= 500) {
-        return res.status(403).json({ error: 'Has alcanzado el límite de 500 cotizaciones. Elimina algunas para continuar.', enlacePlanes: '/planes' });
+    const limite = req.usuario.rol === 'admin' ? null : (LIMITE_COTIZACIONES[req.usuario.tipoCuenta] ?? LIMITE_COTIZACIONES.gratuita);
+    if (limite !== null) {
+      const cuenta = await db.get('SELECT COUNT(*) AS cnt FROM cotizaciones WHERE usuario_id = ?', [req.usuario.id]);
+      if (cuenta.cnt >= limite) {
+        return res.status(403).json({
+          error: `Has alcanzado el límite de ${limite} cotizaciones de tu plan. Elimina algunas para continuar.`,
+          enlacePlanes: '/planes'
+        });
       }
     }
 
@@ -201,7 +207,7 @@ function crearRutasCotizaciones(db) {
           fiscal.valor.retencionActivada,
           fiscal.valor.retencionConcepto,
           fiscal.valor.retencionPorcentaje,
-          esPremium ? 0 : 1
+          0
         ]
       );
       return resultado.insertId;

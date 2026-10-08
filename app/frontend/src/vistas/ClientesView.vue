@@ -3,10 +3,12 @@ import { ref, onMounted } from 'vue';
 import { clientes as apiClientes } from '../api.js';
 import DirectAdSlot from '../components/ads/DirectAdSlot.vue';
 
-const CLIENTE_VACIO = { nombre: '', documento: '', contacto: '', tipo: 'persona_juridica', agenteRetenedor: false };
+const CLIENTE_VACIO = { nombre: '', documento: '', contacto: '', tipo: 'persona_juridica', agenteRetenedor: false, logoBase64: '' };
+const MAX_LOGO_BYTES = 1024 * 1024;
 
 const lista = ref([]);
 const error = ref('');
+const aviso = ref('');
 const editando = ref(null);
 const formulario = ref({ ...CLIENTE_VACIO });
 
@@ -25,16 +27,48 @@ function nuevoFormulario() {
 
 function editar(cliente) {
   editando.value = cliente.id;
-  formulario.value = { nombre: cliente.nombre, documento: cliente.documento || '', contacto: cliente.contacto || '', tipo: cliente.tipo, agenteRetenedor: cliente.agenteRetenedor };
+  formulario.value = {
+    nombre: cliente.nombre,
+    documento: cliente.documento || '',
+    contacto: cliente.contacto || '',
+    tipo: cliente.tipo,
+    agenteRetenedor: cliente.agenteRetenedor,
+    logoBase64: cliente.logoBase64 || ''
+  };
+}
+
+function cambiarLogo(evento) {
+  const archivo = evento.target.files[0];
+  if (!archivo) return;
+
+  if (archivo.size > MAX_LOGO_BYTES) {
+    error.value = 'El logo supera 1 MB; elige una imagen más liviana.';
+    evento.target.value = '';
+    return;
+  }
+
+  error.value = '';
+  const lector = new FileReader();
+  lector.onload = () => {
+    formulario.value.logoBase64 = lector.result;
+  };
+  lector.readAsDataURL(archivo);
+}
+
+function quitarLogo() {
+  formulario.value.logoBase64 = '';
 }
 
 async function guardar() {
   error.value = '';
+  aviso.value = '';
   try {
     if (editando.value) {
       await apiClientes.actualizar(editando.value, formulario.value);
+      aviso.value = 'Cliente actualizado.';
     } else {
       await apiClientes.crear(formulario.value);
+      aviso.value = 'Cliente añadido.';
     }
     nuevoFormulario();
     await cargar();
@@ -66,6 +100,7 @@ onMounted(cargar);
     <DirectAdSlot espacio-id="adsense-clientes" />
 
     <p v-if="error" class="error" role="alert">{{ error }}</p>
+    <p v-if="aviso" class="exito" role="status">{{ aviso }}</p>
 
     <div class="grid-2" style="margin-bottom: 24px">
       <!-- Formulario -->
@@ -105,6 +140,14 @@ onMounted(cargar);
               </div>
             </div>
           </div>
+          <div>
+            <label class="field-label">Logo del cliente (opcional, máx. 1 MB)</label>
+            <input type="file" accept="image/*" @change="cambiarLogo" style="background: none; border: none; padding: 0">
+            <div v-if="formulario.logoBase64" style="display: flex; align-items: center; gap: 10px; margin-top: 8px">
+              <img :src="formulario.logoBase64" alt="Vista previa del logo" class="logo-previa">
+              <button class="btn btn-secondary btn-sm" type="button" @click="quitarLogo">Quitar logo</button>
+            </div>
+          </div>
           <div class="acciones" style="margin: 0">
             <button class="btn btn-primary" type="submit">{{ editando ? 'Guardar cambios' : 'Añadir cliente' }}</button>
             <button v-if="editando" class="btn btn-secondary" type="button" @click="nuevoFormulario">Cancelar</button>
@@ -133,8 +176,13 @@ onMounted(cargar);
           <tbody>
             <tr v-for="cliente in lista" :key="cliente.id">
               <td>
-                <div style="font-weight: 600">{{ cliente.nombre }}</div>
-                <div v-if="cliente.contacto" style="font-size: 12px; color: var(--color-texto-secundario)">{{ cliente.contacto }}</div>
+                <div style="display: flex; align-items: center; gap: 8px">
+                  <img v-if="cliente.logoBase64" :src="cliente.logoBase64" alt="" style="width: 28px; height: 28px; object-fit: contain; border-radius: 4px; border: 1px solid var(--color-borde)">
+                  <div>
+                    <div style="font-weight: 600">{{ cliente.nombre }}</div>
+                    <div v-if="cliente.contacto" style="font-size: 12px; color: var(--color-texto-secundario)">{{ cliente.contacto }}</div>
+                  </div>
+                </div>
               </td>
               <td>
                 <span class="badge" :class="{ emitida: cliente.agenteRetenedor }">

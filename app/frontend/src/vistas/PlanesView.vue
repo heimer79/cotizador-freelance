@@ -23,10 +23,10 @@ async function iniciarSuscripcion() {
 }
 
 const caracteristicas = [
-  { nombre: 'Cotizaciones', gratuita: 'Temporales (se eliminan en 24 h)', premium: 'Hasta 500 permanentes' },
-  { nombre: 'Clientes guardados', gratuita: 'No disponible', premium: 'Hasta 200 clientes' },
+  { nombre: 'Cotizaciones guardadas', gratuita: 'Hasta 20', premium: 'Hasta 500' },
+  { nombre: 'Clientes guardados', gratuita: 'Hasta 10', premium: 'Hasta 200' },
   { nombre: 'Grupos de clientes', gratuita: 'No disponible', premium: 'Incluido' },
-  { nombre: 'PDF para WhatsApp', gratuita: 'No disponible', premium: 'Incluido' },
+  { nombre: 'Compartir por WhatsApp y descargar PDF', gratuita: 'Incluido', premium: 'Incluido' },
   { nombre: 'Catálogo de servicios', gratuita: 'Incluido', premium: 'Incluido' },
   { nombre: 'Perfil profesional', gratuita: 'Incluido', premium: 'Incluido' },
   { nombre: 'Sin publicidad', gratuita: 'No', premium: 'Sí' },
@@ -49,12 +49,12 @@ const caracteristicas = [
           <div class="plan-precio">$0 <span>/ siempre</span></div>
         </div>
         <ul class="plan-lista">
-          <li>Cotizaciones temporales</li>
+          <li>Hasta 20 cotizaciones guardadas</li>
+          <li>Hasta 10 clientes guardados</li>
+          <li>Compartir por WhatsApp y descargar PDF</li>
           <li>Catálogo de servicios</li>
           <li>Perfil profesional</li>
-          <li class="deshabilitado">Sin clientes guardados</li>
-          <li class="deshabilitado">Sin grupos</li>
-          <li class="deshabilitado">Sin compartir por WhatsApp</li>
+          <li class="deshabilitado">Sin grupos de clientes</li>
           <li class="deshabilitado">Con publicidad</li>
         </ul>
         <div class="plan-cta">

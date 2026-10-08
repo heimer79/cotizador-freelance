@@ -108,3 +108,9 @@ export function generarPdf(cotizacion, perfil = {}) {
 export function generarPdfBase64(cotizacion, perfil = {}) {
   return construirDoc(cotizacion, perfil).output('datauristring');
 }
+
+// Abre el PDF en una pestaña nueva para previsualizarlo sin descargarlo.
+export function previsualizarPdf(cotizacion, perfil = {}) {
+  const url = construirDoc(cotizacion, perfil).output('bloburl');
+  window.open(url, '_blank', 'noopener');
+}

@@ -88,8 +88,8 @@ Como profesional que usa la plataforma frecuentemente, quiero poder suscribirme 
 4. **Given** un usuario premium, **When** crea una cotización, **Then** la cotización se guarda automáticamente y puede acceder a ella en cualquier momento desde su lista de cotizaciones guardadas.
 5. **Given** un usuario premium, **When** crea un cliente, **Then** el cliente se guarda y persiste entre sesiones. Puede consultarlo, editarlo y usarlo en futuras cotizaciones.
 6. **Given** un usuario premium, **When** quiere organizar sus clientes, **Then** puede crear grupos de clientes (por ejemplo: "Restaurantes", "Oficinas") y asignar clientes a uno o más grupos.
-7. **Given** un usuario con cuenta gratuita, **When** crea una cotización, **Then** puede trabajar con ella durante la sesión activa pero NO se guarda al cerrar sesión. Ve un aviso informando que con la cuenta premium podría guardarla.
-8. **Given** un usuario con cuenta gratuita, **When** intenta guardar un cliente o crear un grupo, **Then** ve un mensaje indicando que esa función está disponible en la cuenta premium, con enlace al cuadro comparativo.
+7. **Given** un usuario con cuenta gratuita, **When** crea una cotización o un cliente, **Then** se guardan de forma persistente hasta los límites de la cuenta gratuita (20 cotizaciones, 10 clientes). Al alcanzar el límite, ve un aviso indicando que con la cuenta premium podría guardar más.
+8. **Given** un usuario con cuenta gratuita, **When** intenta crear un grupo de clientes, **Then** ve un mensaje indicando que esa función está disponible en la cuenta premium, con enlace al cuadro comparativo.
 9. **Given** un usuario premium cuya suscripción venció, **When** ingresa a la plataforma, **Then** ve un aviso de renovación. Sus datos guardados (cotizaciones, clientes, grupos) se mantienen accesibles en modo lectura durante 30 días. Si no renueva en 30 días, la cuenta vuelve a gratuita pero los datos se conservan 90 días adicionales antes de eliminarse.
 
 ---
@@ -105,7 +105,7 @@ Como visitante o usuario gratuito, quiero ver un cuadro comparativo claro entre 
 **Acceptance Scenarios**:
 
 1. **Given** cualquier usuario (autenticado o no), **When** accede a la sección de planes o hace clic en "Ver planes", **Then** ve un cuadro comparativo lado a lado con las funcionalidades de la cuenta gratuita vs. la premium.
-2. **Given** el cuadro comparativo visible, **When** el usuario lo revisa, **Then** muestra claramente: publicidad (gratuita: sí / premium: no), guardar cotizaciones (gratuita: no / premium: sí), guardar clientes (gratuita: no / premium: sí), grupos de clientes (gratuita: no / premium: sí), y las funcionalidades comunes a ambas cuentas.
+2. **Given** el cuadro comparativo visible, **When** el usuario lo revisa, **Then** muestra claramente: publicidad (gratuita: sí / premium: no), guardar cotizaciones (gratuita: hasta 20 / premium: hasta 500), guardar clientes (gratuita: hasta 10 / premium: hasta 200), grupos de clientes (gratuita: no / premium: sí), y las funcionalidades comunes a ambas cuentas (incluyendo compartir por WhatsApp y descargar PDF).
 3. **Given** el cuadro comparativo visible, **When** el usuario ve el precio, **Then** el precio de $20 USD/año está resaltado visualmente con un mensaje que comunique su accesibilidad (ejemplo: "Menos de $2 USD al mes" o equivalente en COP).
 
 ---
@@ -150,7 +150,7 @@ Como propietario de la plataforma, quiero que aparezca la atribución "Creado po
 - EC4. Si un administrador intenta eliminar su propia cuenta de administrador y es el único administrador, el sistema lo impide con un mensaje explicando que debe haber al menos un administrador.
 - EC5. Si un usuario rechaza los términos legales durante el registro, la cuenta no se crea y el usuario puede volver a intentarlo cuando esté dispuesto a aceptar.
 - EC6. Si Facebook o Google cambian sus APIs de autenticación, la funcionalidad de login social se degrada mostrando los métodos de login alternativos (correo/contraseña y el otro proveedor social si está disponible).
-- EC7. Si un usuario premium intenta guardar más de 500 cotizaciones o 200 clientes, el sistema informa el límite y sugiere archivar o eliminar registros antiguos.
+- EC7. Si un usuario intenta guardar más cotizaciones o clientes de los que permite su plan (gratuita: 20 cotizaciones / 10 clientes; premium: 500 cotizaciones / 200 clientes), el sistema informa el límite y sugiere archivar o eliminar registros antiguos, o suscribirse a premium. Los administradores no tienen límite.
 - EC8. Si el servicio de Gmail API no está disponible o las credenciales configuradas son inválidas, los correos transaccionales se encolan y reintentan hasta 3 veces. El administrador ve una notificación de error en el panel. El usuario puede continuar usando la plataforma sin bloqueo.
 - EC9. Si el usuario presiona el botón de WhatsApp sin tener la aplicación instalada, el enlace wa.me redirige automáticamente a WhatsApp Web o a la página de descarga de WhatsApp. La plataforma no requiere manejar este caso activamente.
 - EC10. Si un destinatario accede a un enlace de descarga de PDF después de los 7 días de vigencia, ve un mensaje indicando que el enlace expiró y que debe solicitar uno nuevo al remitente.
@@ -185,16 +185,16 @@ Como propietario de la plataforma, quiero que aparezca la atribución "Creado po
 **Tipos de cuenta — gratuita y premium**
 
 - **FR-013**: El sistema MUST soportar dos tipos de cuenta para usuarios normales: gratuita y premium.
-- **FR-014**: La cuenta gratuita MUST permitir todas las funcionalidades actuales de la plataforma (crear cotizaciones, generar PDFs, usar catálogo de servicios) durante la sesión activa.
-- **FR-015**: La cuenta gratuita MUST NOT permitir guardar cotizaciones entre sesiones. Las cotizaciones se envían al backend (necesario para generar PDFs y compartir por WhatsApp) pero se marcan como temporales y se eliminan al cerrar sesión o después de 24 horas de inactividad.
-- **FR-016**: La cuenta gratuita MUST NOT permitir guardar clientes de forma persistente.
+- **FR-014**: La cuenta gratuita MUST permitir todas las funcionalidades actuales de la plataforma (crear cotizaciones, generar PDFs, vista previa, descargar, compartir por WhatsApp, usar catálogo de servicios).
+- **FR-015**: La cuenta gratuita MUST permitir guardar cotizaciones de forma persistente, hasta un máximo de 20 cotizaciones activas.
+- **FR-016**: La cuenta gratuita MUST permitir guardar clientes de forma persistente, hasta un máximo de 10 clientes.
 - **FR-017**: La cuenta gratuita MUST NOT permitir crear grupos de clientes.
 - **FR-018**: La cuenta gratuita MUST mostrar publicidad (Google AdSense) según lo definido en spec-004.
 - **FR-019**: La cuenta premium MUST costar $20 USD al año. El usuario MUST poder elegir entre dos modalidades de renovación: (a) renovación automática (cobro recurrente anual mediante suscripción de MercadoPago, cancelable en cualquier momento desde el perfil) o (b) pago manual (pago único anual; el usuario recibe recordatorio por correo antes del vencimiento y renueva manualmente).
 - **FR-020**: La cuenta premium MUST eliminar toda publicidad de la interfaz del usuario.
 - **FR-021**: La cuenta premium MUST permitir guardar cotizaciones de forma persistente (máximo 500 cotizaciones activas).
 - **FR-022**: La cuenta premium MUST permitir guardar clientes de forma persistente (máximo 200 clientes).
-- **FR-023**: La cuenta premium MUST permitir crear grupos de clientes para organizar su cartera (máximo 50 grupos).
+- **FR-023**: La cuenta premium MUST permitir crear grupos de clientes para organizar su cartera (máximo 50 grupos). Un administrador no tiene límite de cotizaciones ni de clientes guardados.
 - **FR-024**: Si la suscripción premium vence y el usuario no renueva, el sistema MUST mantener los datos guardados en modo lectura durante 30 días. Si no renueva en ese plazo, los datos se conservan 90 días adicionales antes de eliminarse definitivamente.
 - **FR-025**: La plataforma MUST mostrar un cuadro comparativo entre cuenta gratuita y premium, accesible desde el menú y desde los mensajes de funciones restringidas. El precio MUST resaltarse visualmente con equivalencia mensual (menos de $2 USD/mes) y equivalencia aproximada en COP.
 
@@ -271,8 +271,8 @@ Como propietario de la plataforma, quiero que aparezca la atribución "Creado po
 
 - **SC-001**: Un usuario puede registrarse e iniciar sesión con Google o Facebook en menos de 1 minuto (desde hacer clic hasta estar autenticado en la plataforma).
 - **SC-002**: El administrador puede cambiar la configuración de AdSense, pasarelas de donación o autenticación social en menos de 2 minutos, y los cambios se reflejan inmediatamente sin despliegue.
-- **SC-003**: Un usuario gratuito puede crear una cotización completa y descargar el PDF sin limitaciones funcionales (misma experiencia que hoy).
-- **SC-004**: Un usuario premium, tras suscribirse, trabaja sin ningún anuncio visible y sus cotizaciones y clientes persisten entre sesiones indefinidamente mientras la suscripción esté activa.
+- **SC-003**: Un usuario gratuito puede crear una cotización completa, guardarla, verla en vista previa, descargar el PDF y compartirla por WhatsApp sin limitaciones funcionales (misma experiencia que hoy), hasta los límites de su plan (20 cotizaciones, 10 clientes).
+- **SC-004**: Un usuario premium, tras suscribirse, trabaja sin ningún anuncio visible y sus cotizaciones y clientes persisten entre sesiones indefinidamente (hasta 500 cotizaciones y 200 clientes) mientras la suscripción esté activa.
 - **SC-005**: El 100 % de los usuarios nuevos aceptan los términos legales antes de que su cuenta se active.
 - **SC-006**: Los documentos legales son accesibles desde cualquier pantalla de la plataforma en máximo 2 clics.
 - **SC-007**: El cuadro comparativo de cuentas muestra el precio en USD y equivalencia mensual, y es accesible desde al menos 3 puntos de la plataforma (menú, mensajes de restricción, pie de página o perfil).
@@ -327,7 +327,7 @@ El texto MUST incluir los siguientes puntos conforme a la legislación colombian
 - El precio de la suscripción premium ($20 USD/año) se muestra en USD y con equivalencia aproximada en COP al usuario. La conversión exacta la realiza la pasarela de pago al momento del cobro.
 - La pasarela de pago para suscripciones premium es MercadoPago exclusivamente. Las donaciones se procesan mediante MercadoPago y PayPal (ambas opcionales para el usuario). El administrador puede configurar los enlaces de cada pasarela de forma independiente.
 - El correo electrónico es el identificador único del usuario. La vinculación de cuentas sociales se basa en coincidencia de correo electrónico.
-- Los límites de almacenamiento para premium (500 cotizaciones, 200 clientes, 50 grupos) son un punto de partida razonable para v1. El administrador no puede cambiar estos límites desde el panel.
+- Los límites de almacenamiento para gratuita (20 cotizaciones, 10 clientes) y premium (500 cotizaciones, 200 clientes, 50 grupos) son un punto de partida razonable para v1. El administrador no tiene límite y no puede cambiar estos límites desde el panel.
 - Los textos legales son contenido estático versionado. El administrador no los edita desde el panel; se actualizan mediante despliegue.
 - DPS no es una entidad del régimen tributario especial, por lo que las donaciones no generan beneficio tributario para el donante.
 - La plataforma cumple con la Ley 1581 de 2012 en cuanto al acceso del administrador a datos de usuarios: solo puede ver datos de perfil y estado de cuenta, no el contenido generado por los usuarios (cotizaciones, clientes).

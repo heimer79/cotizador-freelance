@@ -1,65 +1,55 @@
 const { Resend } = require('resend');
-const { GmailService } = require('./gmail-service');
+const { SmtpService } = require('./smtp-service');
 const { registrarNotificacion } = require('../models/notificacion');
 
 function escapar(texto) {
   return String(texto).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
-// Envío transaccional con Gmail API (si está configurado) o Resend como fallback.
+// Envío transaccional: SMTP (Hostinger u otro) como primera opción, Resend como fallback.
 class EmailService {
-  constructor({ apiKey = process.env.RESEND_API_KEY, remitente = process.env.EMAIL_REMITENTE || 'PresupuestosPro <no-responder@presupuestospro.co>' } = {}) {
+  constructor({
+    apiKey = process.env.RESEND_API_KEY,
+    remitente = process.env.EMAIL_REMITENTE || 'PresupuestosPro <no-responder@presupuestospro.co>',
+  } = {}) {
     this.remitente = remitente;
-    this.cliente = apiKey ? new Resend(apiKey) : null;
-    this._gmailService = null;
-  }
+    this.resend = apiKey ? new Resend(apiKey) : null;
 
-  async _obtenerGmail() {
-    if (this._gmailService !== null) return this._gmailService;
-    try {
-      const config = require('../models/configuracion-plataforma');
-      const clientId = await config.obtener('gmail_client_id');
-      const clientSecret = await config.obtener('gmail_client_secret');
-      const refreshToken = await config.obtener('gmail_refresh_token');
-      const remitente = await config.obtener('gmail_correo_remitente');
-      if (clientId && clientSecret && refreshToken && remitente) {
-        this._gmailService = new GmailService({ clientId, clientSecret, refreshToken, remitente });
-      } else {
-        this._gmailService = false;
-      }
-    } catch {
-      this._gmailService = false;
-    }
-    return this._gmailService;
+    const smtpUser = process.env.SMTP_USER;
+    const smtpPass = process.env.SMTP_PASS;
+    const smtpHost = process.env.SMTP_HOST || 'smtp.hostinger.com';
+    const smtpPort = process.env.SMTP_PORT || '465';
+
+    this.smtp = smtpUser && smtpPass
+      ? new SmtpService({ host: smtpHost, port: smtpPort, user: smtpUser, pass: smtpPass, remitente })
+      : null;
   }
 
   async enviar({ para, asunto, html, texto }) {
-    const gmail = await this._obtenerGmail();
-    if (gmail) {
+    if (this.smtp) {
       for (let intento = 1; intento <= 3; intento++) {
         try {
-          return await gmail.enviar({ para, asunto, html, texto });
+          return await this.smtp.enviar({ para, asunto, html, texto });
         } catch (e) {
           if (intento === 3) {
-            await registrarNotificacion({ tipo: 'correo_fallido', titulo: 'Error al enviar correo (Gmail)', descripcion: e.message }).catch(() => {});
-            break;
+            await registrarNotificacion({ tipo: 'correo_fallido', titulo: 'Error al enviar correo (SMTP)', descripcion: e.message }).catch(() => {});
           }
         }
       }
     }
 
-    if (!this.cliente) {
+    if (!this.resend) {
       console.log(`[correo no enviado: sin configuración] Para: ${para} | ${asunto}\n${texto}`);
       return { enviado: false };
     }
 
     for (let intento = 1; intento <= 3; intento++) {
-      const { error } = await this.cliente.emails.send({
+      const { error } = await this.resend.emails.send({
         from: this.remitente,
         to: para,
         subject: asunto,
         html,
-        text: texto
+        text: texto,
       });
       if (!error) return { enviado: true };
       if (intento === 3) {
@@ -81,14 +71,14 @@ class EmailService {
       `Fecha: ${fechaFormateada}`,
       `Referencia: ${referencia}`,
       '',
-      'Esta donación es voluntaria y no reembolsable.'
+      'Esta donación es voluntaria y no reembolsable.',
     ].join('\n');
 
     return this.enviar({
       para,
       asunto: 'Gracias por tu donación a PresupuestosPro',
       texto,
-      html: texto.split('\n').map((linea) => `<p>${escapar(linea) || '&nbsp;'}</p>`).join('')
+      html: texto.split('\n').map((linea) => `<p>${escapar(linea) || '&nbsp;'}</p>`).join(''),
     });
   }
 }

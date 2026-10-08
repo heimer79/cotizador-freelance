@@ -56,7 +56,8 @@ function crearApp(db, opciones = {}) {
   app.use('/api/perfil', ...protegidasConLegal, crearRutasPerfil(db));
   app.use('/api/donaciones', requiereSesion, estadoCheck, crearRutasDonaciones(db));
   app.use('/api/grupos', ...protegidasConLegal, verificarPremium(), crearRutasGrupos(db));
-  app.use('/api/cotizaciones/compartir', crearRutasCrearEnlace(db, requiereSesion, verificarPremium()));
+  // Compartir por WhatsApp está disponible para cualquier cuenta (gratuita, premium o admin).
+  app.use('/api/cotizaciones/compartir', crearRutasCrearEnlace(db, requiereSesion, (req, res, next) => next()));
   app.use('/compartir', crearRutasAccesoEnlace());
 
   app.use(express.static(path.join(__dirname, 'public')));

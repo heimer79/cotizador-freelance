@@ -92,6 +92,7 @@ async function crearEsquema() {
         contacto VARCHAR(500),
         tipo VARCHAR(30) NOT NULL,
         agente_retenedor TINYINT(1) NOT NULL DEFAULT 0,
+        logo_base64 LONGTEXT,
         FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     `);
@@ -188,6 +189,12 @@ async function crearEsquema() {
       await conn.query(`ALTER TABLE usuarios ADD COLUMN tipo_cuenta VARCHAR(20) NOT NULL DEFAULT 'gratuita'`);
       await conn.query(`ALTER TABLE usuarios ADD COLUMN estado VARCHAR(20) NOT NULL DEFAULT 'activo'`);
       await conn.query(`ALTER TABLE usuarios MODIFY COLUMN password_hash VARCHAR(255) NULL`);
+    }
+
+    // Logo del cliente
+    const [colsLogoCliente] = await conn.query(`SHOW COLUMNS FROM clientes LIKE 'logo_base64'`);
+    if (colsLogoCliente.length === 0) {
+      await conn.query(`ALTER TABLE clientes ADD COLUMN logo_base64 LONGTEXT`);
     }
 
     // Columna temporal para cotizaciones

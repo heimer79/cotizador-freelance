@@ -1,8 +1,7 @@
 <script setup>
 import { ref, computed, inject, onMounted } from 'vue';
 import { cotizaciones as apiCotizaciones, clientes as apiClientes, catalogo as apiCatalogo, perfil as apiPerfil, compartir as apiCompartir } from '../api.js';
-import { generarPdf, generarPdfBase64 } from '../pdf.js';
-import { useAuth } from '../composables/useAuth.js';
+import { generarPdf, generarPdfBase64, previsualizarPdf } from '../pdf.js';
 import DirectAdSlot from '../components/ads/DirectAdSlot.vue';
 
 const props = defineProps({
@@ -11,8 +10,8 @@ const props = defineProps({
 
 const requireLogin = inject('requireLogin');
 const toast = inject('toast', null);
-const { isPremium } = useAuth();
 const compartiendoWhatsapp = ref(false);
+const guardando = ref(false);
 
 const CONCEPTOS = {
   honorarios: { nombre: 'Honorarios', porcentajes: [10, 11] },
@@ -252,42 +251,131 @@ async function eliminar() {
   }
 }
 
-function descargarPdf() {
+// Valida lo mínimo antes de intentar guardar/previsualizar/compartir, para no forzar
+// el inicio de sesión cuando el motivo del bloqueo es otro (sin líneas o sin cliente).
+function validarAntesDeGuardar() {
+  if (actual.value) {
+    return actual.value.lineas.length === 0 ? 'Agrega al menos una línea antes de continuar.' : null;
+  }
+  if (!localCliente.value.nombre.trim()) {
+    return 'Ingresa el nombre del cliente antes de continuar.';
+  }
+  if (localLineas.value.length === 0) {
+    return 'Agrega al menos una línea antes de continuar.';
+  }
+  return null;
+}
+
+// Convierte la cotización editada localmente (sin backend) en un cliente + cotización
+// guardados de verdad, para que vista previa, descarga, guardar y WhatsApp usen siempre
+// los mismos datos persistidos. Si ya existe una cotización guardada (actual), la reutiliza.
+async function guardarEnBackend() {
+  if (actual.value) return actual.value;
+
+  if (!localCliente.value.nombre.trim()) {
+    throw new Error('Ingresa el nombre del cliente antes de continuar.');
+  }
+  if (localLineas.value.length === 0) {
+    throw new Error('Agrega al menos una línea antes de continuar.');
+  }
+
+  const perfilActual = await apiPerfil.obtener();
+  if (localEmisor.value.nombre || localEmisor.value.nit || localEmisor.value.telefono || localEmisor.value.correo) {
+    perfil.value = await apiPerfil.guardar({
+      nombre: localEmisor.value.nombre || perfilActual.nombre,
+      nit: localEmisor.value.nit || perfilActual.nit,
+      contacto: localEmisor.value.telefono || localEmisor.value.correo || perfilActual.contacto,
+      regimen: perfilActual.regimen,
+      logoBase64: perfilActual.logoBase64
+    });
+  } else {
+    perfil.value = perfilActual;
+  }
+
+  const clienteCreado = await apiClientes.crear({
+    nombre: localCliente.value.nombre,
+    documento: localCliente.value.nit || '',
+    contacto: localCliente.value.contacto || '',
+    tipo: 'persona_juridica',
+    agenteRetenedor: localRetencionActiva.value
+  });
+
+  let cot = await apiCotizaciones.crear({
+    clienteId: clienteCreado.id,
+    ivaTarifa: localIvaTarifa.value,
+    retencion: localRetencionActiva.value
+      ? { activada: true, concepto: 'honorarios', porcentaje: 11 }
+      : { activada: false }
+  });
+
+  for (const linea of localLineas.value) {
+    cot = await apiCotizaciones.crearLinea(cot.id, {
+      descripcion: linea.descripcion,
+      cantidad: linea.cantidad,
+      precioUnitario: linea.precioUnitario,
+      origen: 'manual'
+    });
+  }
+
+  actual.value = cot;
+  vistaLista.value = true;
+  localLineas.value = [];
+  clientes.value = await apiClientes.listar();
+  return actual.value;
+}
+
+function vistaPrevia() {
   error.value = '';
-  if (actual.value && actual.value.lineas.length === 0) {
-    error.value = 'Agrega al menos una línea antes de descargar el PDF.';
+  const problema = validarAntesDeGuardar();
+  if (problema) {
+    error.value = problema;
     return;
   }
-  requireLogin(() => {
-    if (actual.value) {
-      generarPdf(actual.value, perfil.value);
+  requireLogin(async () => {
+    try {
+      const cot = await guardarEnBackend();
+      previsualizarPdf(cot, perfil.value);
+    } catch (e) {
+      error.value = e.message;
     }
   });
 }
 
-async function compartirWhatsapp() {
-  if (!actual.value || actual.value.lineas.length === 0) {
-    error.value = 'Agrega al menos una línea antes de compartir.';
+function descargarPdf() {
+  error.value = '';
+  const problema = validarAntesDeGuardar();
+  if (problema) {
+    error.value = problema;
     return;
   }
-  if (!isPremium.value) {
-    window.dispatchEvent(new CustomEvent('premium-upsell', { detail: { mensaje: 'Compartir por WhatsApp requiere cuenta Premium.' } }));
+  requireLogin(async () => {
+    try {
+      const cot = await guardarEnBackend();
+      generarPdf(cot, perfil.value);
+    } catch (e) {
+      error.value = e.message;
+    }
+  });
+}
+
+function compartirWhatsapp() {
+  error.value = '';
+  const problema = validarAntesDeGuardar();
+  if (problema) {
+    error.value = problema;
     return;
   }
   requireLogin(async () => {
     compartiendoWhatsapp.value = true;
     try {
-      const pdfBase64 = generarPdfBase64 ? generarPdfBase64(actual.value, perfil.value) : null;
-      if (!pdfBase64) {
-        error.value = 'No se pudo generar el PDF.';
-        return;
-      }
+      const cot = await guardarEnBackend();
+      const pdfBase64 = generarPdfBase64(cot, perfil.value);
       const { url } = await apiCompartir.crearEnlace({
         pdfBase64,
-        cotizacionId: actual.value.id,
-        nombre: `cotizacion-${actual.value.numero}.pdf`
+        cotizacionId: cot.id,
+        nombre: `cotizacion-${cot.numero}.pdf`
       });
-      const texto = encodeURIComponent(`Hola, te comparto la cotización Nro. ${actual.value.numero}: ${url}`);
+      const texto = encodeURIComponent(`Hola, te comparto la cotización Nro. ${cot.numero}: ${url}`);
       window.open(`https://wa.me/?text=${texto}`, '_blank', 'noopener');
     } catch (e) {
       error.value = e.message;
@@ -298,10 +386,21 @@ async function compartirWhatsapp() {
 }
 
 function guardarCotizacion() {
-  requireLogin(() => {
-    if (!actual.value) {
-      vistaLista.value = true;
-      cargarTodo();
+  error.value = '';
+  const problema = validarAntesDeGuardar();
+  if (problema) {
+    error.value = problema;
+    return;
+  }
+  requireLogin(async () => {
+    guardando.value = true;
+    try {
+      await guardarEnBackend();
+      aviso.value = 'Cotización guardada. Puedes descargarla o compartirla cuando quieras.';
+    } catch (e) {
+      error.value = e.message;
+    } finally {
+      guardando.value = false;
     }
   });
 }
@@ -328,6 +427,9 @@ onMounted(() => {
       </div>
 
       <DirectAdSlot espacio-id="banner-superior-cotizaciones" />
+
+      <p v-if="error" class="error" role="alert">{{ error }}</p>
+      <p v-if="aviso" class="exito" role="status">{{ aviso }}</p>
 
       <!-- Emisor + Cliente grid -->
       <div class="grid-2" style="margin-bottom: 16px">
@@ -456,19 +558,19 @@ onMounted(() => {
 
       <!-- Actions -->
       <div class="acciones">
-        <button class="btn btn-secondary" style="flex: 1 1 120px" @click="guardarCotizacion">
+        <button class="btn btn-secondary" style="flex: 1 1 120px" :disabled="guardando" @click="guardarCotizacion">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5v5M5.5 4L8 1.5 10.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 9.5v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          Guardar
+          {{ guardando ? 'Guardando…' : 'Guardar' }}
         </button>
-        <button class="btn btn-accent" style="flex: 1 1 140px">
+        <button class="btn btn-accent" style="flex: 1 1 140px" type="button" @click="vistaPrevia">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2h12v12H2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M5 6h6M5 8.5h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
           Vista previa
         </button>
-        <button class="btn btn-primary" style="flex: 2 1 180px" @click="descargarPdf">
+        <button class="btn btn-primary" style="flex: 2 1 180px" type="button" @click="descargarPdf">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 10.5v3h11v-3M8 2v8M5 7.5L8 10.5 11 7.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Descargar PDF
         </button>
-        <button class="btn btn-whatsapp" style="flex: 1 1 120px" :disabled="compartiendoWhatsapp" @click="compartirWhatsapp" :title="isPremium ? 'Compartir por WhatsApp' : 'Requiere cuenta Premium'">
+        <button class="btn btn-whatsapp" style="flex: 1 1 120px" type="button" :disabled="compartiendoWhatsapp" @click="compartirWhatsapp" title="Compartir por WhatsApp">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A6.5 6.5 0 001.5 8c0 1.14.37 2.2 1 3.06L1.5 14.5l3.54-.94A6.47 6.47 0 008 14.5 6.5 6.5 0 008 1.5z" stroke="white" stroke-width="1.4" stroke-linejoin="round"/></svg>
           {{ compartiendoWhatsapp ? '…' : 'WhatsApp' }}
         </button>
@@ -651,7 +753,9 @@ onMounted(() => {
       <DirectAdSlot espacio-id="adsense-editor-cotizacion" />
 
       <div class="acciones">
+        <button class="btn btn-accent" type="button" @click="vistaPrevia">Vista previa</button>
         <button class="btn btn-primary" type="button" @click="descargarPdf">Descargar PDF</button>
+        <button class="btn btn-whatsapp" type="button" :disabled="compartiendoWhatsapp" @click="compartirWhatsapp">{{ compartiendoWhatsapp ? '…' : 'WhatsApp' }}</button>
         <button v-if="borrador" class="btn btn-secondary" type="button" @click="emitir">Marcar como emitida</button>
         <button v-if="borrador" class="btn btn-danger" type="button" @click="eliminar">Eliminar borrador</button>
         <button class="btn btn-secondary" type="button" @click="volverALista">Volver a mis cotizaciones</button>
