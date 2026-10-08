@@ -6,7 +6,17 @@ async function peticion(url, opciones = {}) {
 
   if (respuesta.status === 204) return null;
 
-  const datos = await respuesta.json();
+  const texto = await respuesta.text();
+  if (!texto) return null;
+
+  let datos;
+  try {
+    datos = JSON.parse(texto);
+  } catch {
+    const err = new Error(`Respuesta no válida del servidor (${respuesta.status})`);
+    err.status = respuesta.status;
+    throw err;
+  }
 
   if (respuesta.status === 401 && !url.startsWith('/api/auth/')) {
     window.dispatchEvent(new CustomEvent('sesion-expirada'));
@@ -31,12 +41,14 @@ export const auth = {
   verificar: (token) => peticion('/api/auth/verificar', enviar('POST', { token })),
   reenviarVerificacion: () => peticion('/api/auth/reenviar-verificacion', { method: 'POST' }),
   olvide: (email) => peticion('/api/auth/olvide', enviar('POST', { email })),
-  restablecer: (token, password) => peticion('/api/auth/restablecer', enviar('POST', { token, password }))
+  restablecer: (token, password) => peticion('/api/auth/restablecer', enviar('POST', { token, password })),
+  establecerPassword: (password) => peticion('/api/auth/establecer-password', enviar('POST', { password }))
 };
 
 export const perfil = {
   obtener: () => peticion('/api/perfil'),
-  guardar: (datos) => peticion('/api/perfil', enviar('PUT', datos))
+  guardar: (datos) => peticion('/api/perfil', enviar('PUT', datos)),
+  actividad: () => peticion('/api/perfil/actividad')
 };
 
 export const clientes = {
@@ -72,4 +84,45 @@ export const donaciones = {
 
 export const configAds = {
   obtener: () => peticion('/api/config/ads')
+};
+
+export const legal = {
+  documentos: () => peticion('/api/legal/documentos'),
+  documento: (tipo) => peticion(`/api/legal/documentos/${tipo}`),
+  aceptar: (documentoIds) => peticion('/api/legal/aceptar', enviar('POST', { documentoIds })),
+  estado: () => peticion('/api/legal/estado')
+};
+
+export const suscripcion = {
+  crear: (datos) => peticion('/api/suscripcion/crear', enviar('POST', datos)),
+  cancelar: () => peticion('/api/suscripcion/cancelar', { method: 'POST' }),
+  estado: () => peticion('/api/suscripcion/estado')
+};
+
+export const admin = {
+  config: (seccion) => peticion(`/api/admin/config/${seccion}`),
+  guardarConfig: (seccion, datos) => peticion(`/api/admin/config/${seccion}`, enviar('PUT', datos)),
+  usuarios: (pagina = 1, busqueda = '') => peticion(`/api/admin/usuarios?pagina=${pagina}&busqueda=${encodeURIComponent(busqueda)}`),
+  suspenderUsuario: (id) => peticion(`/api/admin/usuarios/${id}/suspender`, { method: 'PATCH' }),
+  reactivarUsuario: (id) => peticion(`/api/admin/usuarios/${id}/reactivar`, { method: 'PATCH' }),
+  cambiarRol: (id, rol) => peticion(`/api/admin/usuarios/${id}/rol`, enviar('PATCH', { rol })),
+  notificaciones: (pagina = 1) => peticion(`/api/admin/notificaciones?pagina=${pagina}`),
+  conteoNotificaciones: () => peticion('/api/admin/notificaciones/conteo'),
+  marcarNotificacion: (id) => peticion(`/api/admin/notificaciones/${id}`, { method: 'PATCH' }),
+  tabla: (tabla, pagina = 1) => peticion(`/api/admin/bd/${tabla}?pagina=${pagina}`)
+};
+
+export const grupos = {
+  listar: () => peticion('/api/grupos'),
+  crear: (datos) => peticion('/api/grupos', enviar('POST', datos)),
+  actualizar: (id, datos) => peticion(`/api/grupos/${id}`, enviar('PUT', datos)),
+  eliminar: (id) => peticion(`/api/grupos/${id}`, { method: 'DELETE' }),
+  miembros: (id) => peticion(`/api/grupos/${id}/clientes`),
+  asignarCliente: (id, clienteId) => peticion(`/api/grupos/${id}/clientes`, enviar('POST', { clienteId })),
+  quitarMiembro: (id, clienteId) => peticion(`/api/grupos/${id}/clientes/${clienteId}`, { method: 'DELETE' }),
+  quitarCliente: (id, clienteId) => peticion(`/api/grupos/${id}/clientes/${clienteId}`, { method: 'DELETE' })
+};
+
+export const compartir = {
+  crearEnlace: (datos) => peticion('/api/cotizaciones/compartir', enviar('POST', datos))
 };

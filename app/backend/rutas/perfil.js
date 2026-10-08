@@ -1,4 +1,5 @@
 const express = require('express');
+const { obtenerRecientes } = require('../src/models/historial-actividad');
 
 const REGIMENES = ['ordinario', 'simple', 'no_responsable_iva'];
 
@@ -44,6 +45,11 @@ function crearRutasPerfil(db) {
 
     const guardado = await db.get('SELECT * FROM perfil WHERE usuario_id = ?', [req.usuario.id]);
     res.json(aFormatoApi(guardado));
+  });
+
+  router.get('/actividad', async (req, res) => {
+    const actividad = await obtenerRecientes(req.usuario.id);
+    res.json(actividad);
   });
 
   return router;

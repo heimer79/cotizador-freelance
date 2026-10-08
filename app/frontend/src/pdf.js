@@ -15,7 +15,7 @@ const ETIQUETA_IVA = {
 };
 
 // El PDF nunca incluye publicidad (FR-026). Los datos fiscales salen de la copia guardada en la cotización (FR-016).
-export function generarPdf(cotizacion, perfil = {}) {
+function construirDoc(cotizacion, perfil = {}) {
   const doc = new jsPDF();
   const emisor = cotizacion.emisor || {};
   let y = 20;
@@ -98,5 +98,13 @@ export function generarPdf(cotizacion, perfil = {}) {
   doc.setFontSize(12);
   doc.text(`Total: ${formatoCOP.format(t.total)}`, 130, y);
 
-  doc.save(`cotizacion-${cotizacion.numero}.pdf`);
+  return doc;
+}
+
+export function generarPdf(cotizacion, perfil = {}) {
+  construirDoc(cotizacion, perfil).save(`cotizacion-${cotizacion.numero}.pdf`);
+}
+
+export function generarPdfBase64(cotizacion, perfil = {}) {
+  return construirDoc(cotizacion, perfil).output('datauristring');
 }

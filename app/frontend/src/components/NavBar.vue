@@ -1,15 +1,30 @@
 <script setup>
-defineProps({
+import { ref, onMounted } from 'vue';
+import { admin } from '../api.js';
+
+const props = defineProps({
   usuario: { type: Object, default: null },
   vistaActiva: { type: String, default: 'cotizaciones' }
 });
 
 const emit = defineEmits(['cambiarVista', 'login', 'logout', 'donar']);
 
+const notificacionesNoLeidas = ref(0);
+
 function iniciales(nombre) {
   if (!nombre) return '?';
   return nombre.split(' ').map(p => p[0]).join('').toUpperCase().slice(0, 2);
 }
+
+async function cargarConteoNotificaciones() {
+  if (!props.usuario || props.usuario.rol !== 'admin') return;
+  try {
+    const r = await admin.conteoNotificaciones();
+    notificacionesNoLeidas.value = r.noLeidas;
+  } catch { /* silencioso */ }
+}
+
+onMounted(cargarConteoNotificaciones);
 </script>
 
 <template>
@@ -26,6 +41,20 @@ function iniciales(nombre) {
       <button v-if="usuario" :class="{ activa: vistaActiva === 'clientes' }" @click="emit('cambiarVista', 'clientes')">Clientes</button>
       <button v-if="usuario" :class="{ activa: vistaActiva === 'catalogo' }" @click="emit('cambiarVista', 'catalogo')">Catálogo</button>
       <button v-if="usuario" :class="{ activa: vistaActiva === 'perfil' }" @click="emit('cambiarVista', 'perfil')">Perfil</button>
+      <button :class="{ activa: vistaActiva === 'planes' }" @click="emit('cambiarVista', 'planes')">Planes</button>
+      <button
+        v-if="usuario && usuario.rol === 'admin'"
+        :class="{ activa: vistaActiva === 'admin' }"
+        @click="emit('cambiarVista', 'admin')"
+        style="position:relative"
+      >
+        Administración
+        <span
+          v-if="notificacionesNoLeidas > 0"
+          style="position:absolute; top:-4px; right:-4px; background:#c82333; color:#fff; border-radius:50%; width:16px; height:16px; font-size:10px; display:flex; align-items:center; justify-content:center"
+          :aria-label="`${notificacionesNoLeidas} notificaciones sin leer`"
+        >{{ notificacionesNoLeidas > 9 ? '9+' : notificacionesNoLeidas }}</span>
+      </button>
     </div>
 
     <div class="navbar-actions">

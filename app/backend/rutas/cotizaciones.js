@@ -164,6 +164,17 @@ function crearRutasCotizaciones(db) {
     const ahora = new Date();
     const emisor = await datosEmisor(db, req.usuario.id);
 
+    const esPremium = req.usuario.tipoCuenta === 'premium';
+    if (esPremium) {
+      const cuenta = await db.get(
+        'SELECT COUNT(*) AS cnt FROM cotizaciones WHERE usuario_id = ? AND temporal = 0',
+        [req.usuario.id]
+      );
+      if (cuenta.cnt >= 500) {
+        return res.status(403).json({ error: 'Has alcanzado el límite de 500 cotizaciones. Elimina algunas para continuar.', enlacePlanes: '/planes' });
+      }
+    }
+
     const cotizacionId = await db.transaction(async (tx) => {
       const numero = await siguienteNumero(tx, req.usuario.id, ahora);
       const resultado = await tx.run(
@@ -171,8 +182,9 @@ function crearRutasCotizaciones(db) {
           usuario_id, numero, estado, fecha_emision, fecha_vigencia,
           cliente_id, cliente_nombre, cliente_documento, cliente_contacto, cliente_tipo, cliente_agente_retenedor,
           emisor_nombre, emisor_documento, emisor_contacto, emisor_regimen, emisor_logo_base64,
-          iva_tarifa, retencion_activada, retencion_concepto, retencion_porcentaje
-        ) VALUES (?, ?, 'borrador', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          iva_tarifa, retencion_activada, retencion_concepto, retencion_porcentaje,
+          temporal, ultima_actividad
+        ) VALUES (?, ?, 'borrador', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [
           req.usuario.id,
           numero,
@@ -188,7 +200,8 @@ function crearRutasCotizaciones(db) {
           fiscal.valor.ivaTarifa,
           fiscal.valor.retencionActivada,
           fiscal.valor.retencionConcepto,
-          fiscal.valor.retencionPorcentaje
+          fiscal.valor.retencionPorcentaje,
+          esPremium ? 0 : 1
         ]
       );
       return resultado.insertId;

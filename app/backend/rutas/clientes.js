@@ -35,6 +35,18 @@ function crearRutasClientes(db) {
     const error = validarCliente(req.body);
     if (error) return res.status(400).json({ error });
 
+    if (req.usuario.tipoCuenta !== 'premium') {
+      return res.status(403).json({
+        error: 'Guardar clientes requiere una cuenta premium',
+        enlacePlanes: '/planes'
+      });
+    }
+
+    const cuentaClientes = await db.get('SELECT COUNT(*) AS cnt FROM clientes WHERE usuario_id = ?', [req.usuario.id]);
+    if (cuentaClientes.cnt >= 200) {
+      return res.status(403).json({ error: 'Has alcanzado el límite de 200 clientes.', enlacePlanes: '/planes' });
+    }
+
     const { nombre, documento, contacto, tipo, agenteRetenedor } = req.body;
     const resultado = await db.run(
       `INSERT INTO clientes (usuario_id, nombre, documento, contacto, tipo, agente_retenedor)

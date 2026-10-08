@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useAdConfig } from '../../composables/useAdConfig.js';
 import AdSlot from './AdSlot.vue';
 
@@ -8,6 +8,7 @@ const props = defineProps({
 });
 
 const { configuracion } = useAdConfig();
+const isPremium = inject('isPremium', ref(false));
 
 const espacio = computed(() =>
   configuracion.value ? configuracion.value.espacios.find((e) => e.id === props.espacioId && e.activo) : null
@@ -18,7 +19,7 @@ const usaAdsense = computed(() => espacio.value && espacio.value.fallback === 'a
 </script>
 
 <template>
-  <div v-if="espacio" class="ad-slot" :data-espacio="espacio.id">
+  <div v-if="espacio && !isPremium" class="ad-slot" :data-espacio="espacio.id">
     <!-- Pauta directa: no usa cookies de terceros, así que se muestra sin importar el consentimiento (FR-024). -->
     <a
       v-if="contratado"

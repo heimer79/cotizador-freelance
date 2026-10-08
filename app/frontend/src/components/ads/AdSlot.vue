@@ -8,11 +8,12 @@ const props = defineProps({
 });
 
 const cookieConsent = inject('cookieConsent', ref(null));
+const isPremium = inject('isPremium', ref(false));
 const cargado = ref(false);
 
-// AdSense solo se carga con consentimiento. Si el script falla (bloqueador o red), el espacio queda vacío y se colapsa.
+// AdSense solo se carga con consentimiento y si no es cuenta premium.
 async function mostrar() {
-  if (cargado.value || cookieConsent.value !== true || !props.adsenseClientId || !props.espacio.adsense_slot) return;
+  if (cargado.value || cookieConsent.value !== true || isPremium.value || !props.adsenseClientId || !props.espacio.adsense_slot) return;
 
   try {
     await loadAdSense(props.adsenseClientId);
@@ -28,7 +29,7 @@ onMounted(mostrar);
 </script>
 
 <template>
-  <div v-if="cookieConsent === true && adsenseClientId && espacio.adsense_slot" class="ad-slot" :data-espacio="espacio.id">
+  <div v-if="cookieConsent === true && !isPremium && adsenseClientId && espacio.adsense_slot" class="ad-slot" :data-espacio="espacio.id">
     <ins
       class="adsbygoogle"
       style="display: block"

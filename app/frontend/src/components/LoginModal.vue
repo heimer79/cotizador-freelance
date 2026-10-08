@@ -12,8 +12,9 @@ const error = ref('');
 const aviso = ref('');
 const enviando = ref(false);
 
-const datos = ref({ nombreCompleto: '', email: '', tipoDocumento: 'CC', numeroDocumento: '', password: '' });
+const datos = ref({ nombreCompleto: '', email: '', tipoDocumento: 'CC', numeroDocumento: '', password: '', aceptaTerminos: false });
 const nuevaPassword = ref('');
+const mostrarPassword = ref(false);
 
 const titulos = {
   login: 'Inicia sesión para continuar',
@@ -38,8 +39,13 @@ async function enviar() {
       const r = await auth.login({ email: datos.value.email, password: datos.value.password });
       emit('autenticado', r.usuario);
     } else if (modo.value === 'registro') {
+      if (!datos.value.aceptaTerminos) {
+        error.value = 'Debes aceptar la Política de Privacidad y los Términos de Uso para registrarte.';
+        enviando.value = false;
+        return;
+      }
       const r = await auth.registro(datos.value);
-      emit('autenticado', r.usuario);
+      emit('autenticado', r?.usuario);
     } else if (modo.value === 'olvide') {
       await auth.olvide(datos.value.email);
       aviso.value = 'Si el correo está registrado, te enviamos un enlace para crear una nueva contraseña.';
@@ -88,15 +94,43 @@ function cerrarOverlay(e) {
           <label class="field-label">Correo electrónico</label>
           <input v-model="datos.email" type="email" placeholder="tu@correo.com" autocomplete="email" required>
         </div>
-        <div>
+        <div style="position: relative">
           <label class="field-label">Contraseña</label>
-          <input v-model="datos.password" type="password" placeholder="Tu contraseña" autocomplete="current-password" required>
+          <input
+            v-model="datos.password"
+            :type="mostrarPassword ? 'text' : 'password'"
+            placeholder="Tu contraseña"
+            autocomplete="current-password"
+            required
+            style="padding-right: 40px; width: 100%"
+          >
+          <button
+            type="button"
+            @click="mostrarPassword = !mostrarPassword"
+            aria-label="Mostrar u ocultar contraseña"
+            style="position:absolute; right:10px; top:50%; transform:translateY(50%); background:none; border:none; cursor:pointer; font-size:16px; padding:0"
+          >{{ mostrarPassword ? '🙈' : '👁' }}</button>
         </div>
         <button class="btn btn-primary" type="submit" :disabled="enviando" style="width: 100%">Iniciar sesión</button>
       </form>
+      <div v-if="modo === 'login' || modo === 'registro'" style="margin: 12px 0; text-align: center">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px">
+          <hr style="flex:1; border:none; border-top:1px solid var(--color-borde)">
+          <span style="font-size:12px; color:var(--color-texto-secundario)">o continúa con</span>
+          <hr style="flex:1; border:none; border-top:1px solid var(--color-borde)">
+        </div>
+        <div style="display:flex; gap:8px; justify-content:center">
+          <a href="/api/auth/google" class="btn btn-secondary" style="flex:1; text-align:center; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px">
+            <span>G</span> Google
+          </a>
+          <a href="/api/auth/facebook" class="btn btn-secondary" style="flex:1; text-align:center; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px">
+            <span>f</span> Facebook
+          </a>
+        </div>
+      </div>
 
       <!-- Registro -->
-      <form v-else-if="modo === 'registro'" class="formulario" @submit.prevent="enviar" style="margin: 16px 0">
+      <form v-if="modo === 'registro'" class="formulario" @submit.prevent="enviar" style="margin: 16px 0">
         <input v-model="datos.nombreCompleto" placeholder="Nombre completo" autocomplete="name" required>
         <input v-model="datos.email" type="email" placeholder="Correo electrónico" autocomplete="email" required>
         <div class="fila-doble">
@@ -115,6 +149,15 @@ function cerrarOverlay(e) {
           </div>
         </div>
         <input v-model="datos.password" type="password" placeholder="Contraseña (mín. 8 caracteres)" autocomplete="new-password" minlength="8" required>
+        <label style="display:flex; align-items:flex-start; gap:8px; font-size:13px; cursor:pointer">
+          <input type="checkbox" v-model="datos.aceptaTerminos" style="margin-top:2px; flex-shrink:0" required>
+          <span>
+            Acepto la
+            <a href="/legal/privacidad" target="_blank" style="color:var(--color-primario)">Política de Privacidad</a>
+            y los
+            <a href="/legal/terminos_uso" target="_blank" style="color:var(--color-primario)">Términos de Uso</a>
+          </span>
+        </label>
         <button class="btn btn-primary" type="submit" :disabled="enviando" style="width: 100%">Crear cuenta</button>
       </form>
 

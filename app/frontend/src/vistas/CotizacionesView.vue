@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed, inject, onMounted } from 'vue';
-import { cotizaciones as apiCotizaciones, clientes as apiClientes, catalogo as apiCatalogo, perfil as apiPerfil } from '../api.js';
-import { generarPdf } from '../pdf.js';
+import { cotizaciones as apiCotizaciones, clientes as apiClientes, catalogo as apiCatalogo, perfil as apiPerfil, compartir as apiCompartir } from '../api.js';
+import { generarPdf, generarPdfBase64 } from '../pdf.js';
+import { useAuth } from '../composables/useAuth.js';
 import DirectAdSlot from '../components/ads/DirectAdSlot.vue';
 
 const props = defineProps({
@@ -9,6 +10,9 @@ const props = defineProps({
 });
 
 const requireLogin = inject('requireLogin');
+const toast = inject('toast', null);
+const { isPremium } = useAuth();
+const compartiendoWhatsapp = ref(false);
 
 const CONCEPTOS = {
   honorarios: { nombre: 'Honorarios', porcentajes: [10, 11] },
@@ -261,6 +265,38 @@ function descargarPdf() {
   });
 }
 
+async function compartirWhatsapp() {
+  if (!actual.value || actual.value.lineas.length === 0) {
+    error.value = 'Agrega al menos una línea antes de compartir.';
+    return;
+  }
+  if (!isPremium.value) {
+    window.dispatchEvent(new CustomEvent('premium-upsell', { detail: { mensaje: 'Compartir por WhatsApp requiere cuenta Premium.' } }));
+    return;
+  }
+  requireLogin(async () => {
+    compartiendoWhatsapp.value = true;
+    try {
+      const pdfBase64 = generarPdfBase64 ? generarPdfBase64(actual.value, perfil.value) : null;
+      if (!pdfBase64) {
+        error.value = 'No se pudo generar el PDF.';
+        return;
+      }
+      const { url } = await apiCompartir.crearEnlace({
+        pdfBase64,
+        cotizacionId: actual.value.id,
+        nombre: `cotizacion-${actual.value.numero}.pdf`
+      });
+      const texto = encodeURIComponent(`Hola, te comparto la cotización Nro. ${actual.value.numero}: ${url}`);
+      window.open(`https://wa.me/?text=${texto}`, '_blank', 'noopener');
+    } catch (e) {
+      error.value = e.message;
+    } finally {
+      compartiendoWhatsapp.value = false;
+    }
+  });
+}
+
 function guardarCotizacion() {
   requireLogin(() => {
     if (!actual.value) {
@@ -432,9 +468,9 @@ onMounted(() => {
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.5 10.5v3h11v-3M8 2v8M5 7.5L8 10.5 11 7.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Descargar PDF
         </button>
-        <button class="btn btn-whatsapp" style="flex: 1 1 120px">
+        <button class="btn btn-whatsapp" style="flex: 1 1 120px" :disabled="compartiendoWhatsapp" @click="compartirWhatsapp" :title="isPremium ? 'Compartir por WhatsApp' : 'Requiere cuenta Premium'">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A6.5 6.5 0 001.5 8c0 1.14.37 2.2 1 3.06L1.5 14.5l3.54-.94A6.47 6.47 0 008 14.5 6.5 6.5 0 008 1.5z" stroke="white" stroke-width="1.4" stroke-linejoin="round"/></svg>
-          WhatsApp
+          {{ compartiendoWhatsapp ? '…' : 'WhatsApp' }}
         </button>
       </div>
     </template>

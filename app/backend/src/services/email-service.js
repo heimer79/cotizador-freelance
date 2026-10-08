@@ -1,35 +1,73 @@
 const { Resend } = require('resend');
+const { GmailService } = require('./gmail-service');
+const { registrarNotificacion } = require('../models/notificacion');
 
 function escapar(texto) {
   return String(texto).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 }
 
-// Envío transaccional con Resend (RESEND_API_KEY). Sin clave, el correo se registra en consola
-// para que el desarrollo local pueda seguir el flujo sin depender de un proveedor externo.
+// Envío transaccional con Gmail API (si está configurado) o Resend como fallback.
 class EmailService {
   constructor({ apiKey = process.env.RESEND_API_KEY, remitente = process.env.EMAIL_REMITENTE || 'PresupuestosPro <no-responder@presupuestospro.co>' } = {}) {
     this.remitente = remitente;
     this.cliente = apiKey ? new Resend(apiKey) : null;
+    this._gmailService = null;
+  }
+
+  async _obtenerGmail() {
+    if (this._gmailService !== null) return this._gmailService;
+    try {
+      const config = require('../models/configuracion-plataforma');
+      const clientId = await config.obtener('gmail_client_id');
+      const clientSecret = await config.obtener('gmail_client_secret');
+      const refreshToken = await config.obtener('gmail_refresh_token');
+      const remitente = await config.obtener('gmail_correo_remitente');
+      if (clientId && clientSecret && refreshToken && remitente) {
+        this._gmailService = new GmailService({ clientId, clientSecret, refreshToken, remitente });
+      } else {
+        this._gmailService = false;
+      }
+    } catch {
+      this._gmailService = false;
+    }
+    return this._gmailService;
   }
 
   async enviar({ para, asunto, html, texto }) {
+    const gmail = await this._obtenerGmail();
+    if (gmail) {
+      for (let intento = 1; intento <= 3; intento++) {
+        try {
+          return await gmail.enviar({ para, asunto, html, texto });
+        } catch (e) {
+          if (intento === 3) {
+            await registrarNotificacion({ tipo: 'correo_fallido', titulo: 'Error al enviar correo (Gmail)', descripcion: e.message }).catch(() => {});
+            break;
+          }
+        }
+      }
+    }
+
     if (!this.cliente) {
-      console.log(`[correo no enviado: falta RESEND_API_KEY] Para: ${para} | ${asunto}\n${texto}`);
+      console.log(`[correo no enviado: sin configuración] Para: ${para} | ${asunto}\n${texto}`);
       return { enviado: false };
     }
 
-    const { error } = await this.cliente.emails.send({
-      from: this.remitente,
-      to: para,
-      subject: asunto,
-      html,
-      text: texto
-    });
-
-    if (error) {
-      throw new Error(`Resend rechazó el correo: ${error.message}`);
+    for (let intento = 1; intento <= 3; intento++) {
+      const { error } = await this.cliente.emails.send({
+        from: this.remitente,
+        to: para,
+        subject: asunto,
+        html,
+        text: texto
+      });
+      if (!error) return { enviado: true };
+      if (intento === 3) {
+        await registrarNotificacion({ tipo: 'correo_fallido', titulo: 'Error al enviar correo (Resend)', descripcion: error.message }).catch(() => {});
+        throw new Error(`No se pudo enviar el correo: ${error.message}`);
+      }
     }
-    return { enviado: true };
+    return { enviado: false };
   }
 
   enviarConfirmacionDonacion({ para, nombre, monto, referencia, fecha }) {

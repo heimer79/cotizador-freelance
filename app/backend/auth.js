@@ -1,4 +1,7 @@
 const crypto = require('crypto');
+const passport = require('passport');
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
 
 const NOMBRE_COOKIE = 'sesion';
 const DURACION_SESION_MS = 30 * 24 * 60 * 60 * 1000;
@@ -49,7 +52,7 @@ function emitirCookieSesion(res, token) {
 
 async function crearSesion(db, usuarioId) {
   const token = generarToken();
-  const expiraEn = new Date(Date.now() + DURACION_SESION_MS).toISOString();
+  const expiraEn = new Date(Date.now() + DURACION_SESION_MS).toISOString().slice(0, 19).replace('T', ' ');
   await db.run('INSERT INTO sesiones (token_hash, usuario_id, expira_en) VALUES (?, ?, ?)', [
     hashToken(token),
     usuarioId,
@@ -66,7 +69,7 @@ async function crearTokenCorreo(db, usuarioId, tipo) {
     hashToken(token),
     usuarioId,
     tipo,
-    new Date(Date.now() + vigencia).toISOString()
+    new Date(Date.now() + vigencia).toISOString().slice(0, 19).replace('T', ' ')
   ]);
   return token;
 }
@@ -120,7 +123,181 @@ function soloVerificadosParaEscribir(req, res, next) {
   next();
 }
 
+async function obtenerCredencialOAuth(db, claveEnv, claveConfig) {
+  if (process.env[claveEnv]) return process.env[claveEnv];
+  try {
+    const config = require('./src/models/configuracion-plataforma');
+    return await config.obtener(claveConfig);
+  } catch {
+    return null;
+  }
+}
+
+async function configurarPassport(db) {
+  passport.serializeUser((user, done) => done(null, user.id));
+  passport.deserializeUser(async (id, done) => {
+    try {
+      const u = await db.get('SELECT * FROM usuarios WHERE id = ?', [id]);
+      done(null, u || false);
+    } catch (e) {
+      done(e);
+    }
+  });
+
+  async function manejarOAuth(proveedor, proveedorId, email, nombre, done) {
+    try {
+      let usuario = await db.get('SELECT * FROM usuarios WHERE email = ?', [email.toLowerCase()]);
+      if (usuario) {
+        await db.run(
+          'INSERT IGNORE INTO auth_proveedores (usuario_id, proveedor, proveedor_id) VALUES (?, ?, ?)',
+          [usuario.id, proveedor, proveedorId]
+        );
+      } else {
+        const res = await db.run(
+          `INSERT INTO usuarios (nombre_completo, email, tipo_documento, numero_documento)
+           VALUES (?, ?, 'CC', '0')`,
+          [nombre, email.toLowerCase()]
+        );
+        usuario = { id: res.insertId, nombre_completo: nombre, email: email.toLowerCase() };
+        await db.run('INSERT IGNORE INTO perfil (usuario_id, nombre) VALUES (?, ?)', [usuario.id, nombre]);
+        await db.run(
+          'INSERT IGNORE INTO auth_proveedores (usuario_id, proveedor, proveedor_id) VALUES (?, ?, ?)',
+          [usuario.id, proveedor, proveedorId]
+        );
+      }
+      await db.run(
+        'INSERT INTO historial_actividad (usuario_id, tipo, detalle) VALUES (?, ?, ?)',
+        [usuario.id, 'login', proveedor]
+      ).catch(() => {});
+      done(null, usuario);
+    } catch (e) {
+      done(e);
+    }
+  }
+
+  const googleClientId = await obtenerCredencialOAuth(db, 'GOOGLE_OAUTH_CLIENT_ID', 'google_oauth_client_id');
+  const googleSecret = await obtenerCredencialOAuth(db, 'GOOGLE_OAUTH_CLIENT_SECRET', 'google_oauth_client_secret');
+
+  if (googleClientId && googleSecret) {
+    passport.use(new GoogleStrategy(
+      {
+        clientID: googleClientId,
+        clientSecret: googleSecret,
+        callbackURL: `${process.env.APP_URL || 'http://localhost:3000'}/api/auth/google/callback`,
+        scope: ['profile', 'email']
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        const email = profile.emails?.[0]?.value;
+        if (!email) return done(null, false);
+        await manejarOAuth('google', profile.id, email, profile.displayName || email, done);
+      }
+    ));
+  }
+
+  const fbAppId = await obtenerCredencialOAuth(db, 'FACEBOOK_OAUTH_APP_ID', 'facebook_oauth_app_id');
+  const fbSecret = await obtenerCredencialOAuth(db, 'FACEBOOK_OAUTH_APP_SECRET', 'facebook_oauth_app_secret');
+
+  if (fbAppId && fbSecret) {
+    passport.use(new FacebookStrategy(
+      {
+        clientID: fbAppId,
+        clientSecret: fbSecret,
+        callbackURL: `${process.env.APP_URL || 'http://localhost:3000'}/api/auth/facebook/callback`,
+        profileFields: ['id', 'displayName', 'emails']
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        const email = profile.emails?.[0]?.value;
+        if (!email) return done(null, false);
+        await manejarOAuth('facebook', profile.id, email, profile.displayName || email, done);
+      }
+    ));
+  }
+
+  return passport;
+}
+
+function soloAdmin() {
+  return function (req, res, next) {
+    if (!req.usuario || req.usuario.rol !== 'admin') {
+      return res.status(403).json({ error: 'Acceso restringido a administradores' });
+    }
+    next();
+  };
+}
+
+function verificarEstado() {
+  return async function (req, res, next) {
+    if (!req.usuario) return next();
+    if (req.usuario.estado === 'suspendido') {
+      return res.status(403).json({ error: 'Tu cuenta ha sido suspendida. Contacta al administrador.' });
+    }
+    next();
+  };
+}
+
+function verificarPremium() {
+  return function (req, res, next) {
+    if (!req.usuario || req.usuario.tipoCuenta !== 'premium') {
+      return res.status(403).json({
+        error: 'Esta función requiere una cuenta premium',
+        enlacePlanes: '/planes'
+      });
+    }
+    next();
+  };
+}
+
+function crearMiddlewareRequiereAceptacionLegal(db) {
+  return async function requiereAceptacionLegal(req, res, next) {
+    if (!req.usuario) return next();
+    try {
+      const { verificarAceptacion } = require('./src/models/documento-legal');
+      const { pendientes } = await verificarAceptacion(req.usuario.id);
+      if (pendientes.length > 0) {
+        return res.status(403).json({ error: 'Debes aceptar los términos legales pendientes', pendientes });
+      }
+      next();
+    } catch (e) {
+      next(e);
+    }
+  };
+}
+
+function crearMiddlewareSesionExtendido(db) {
+  return async function requiereSesion(req, res, next) {
+    const token = leerCookie(req, NOMBRE_COOKIE);
+    if (!token) {
+      return res.status(401).json({ error: 'Debes iniciar sesión para continuar' });
+    }
+
+    const fila = await db.get(
+      `SELECT u.id, u.email, u.nombre_completo, u.email_verificado, u.rol, u.tipo_cuenta, u.estado, s.expira_en
+       FROM sesiones s JOIN usuarios u ON u.id = s.usuario_id
+       WHERE s.token_hash = ?`,
+      [hashToken(token)]
+    );
+
+    if (!fila || new Date(fila.expira_en) < new Date()) {
+      if (fila) await db.run('DELETE FROM sesiones WHERE token_hash = ?', [hashToken(token)]);
+      return res.status(401).json({ error: 'Tu sesión expiró. Vuelve a iniciar sesión.' });
+    }
+
+    req.usuario = {
+      id: fila.id,
+      email: fila.email,
+      nombre: fila.nombre_completo,
+      verificado: !!fila.email_verificado,
+      rol: fila.rol || 'normal',
+      tipoCuenta: fila.tipo_cuenta || 'gratuita',
+      estado: fila.estado || 'activo'
+    };
+    next();
+  };
+}
+
 module.exports = {
+  passport,
+  configurarPassport,
   NOMBRE_COOKIE,
   hashPassword,
   verificarPassword,
@@ -131,5 +308,10 @@ module.exports = {
   crearTokenCorreo,
   consumirTokenCorreo,
   crearMiddlewareSesion,
-  soloVerificadosParaEscribir
+  crearMiddlewareSesionExtendido,
+  soloVerificadosParaEscribir,
+  soloAdmin,
+  verificarEstado,
+  verificarPremium,
+  crearMiddlewareRequiereAceptacionLegal
 };

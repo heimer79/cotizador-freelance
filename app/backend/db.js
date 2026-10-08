@@ -180,9 +180,280 @@ async function crearEsquema() {
     if (indexes2.length === 0) {
       await conn.query(`CREATE INDEX idx_donacion_referencia ON donacion (referencia_pasarela)`);
     }
+
+    // Nuevas columnas en usuarios
+    const [cols] = await conn.query(`SHOW COLUMNS FROM usuarios LIKE 'rol'`);
+    if (cols.length === 0) {
+      await conn.query(`ALTER TABLE usuarios ADD COLUMN rol VARCHAR(20) NOT NULL DEFAULT 'normal'`);
+      await conn.query(`ALTER TABLE usuarios ADD COLUMN tipo_cuenta VARCHAR(20) NOT NULL DEFAULT 'gratuita'`);
+      await conn.query(`ALTER TABLE usuarios ADD COLUMN estado VARCHAR(20) NOT NULL DEFAULT 'activo'`);
+      await conn.query(`ALTER TABLE usuarios MODIFY COLUMN password_hash VARCHAR(255) NULL`);
+    }
+
+    // Columna temporal para cotizaciones
+    const [colsTemp] = await conn.query(`SHOW COLUMNS FROM cotizaciones LIKE 'temporal'`);
+    if (colsTemp.length === 0) {
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN temporal TINYINT(1) NOT NULL DEFAULT 0`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN ultima_actividad DATETIME DEFAULT CURRENT_TIMESTAMP`);
+    }
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS auth_proveedores (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        proveedor VARCHAR(20) NOT NULL,
+        proveedor_id VARCHAR(255) DEFAULT NULL,
+        fecha_vinculacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_usuario_proveedor (usuario_id, proveedor),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS suscripciones (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        fecha_inicio DATETIME NOT NULL,
+        fecha_vencimiento DATETIME NOT NULL,
+        estado VARCHAR(20) NOT NULL DEFAULT 'activa',
+        modalidad VARCHAR(20) NOT NULL,
+        referencia_pasarela VARCHAR(255) DEFAULT NULL,
+        pasarela VARCHAR(30) NOT NULL DEFAULT 'mercadopago',
+        fecha_creacion DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        KEY idx_suscripcion_usuario (usuario_id),
+        KEY idx_suscripcion_estado (estado),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS grupos_clientes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        nombre VARCHAR(255) NOT NULL,
+        fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_usuario_nombre_grupo (usuario_id, nombre),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS clientes_grupos (
+        cliente_id INT NOT NULL,
+        grupo_id INT NOT NULL,
+        PRIMARY KEY (cliente_id, grupo_id),
+        FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+        FOREIGN KEY (grupo_id) REFERENCES grupos_clientes(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS documentos_legales (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tipo VARCHAR(30) NOT NULL,
+        version VARCHAR(20) NOT NULL,
+        titulo VARCHAR(255) NOT NULL,
+        contenido LONGTEXT NOT NULL,
+        fecha_publicacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        activo TINYINT(1) NOT NULL DEFAULT 1,
+        UNIQUE KEY uq_tipo_version (tipo, version)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS aceptaciones_legales (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        documento_id INT NOT NULL,
+        fecha_aceptacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_usuario_documento (usuario_id, documento_id),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+        FOREIGN KEY (documento_id) REFERENCES documentos_legales(id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS configuracion_plataforma (
+        clave VARCHAR(100) PRIMARY KEY,
+        valor TEXT DEFAULT NULL,
+        sensible TINYINT(1) NOT NULL DEFAULT 0,
+        fecha_actualizacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS notificaciones_admin (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tipo VARCHAR(30) NOT NULL,
+        titulo VARCHAR(255) NOT NULL,
+        descripcion TEXT NOT NULL,
+        fecha DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        leida TINYINT(1) NOT NULL DEFAULT 0,
+        KEY idx_notificacion_leida (leida),
+        KEY idx_notificacion_fecha (fecha)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS enlaces_temporales (
+        token VARCHAR(36) PRIMARY KEY,
+        ruta_pdf TEXT NOT NULL,
+        usuario_id INT NOT NULL,
+        fecha_creacion DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        fecha_expiracion DATETIME NOT NULL,
+        KEY idx_enlace_expiracion (fecha_expiracion),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS historial_actividad (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        tipo VARCHAR(30) NOT NULL,
+        detalle VARCHAR(255) DEFAULT NULL,
+        fecha DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+        KEY idx_actividad_usuario_fecha (usuario_id, fecha),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
   } finally {
     conn.release();
   }
+}
+
+async function sembrarDatos() {
+  const conn = await pool.getConnection();
+  try {
+    const [docs] = await conn.query(`SELECT COUNT(*) AS cnt FROM documentos_legales`);
+    if (docs[0].cnt > 0) return;
+
+    const documentos = [
+      {
+        tipo: 'privacidad',
+        version: '1.0.0',
+        titulo: 'Política de Privacidad y Tratamiento de Datos Personales',
+        contenido: `<h1>Política de Privacidad y Tratamiento de Datos Personales</h1>
+<p><strong>Quotizador</strong> (en adelante "la Plataforma"), desarrollada por Digital Pyme Solutions, recopila y trata los datos personales de sus usuarios de conformidad con la Ley 1581 de 2012 y el Decreto 1377 de 2013 de la República de Colombia.</p>
+<h2>1. Responsable del Tratamiento</h2>
+<p>Digital Pyme Solutions, contacto: contacto@digitalpymesolutions.dev</p>
+<h2>2. Datos Recopilados</h2>
+<p>Recopilamos: nombre completo, correo electrónico, tipo y número de documento de identidad, información de perfil profesional, cotizaciones y datos de clientes creados en la plataforma.</p>
+<h2>3. Finalidad del Tratamiento</h2>
+<p>Los datos se utilizan para: prestación del servicio, envío de comunicaciones relacionadas con la cuenta, soporte técnico, y cumplimiento de obligaciones legales.</p>
+<h2>4. Derechos del Titular</h2>
+<p>Como titular de los datos, tiene derecho a conocer, actualizar, rectificar y suprimir su información personal. Para ejercer estos derechos, escríbanos a contacto@digitalpymesolutions.dev.</p>
+<h2>5. Seguridad</h2>
+<p>Implementamos medidas técnicas y organizativas para proteger sus datos contra acceso no autorizado, pérdida o destrucción.</p>
+<h2>6. Vigencia</h2>
+<p>Esta política está vigente desde el 1 de octubre de 2026.</p>`
+      },
+      {
+        tipo: 'sarlaft',
+        version: '1.0.0',
+        titulo: 'Declaración SARLAFT – Sistema de Administración del Riesgo de LA/FT',
+        contenido: `<h1>Declaración SARLAFT</h1>
+<p>En cumplimiento de la normativa colombiana sobre prevención del lavado de activos y financiación del terrorismo (LA/FT), <strong>Quotizador</strong> declara lo siguiente:</p>
+<h2>1. Compromiso</h2>
+<p>La Plataforma se compromete a no facilitar, directa ni indirectamente, operaciones relacionadas con el lavado de activos o la financiación del terrorismo.</p>
+<h2>2. Uso Permitido</h2>
+<p>La Plataforma está diseñada exclusivamente para la generación de cotizaciones y presupuestos de servicios profesionales lícitos. Queda prohibido su uso para fines ilegales.</p>
+<h2>3. Obligación del Usuario</h2>
+<p>Al usar la Plataforma, el usuario declara que los recursos utilizados para adquirir servicios premium provienen de actividades lícitas y que no está vinculado a listas de control de autoridades nacionales o internacionales.</p>
+<h2>4. Reporte</h2>
+<p>Cualquier operación sospechosa será reportada a las autoridades competentes conforme a la ley colombiana.</p>`
+      },
+      {
+        tipo: 'donaciones',
+        version: '1.0.0',
+        titulo: 'Términos de Donaciones Voluntarias',
+        contenido: `<h1>Términos de Donaciones Voluntarias</h1>
+<p>Las donaciones realizadas a través de <strong>Quotizador</strong> son completamente voluntarias y no reembolsables.</p>
+<h2>1. Carácter Voluntario</h2>
+<p>Ninguna donación es requerida para acceder a las funcionalidades gratuitas de la Plataforma. Las donaciones son un apoyo voluntario al mantenimiento y desarrollo de la herramienta.</p>
+<h2>2. No Reembolso</h2>
+<p>Las donaciones no son reembolsables bajo ninguna circunstancia, salvo error técnico comprobable en el cobro.</p>
+<h2>3. Procesamiento</h2>
+<p>Las donaciones son procesadas por pasarelas de pago externas (MercadoPago, PayPal). Digital Pyme Solutions no almacena datos de tarjetas de crédito.</p>
+<h2>4. Uso de los Fondos</h2>
+<p>Los fondos recibidos se destinan exclusivamente al mantenimiento de servidores, desarrollo de nuevas funcionalidades y soporte de la Plataforma.</p>`
+      },
+      {
+        tipo: 'terminos_uso',
+        version: '1.0.0',
+        titulo: 'Términos y Condiciones de Uso',
+        contenido: `<h1>Términos y Condiciones de Uso</h1>
+<p>Al registrarse y utilizar <strong>Quotizador</strong>, el usuario acepta los presentes Términos y Condiciones.</p>
+<h2>1. Descripción del Servicio</h2>
+<p>Quotizador es una herramienta en línea para la creación de cotizaciones y presupuestos profesionales, disponible en modalidad gratuita y premium.</p>
+<h2>2. Cuenta de Usuario</h2>
+<p>El usuario es responsable de mantener la confidencialidad de sus credenciales y de todas las actividades realizadas bajo su cuenta.</p>
+<h2>3. Uso Aceptable</h2>
+<p>Queda prohibido: usar la Plataforma para fines ilegales, intentar vulnerar la seguridad del sistema, suplantar identidades o distribuir contenido malicioso.</p>
+<h2>4. Cuenta Gratuita</h2>
+<p>La cuenta gratuita permite crear cotizaciones durante la sesión activa. Los datos no se conservan entre sesiones.</p>
+<h2>5. Modificaciones</h2>
+<p>Digital Pyme Solutions se reserva el derecho de modificar estos términos. Los cambios serán notificados y requerirán nueva aceptación.</p>
+<h2>6. Ley Aplicable</h2>
+<p>Estos términos se rigen por las leyes de la República de Colombia.</p>`
+      },
+      {
+        tipo: 'terminos_premium',
+        version: '1.0.0',
+        titulo: 'Términos y Condiciones de la Cuenta Premium',
+        contenido: `<h1>Términos y Condiciones de la Cuenta Premium</h1>
+<p>La suscripción Premium de <strong>Quotizador</strong> ofrece funcionalidades adicionales mediante pago anual.</p>
+<h2>1. Precio y Facturación</h2>
+<p>El precio de la suscripción Premium es de USD $20 por año (menos de USD $2 al mes). El cobro se realiza a través de MercadoPago.</p>
+<h2>2. Funcionalidades Premium</h2>
+<ul>
+<li>Sin publicidad en la Plataforma</li>
+<li>Guardado permanente de hasta 500 cotizaciones</li>
+<li>Guardado permanente de hasta 200 clientes</li>
+<li>Creación de hasta 50 grupos de clientes</li>
+</ul>
+<h2>3. Renovación</h2>
+<p>La suscripción puede configurarse para renovación automática anual. El usuario puede cancelar la renovación automática en cualquier momento desde su perfil.</p>
+<h2>4. Vencimiento y Período de Gracia</h2>
+<p>Al vencer la suscripción sin renovación, el usuario entra en un período de gracia de 30 días con acceso de solo lectura. Transcurridos 90 días adicionales sin renovación, los datos de cotizaciones, clientes y grupos serán eliminados.</p>
+<h2>5. No Reembolso</h2>
+<p>Los pagos de suscripción no son reembolsables salvo error técnico comprobable.</p>`
+      }
+    ];
+
+    for (const doc of documentos) {
+      await conn.query(
+        `INSERT IGNORE INTO documentos_legales (tipo, version, titulo, contenido) VALUES (?, ?, ?, ?)`,
+        [doc.tipo, doc.version, doc.titulo, doc.contenido]
+      );
+    }
+
+    // Vincular proveedor 'email' para usuarios existentes sin proveedor
+    await conn.query(`
+      INSERT IGNORE INTO auth_proveedores (usuario_id, proveedor)
+      SELECT id, 'email' FROM usuarios
+    `);
+
+    // Asignar rol admin al usuario con ADMIN_EMAIL
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      await conn.query(
+        `UPDATE usuarios SET rol = 'admin' WHERE email = ?`,
+        [adminEmail.trim().toLowerCase()]
+      );
+    }
+  } finally {
+    conn.release();
+  }
+}
+
+async function sincronizarAdmin() {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+  await db.run(
+    `UPDATE usuarios SET rol = 'admin' WHERE email = ?`,
+    [adminEmail.trim().toLowerCase()]
+  );
 }
 
 async function abrirBaseDatos() {
@@ -191,13 +462,15 @@ async function abrirBaseDatos() {
     port: parseInt(process.env.DB_PORT || '3306', 10),
     user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'presupuestospro',
+    database: process.env.DB_NAME || 'Quotizador',
     waitForConnections: true,
     connectionLimit: 10,
     charset: 'utf8mb4'
   });
 
   await crearEsquema();
+  await sembrarDatos();
+  await sincronizarAdmin();
   return db;
 }
 
