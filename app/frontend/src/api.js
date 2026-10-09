@@ -94,6 +94,10 @@ export const configAds = {
   obtener: () => peticion('/api/config/ads')
 };
 
+export const configDonaciones = {
+  obtener: () => peticion('/api/config/donaciones')
+};
+
 export const legal = {
   documentos: () => peticion('/api/legal/documentos'),
   documento: (tipo) => peticion(`/api/legal/documentos/${tipo}`),

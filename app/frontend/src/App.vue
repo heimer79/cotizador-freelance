@@ -2,6 +2,7 @@
 import { ref, provide, onMounted, onBeforeUnmount } from 'vue';
 import NavBar from './components/NavBar.vue';
 import LoginModal from './components/LoginModal.vue';
+import DonationModal from './components/DonationModal.vue';
 import CotizacionesView from './vistas/CotizacionesView.vue';
 import ClientesView from './vistas/ClientesView.vue';
 import CatalogoView from './vistas/CatalogoView.vue';
@@ -206,6 +207,8 @@ onBeforeUnmount(() => window.removeEventListener('sesion-expirada', sesionExpira
     :pendientes="terminosPendientes"
     @aceptado="onTerminosAceptados"
   />
+
+  <DonationModal v-if="mostrarDonacion" @cerrar="mostrarDonacion = false" />
 
   <ToastNotification ref="toast" />
   <CookieConsent />

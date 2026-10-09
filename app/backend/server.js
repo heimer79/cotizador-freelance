@@ -23,6 +23,7 @@ const { crearRutasCotizaciones, crearRutasPlantillasPdf, crearRutasCompartirDesc
 const crearRutasPerfil = require('./rutas/perfil');
 const crearRutasGrupos = require('./rutas/grupos');
 const crearRutasConfigAds = require('./src/api/ads-config');
+const crearRutasConfigDonaciones = require('./src/api/donacion-config');
 const { crearRutasDonaciones } = require('./src/api/donaciones');
 const crearRutasWebhookDonaciones = require('./src/api/donaciones-webhook');
 const crearRutasLegal = require('./src/api/legal');
@@ -61,6 +62,7 @@ function crearApp(db, opciones = {}) {
 
   app.use('/api/auth', crearRutasAuth(db, correo));
   app.use('/api/config', crearRutasConfigAds());
+  app.use('/api/config', crearRutasConfigDonaciones());
   app.use('/api/donaciones/webhook', crearRutasWebhookDonaciones(db, correo));
   app.use('/api/legal', crearRutasLegal(requiereSesion));
   app.use('/api/admin', requiereSesion, estadoCheck, crearRutasAdmin(db, soloAdmin()));
