@@ -18,7 +18,7 @@ async function crear({ usuarioId, rutaPdf }) {
     'INSERT INTO enlaces_temporales (token, ruta_pdf, usuario_id, fecha_expiracion) VALUES (?, ?, ?, ?)',
     [token, rutaPdf, usuarioId, expira]
   );
-  return token;
+  return { token, expira };
 }
 
 async function verificar(token) {
