@@ -55,6 +55,34 @@ test('rechaza el 4.º intento del día (máximo 3 donaciones pendientes o exitos
   );
 });
 
+test('una donación pendiente con más de 60 minutos expira a cancelada y libera el cupo diario', async () => {
+  const { db, profesionalId } = await bdConProfesional();
+  for (let i = 0; i < 3; i++) {
+    await crearDonacion(db, { profesionalId, monto: 10000, referencia: nuevaReferencia(), ahora: MEDIODIA });
+  }
+
+  const unaHoraYUnMinutoDespues = new Date(MEDIODIA.getTime() + 61 * 60 * 1000);
+  const nueva = await crearDonacion(db, { profesionalId, monto: 10000, referencia: nuevaReferencia(), ahora: unaHoraYUnMinutoDespues });
+  assert.strictEqual(nueva.estado, 'pendiente');
+
+  const anteriores = await db.all('SELECT estado FROM donacion WHERE profesional_id = ? AND id != ?', [profesionalId, nueva.id]);
+  assert.strictEqual(anteriores.length, 3);
+  assert.ok(anteriores.every((d) => d.estado === 'cancelada'));
+});
+
+test('una donación pendiente no expira antes de los 60 minutos', async () => {
+  const { db, profesionalId } = await bdConProfesional();
+  for (let i = 0; i < 3; i++) {
+    await crearDonacion(db, { profesionalId, monto: 10000, referencia: nuevaReferencia(), ahora: MEDIODIA });
+  }
+
+  const cincuentaMinutosDespues = new Date(MEDIODIA.getTime() + 50 * 60 * 1000);
+  await assert.rejects(
+    () => crearDonacion(db, { profesionalId, monto: 10000, referencia: nuevaReferencia(), ahora: cincuentaMinutosDespues }),
+    LimiteDonacionError
+  );
+});
+
 test('una donación fallida no consume cupo diario', async () => {
   const { db, profesionalId } = await bdConProfesional();
   for (let i = 0; i < 3; i++) {

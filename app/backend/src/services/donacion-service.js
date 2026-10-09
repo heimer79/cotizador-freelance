@@ -6,6 +6,7 @@ const MAX_DONACIONES_DIA = 3;
 const MAX_MONTO_DIA = 200000;
 const ZONA_HORARIA = 'America/Bogota';
 const DESFASE_UTC_HORAS = 5;
+const MINUTOS_EXPIRACION_PENDIENTE = 60;
 
 class LimiteDonacionError extends Error {}
 class MontoDonacionError extends Error {}
@@ -26,11 +27,21 @@ function validarMonto(monto) {
   }
 }
 
+async function expirarDonacionesPendientes(db, profesionalId, ahora = new Date()) {
+  const limite = new Date(ahora.getTime() - MINUTOS_EXPIRACION_PENDIENTE * 60 * 1000).toISOString();
+  await db.run(
+    `UPDATE donacion SET estado = 'cancelada' WHERE profesional_id = ? AND estado = 'pendiente' AND fecha_creacion < ?`,
+    [profesionalId, limite]
+  );
+}
+
 async function crearDonacion(db, { profesionalId, monto, referencia, ahora = new Date() }) {
   validarMonto(monto);
 
   const { inicio, fin } = rangoDiaBogota(ahora);
   return db.transaction(async (tx) => {
+    await expirarDonacionesPendientes(tx, profesionalId, ahora);
+
     const resumen = await tx.get(
       `SELECT COUNT(*) AS cantidad, COALESCE(SUM(monto), 0) AS acumulado
        FROM donacion
@@ -67,7 +78,9 @@ const ESTADOS_MERCADOPAGO = {
   refunded: 'cancelada'
 };
 
-async function listarDonaciones(db, profesionalId, pagina, porPagina) {
+async function listarDonaciones(db, profesionalId, pagina, porPagina, ahora = new Date()) {
+  await expirarDonacionesPendientes(db, profesionalId, ahora);
+
   const totalRow = await db.get('SELECT COUNT(*) AS total FROM donacion WHERE profesional_id = ?', [profesionalId]);
   const total = totalRow ? totalRow.total : 0;
   const filas = await db.all(
@@ -82,6 +95,7 @@ module.exports = {
   MONTO_MAXIMO,
   MAX_DONACIONES_DIA,
   MAX_MONTO_DIA,
+  MINUTOS_EXPIRACION_PENDIENTE,
   LimiteDonacionError,
   MontoDonacionError,
   diaBogota,
@@ -89,5 +103,6 @@ module.exports = {
   crearDonacion,
   generarReferencia,
   ESTADOS_MERCADOPAGO,
-  listarDonaciones
+  listarDonaciones,
+  expirarDonacionesPendientes
 };

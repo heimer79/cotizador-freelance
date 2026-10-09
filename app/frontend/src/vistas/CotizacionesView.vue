@@ -603,6 +603,27 @@ onMounted(() => {
     cargarTodo();
   }
 });
+
+// Este componente se reutiliza entre las rutas "dashboard" y "cotizaciones" (Vue no lo destruye
+// al alternar ramas v-if/v-else-if en App.vue), así que un cambio de modo en caliente —p. ej. al
+// cerrar sesión— no dispara onMounted. Sin este watch quedarían visibles los datos del usuario
+// que acaba de salir.
+watch(() => props.modo, (nuevoModo) => {
+  if (nuevoModo === 'lista') {
+    vistaLista.value = true;
+    cargarTodo();
+  } else {
+    vistaLista.value = false;
+    actual.value = null;
+    creando.value = false;
+    lista.value = [];
+    clientes.value = [];
+    servicios.value = [];
+    perfil.value = {};
+    error.value = '';
+    aviso.value = '';
+  }
+});
 </script>
 
 <template>

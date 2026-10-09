@@ -117,6 +117,20 @@ test('GET /api/donaciones lista solo las donaciones del profesional, paginadas',
   });
 });
 
+test('GET /api/donaciones expira a cancelada las pendientes con más de 60 minutos', async () => {
+  await conServidor(async (base, db) => {
+    const { cookie } = await usuarioVerificado(db);
+    const creada = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 5000 } });
+
+    const hace2Horas = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    await db.run('UPDATE donacion SET fecha_creacion = ? WHERE id = ?', [hace2Horas.toISOString(), creada.cuerpo.donacion_id]);
+
+    const r = await json(`${base}/api/donaciones?pagina=1&por_pagina=20`, { cookie });
+    assert.strictEqual(r.status, 200);
+    assert.strictEqual(r.cuerpo.donaciones[0].estado, 'cancelada');
+  });
+});
+
 test('webhook de pago approved marca la donación exitosa y envía la confirmación', async () => {
   await conServidor(async (base, db, correo) => {
     const { cookie, id } = await usuarioVerificado(db, 'donante@ejemplo.com');
