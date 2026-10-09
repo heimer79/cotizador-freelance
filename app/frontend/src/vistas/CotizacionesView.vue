@@ -536,10 +536,14 @@ function vistaPrevia() {
     return;
   }
   requireLogin(async () => {
+    // Igual que al compartir por WhatsApp: abrir la pestaña dentro del gesto de
+    // clic para que el navegador no la bloquee como pop-up tras el `await`.
+    const ventanaPrevia = window.open('', '_blank', 'noopener');
     try {
       const cot = await guardarEnBackend();
-      previsualizarPdf(cot, perfil.value, { plantilla: plantillaPdf.value, colores: coloresPdf.value });
+      previsualizarPdf(cot, perfil.value, { plantilla: plantillaPdf.value, colores: coloresPdf.value }, ventanaPrevia);
     } catch (e) {
+      if (ventanaPrevia) ventanaPrevia.close();
       error.value = e.message;
     }
   });
@@ -571,6 +575,11 @@ function compartirWhatsapp() {
   }
   requireLogin(async () => {
     compartiendoWhatsapp.value = true;
+    // Abrir la pestaña ya, dentro del gesto de clic original: si se abre recién
+    // después de los `await` de abajo, los navegadores de escritorio (que no
+    // soportan compartir archivos y caen al enlace wa.me) la bloquean como
+    // pop-up sin avisar, y el usuario ve que "no pasa nada" al hacer clic.
+    const ventanaWhatsapp = window.open('', '_blank', 'noopener');
     try {
       const cot = await guardarEnBackend();
       const opcionesPdf = { plantilla: plantillaPdf.value, colores: coloresPdf.value };
@@ -583,6 +592,7 @@ function compartirWhatsapp() {
       const puedeCompartirArchivo = !!(navigator.canShare && navigator.share && navigator.canShare({ files: [archivo] }));
 
       if (puedeCompartirArchivo) {
+        if (ventanaWhatsapp) ventanaWhatsapp.close();
         await navigator.share({
           title: `Cotización ${cot.numero}`,
           text: `Hola, te comparto la cotización Nro. ${cot.numero}.`,
@@ -597,9 +607,12 @@ function compartirWhatsapp() {
           nombre: `cotizacion-${cot.numero}.pdf`
         });
         const texto = `Hola, te comparto la cotización Nro. ${cot.numero}: ${url}`;
-        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
+        const destino = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+        if (ventanaWhatsapp) ventanaWhatsapp.location.href = destino;
+        else window.open(destino, '_blank', 'noopener');
       }
     } catch (e) {
+      if (ventanaWhatsapp) ventanaWhatsapp.close();
       if (e?.name !== 'AbortError') error.value = e.message;
     } finally {
       compartiendoWhatsapp.value = false;

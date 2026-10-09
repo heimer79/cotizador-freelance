@@ -55,6 +55,7 @@ function plantillaProfesional(cotizacion, perfil, colores = {}) {
   const doc = new jsPDF();
   const acento = colores.acento || '#2563eb';
   const encabezado = colores.encabezado || '#1e3a5f';
+  const texto = colores.texto || '#374151';
   const emisor = cotizacion.emisor || {};
   let y = 20;
 
@@ -68,7 +69,7 @@ function plantillaProfesional(cotizacion, perfil, colores = {}) {
   }
 
   doc.setFontSize(9);
-  doc.setTextColor('#374151');
+  doc.setTextColor(texto);
   let yE = y + 25;
   if (emisor.nombre && emisor.logoBase64) { doc.text(emisor.nombre, 15, yE); yE += 5; }
   doc.text(`NIT / CC: ${emisor.documento || perfil.nit || 'Pendiente'}`, 15, yE); yE += 5;
@@ -81,7 +82,7 @@ function plantillaProfesional(cotizacion, perfil, colores = {}) {
   doc.setFont(undefined, 'bold');
   doc.text(`Cotización N.º ${cotizacion.numero}`, 15, y);
   doc.setFont(undefined, 'normal');
-  doc.setTextColor('#374151');
+  doc.setTextColor(texto);
 
   y += 7;
   doc.setFontSize(9);
@@ -91,12 +92,17 @@ function plantillaProfesional(cotizacion, perfil, colores = {}) {
 
   y += 8;
   const cliente = cotizacion.cliente;
+  const clienteBloqueY = y;
   doc.setFont(undefined, 'bold'); doc.text('Cliente:', 15, y); doc.setFont(undefined, 'normal');
   y += 5;
   doc.text(cliente.nombre, 15, y); y += 5;
   doc.text(`NIT / CC: ${cliente.documento || 'No registrado'}`, 15, y);
   if (cliente.contacto) { y += 5; doc.text(`Contacto: ${cliente.contacto}`, 15, y); }
   if (cliente.email) { y += 5; doc.text(`Email: ${cliente.email}`, 15, y); }
+  if (cliente.logoBase64) {
+    doc.addImage(cliente.logoBase64, 'PNG', 165, clienteBloqueY - 4, 20, 14);
+    y = Math.max(y, clienteBloqueY - 4 + 14);
+  }
 
   y += 10;
   doc.setFillColor(encabezado);
@@ -107,7 +113,7 @@ function plantillaProfesional(cotizacion, perfil, colores = {}) {
   doc.text('Cant.', 130, y, { align: 'right' });
   doc.text('Precio unit.', 165, y, { align: 'right' });
   doc.text('Importe', 193, y, { align: 'right' });
-  doc.setTextColor('#374151');
+  doc.setTextColor(texto);
   y += 7;
 
   cotizacion.lineas.forEach((linea, i) => {
@@ -137,6 +143,7 @@ function plantillaModerna(cotizacion, perfil, colores = {}) {
   const doc = new jsPDF();
   const primario = colores.encabezado || '#7c3aed';
   const acento = colores.acento || '#ddd6fe';
+  const texto = colores.texto || '#111827';
   const emisor = cotizacion.emisor || {};
 
   // Side accent bar
@@ -160,8 +167,10 @@ function plantillaModerna(cotizacion, perfil, colores = {}) {
 
   // Emisor block (right)
   const nombreEmisor = emisor.nombre || perfil.nombre || '';
+  let yInfoEmisor = 22;
   if (emisor.logoBase64) {
     doc.addImage(emisor.logoBase64, 'PNG', 150, 5, 30, 20);
+    yInfoEmisor = 30; // debajo del logo para no superponerse
   } else if (nombreEmisor) {
     doc.setFontSize(11);
     doc.setTextColor(primario);
@@ -172,18 +181,19 @@ function plantillaModerna(cotizacion, perfil, colores = {}) {
   doc.setFontSize(8);
   doc.setTextColor('#6b7280');
   const nitE = emisor.documento || perfil.nit || '';
-  if (nitE) doc.text(`NIT: ${nitE}`, 195, 22, { align: 'right' });
+  if (nitE) doc.text(`NIT: ${nitE}`, 195, yInfoEmisor, { align: 'right' });
   const contE = emisor.contacto || perfil.contacto || '';
-  if (contE) doc.text(contE, 195, 28, { align: 'right' });
+  if (contE) doc.text(contE, 195, yInfoEmisor + 6, { align: 'right' });
 
   let y = 55;
+  const clienteY = y;
   // Cliente
   doc.setFontSize(8);
   doc.setTextColor('#9ca3af');
   doc.text('PARA', 20, y);
   y += 5;
   doc.setFontSize(11);
-  doc.setTextColor('#111827');
+  doc.setTextColor(texto);
   doc.setFont(undefined, 'bold');
   doc.text(cotizacion.cliente.nombre, 20, y);
   doc.setFont(undefined, 'normal');
@@ -192,6 +202,10 @@ function plantillaModerna(cotizacion, perfil, colores = {}) {
   doc.setTextColor('#4b5563');
   if (cotizacion.cliente.documento) { doc.text(`NIT: ${cotizacion.cliente.documento}`, 20, y); y += 5; }
   if (cotizacion.cliente.email) { doc.text(cotizacion.cliente.email, 20, y); y += 5; }
+  if (cotizacion.cliente.logoBase64) {
+    doc.addImage(cotizacion.cliente.logoBase64, 'PNG', 160, clienteY - 3, 25, 16);
+    y = Math.max(y, clienteY - 3 + 16);
+  }
 
   y += 8;
   // Table header
@@ -205,7 +219,7 @@ function plantillaModerna(cotizacion, perfil, colores = {}) {
   doc.text('Total', 193, y, { align: 'right' });
   y += 7;
 
-  doc.setTextColor('#111827');
+  doc.setTextColor(texto);
   cotizacion.lineas.forEach((linea, i) => {
     if (i % 2 === 0) { doc.setFillColor(acento); doc.rect(15, y - 4, 180, 6.5, 'F'); }
     doc.setFontSize(9);
@@ -233,6 +247,7 @@ function plantillaEjecutiva(cotizacion, perfil, colores = {}) {
   const doc = new jsPDF();
   const oscuro = colores.encabezado || '#1e293b';
   const dorado = colores.acento || '#f59e0b';
+  const texto = colores.texto || '#1e293b';
   const emisor = cotizacion.emisor || {};
 
   // Full-width header bar
@@ -266,12 +281,12 @@ function plantillaEjecutiva(cotizacion, perfil, colores = {}) {
   doc.setFontSize(7); doc.text(cotizacion.fechaEmision, 175, 30, { align: 'center' });
 
   let y = 50;
-  doc.setTextColor('#1e293b');
+  doc.setTextColor(texto);
   // Two-column: client + validity
   doc.setFontSize(8); doc.setTextColor('#94a3b8'); doc.text('CLIENTE', 15, y);
   doc.text('VIGENCIA', 130, y);
   y += 5;
-  doc.setFontSize(10); doc.setTextColor('#1e293b'); doc.setFont(undefined, 'bold');
+  doc.setFontSize(10); doc.setTextColor(texto); doc.setFont(undefined, 'bold');
   doc.text(cotizacion.cliente.nombre, 15, y);
   doc.setFont(undefined, 'normal');
   doc.setFontSize(9); doc.text(`Hasta: ${cotizacion.fechaVigencia}`, 130, y);
@@ -280,6 +295,9 @@ function plantillaEjecutiva(cotizacion, perfil, colores = {}) {
   if (cotizacion.cliente.documento) doc.text(`NIT: ${cotizacion.cliente.documento}`, 15, y);
   y += 5;
   if (cotizacion.cliente.contacto) doc.text(cotizacion.cliente.contacto, 15, y);
+  if (cotizacion.cliente.logoBase64) {
+    doc.addImage(cotizacion.cliente.logoBase64, 'PNG', 172, 47, 20, 13);
+  }
 
   y += 12;
   // Table header
@@ -292,7 +310,7 @@ function plantillaEjecutiva(cotizacion, perfil, colores = {}) {
   doc.text('Importe', 193, y, { align: 'right' });
   y += 7;
 
-  doc.setTextColor('#1e293b');
+  doc.setTextColor(texto);
   cotizacion.lineas.forEach((linea, i) => {
     if (i % 2 === 0) { doc.setFillColor(248, 248, 248); doc.rect(15, y - 4, 180, 6.5, 'F'); }
     doc.setFontSize(9);
@@ -339,7 +357,11 @@ export function generarPdfArchivo(cotizacion, perfil = {}, opciones = {}) {
   return new File([blob], `cotizacion-${cotizacion.numero}.pdf`, { type: 'application/pdf' });
 }
 
-export function previsualizarPdf(cotizacion, perfil = {}, opciones = {}) {
+// `ventana` permite reutilizar una pestaña abierta de antemano (p. ej. dentro del
+// gesto de clic original, antes de los `await` que preceden a esta llamada) para
+// evitar que el navegador la bloquee como pop-up.
+export function previsualizarPdf(cotizacion, perfil = {}, opciones = {}, ventana = null) {
   const url = construirDoc(cotizacion, perfil, opciones).output('bloburl');
-  window.open(url, '_blank', 'noopener');
+  if (ventana) ventana.location.href = url;
+  else window.open(url, '_blank', 'noopener');
 }

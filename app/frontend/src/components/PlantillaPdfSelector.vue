@@ -28,6 +28,10 @@
           <span class="field-label">Acento</span>
           <input type="color" :value="colores.acento || '#2563eb'" @input="cambiarColor('acento', $event.target.value)">
         </label>
+        <label class="pps-color-item">
+          <span class="field-label">Texto</span>
+          <input type="color" :value="colores.texto || '#374151'" @input="cambiarColor('texto', $event.target.value)">
+        </label>
       </div>
     </div>
   </div>
