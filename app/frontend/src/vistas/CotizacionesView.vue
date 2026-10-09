@@ -585,11 +585,12 @@ function compartirWhatsapp() {
       const opcionesPdf = { plantilla: plantillaPdf.value, colores: coloresPdf.value };
 
       // FR-030: intentar compartir el PDF como archivo adjunto (Web Share API Level 2).
-      // Si el navegador no soporta compartir archivos (p. ej. escritorio sin esa capacidad),
-      // navigator.share igual existiría pero abriría el selector genérico del sistema SIN el
-      // PDF adjunto, que es justo el comportamiento confuso que se quiere evitar aquí.
+      // Solo en dispositivos móviles: en desktop, Chrome reporta canShare=true pero lanza
+      // "Must be handling a user gesture" porque el gesto se pierde tras los awaits previos.
+      // En desktop el fallback wa.me abre WhatsApp Web directamente, que es lo correcto.
+      const esMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.maxTouchPoints > 1;
       const archivo = generarPdfArchivo(cot, perfil.value, opcionesPdf);
-      const puedeCompartirArchivo = !!(navigator.canShare && navigator.share && navigator.canShare({ files: [archivo] }));
+      const puedeCompartirArchivo = esMobile && !!(navigator.canShare && navigator.share && navigator.canShare({ files: [archivo] }));
 
       if (puedeCompartirArchivo) {
         if (ventanaWhatsapp) ventanaWhatsapp.close();
