@@ -152,7 +152,7 @@ async function iniciar() {
   setInterval(() => tareasPeriodicas(db, correoService).catch(() => {}), 6 * 60 * 60 * 1000);
 }
 
-if (require.main === module) {
+if (process.env.NODE_ENV !== 'test') {
   iniciar().catch((err) => {
     console.error('Error al iniciar la aplicación:', err);
     process.exit(1);
