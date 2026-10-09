@@ -3,6 +3,8 @@ const path = require('path');
 const fs = require('fs');
 const { db } = require('../../db');
 
+const BACKEND_ROOT = path.join(__dirname, '../..');
+
 const DIAS_EXPIRACION = 7;
 
 function fechaExpiracion() {
@@ -34,7 +36,7 @@ async function limpiarExpirados() {
     'SELECT ruta_pdf FROM enlaces_temporales WHERE fecha_expiracion <= NOW()'
   );
   for (const { ruta_pdf } of expirados) {
-    try { fs.unlinkSync(ruta_pdf); } catch { /* archivo ya eliminado */ }
+    try { fs.unlinkSync(path.join(BACKEND_ROOT, ruta_pdf)); } catch { /* archivo ya eliminado */ }
   }
   await db.run('DELETE FROM enlaces_temporales WHERE fecha_expiracion <= NOW()');
 }

@@ -26,7 +26,12 @@ function crearRutasCrearEnlace(db, requiereSesion, verificarPremiumMw) {
     const rutaRelativa = path.join('datos/pdfs-temporales', `${Date.now()}-${nombreArchivo}`);
     const rutaAbsoluta = path.join(__dirname, '../../', rutaRelativa);
 
-    const buffer = Buffer.from(pdfBase64.replace(/^data:application\/pdf;base64,/, ''), 'base64');
+    // Extraer la parte base64 robustamente (soporta cualquier MIME type en el data URI)
+    const base64Only = pdfBase64.includes(',') ? pdfBase64.split(',').slice(1).join(',') : pdfBase64;
+    const buffer = Buffer.from(base64Only, 'base64');
+    if (buffer.length < 4 || buffer.slice(0, 4).toString('ascii') !== '%PDF') {
+      return res.status(400).json({ error: 'El contenido enviado no es un PDF válido' });
+    }
     fs.writeFileSync(rutaAbsoluta, buffer);
 
     const enlace = await crear({ usuarioId: req.usuario.id, rutaPdf: rutaRelativa });
