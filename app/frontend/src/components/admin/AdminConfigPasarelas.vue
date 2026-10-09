@@ -44,7 +44,7 @@ onMounted(cargar);
             <input v-model="config.paypal_enlace_donacion" placeholder="https://paypal.me/...">
           </div>
           <div>
-            <label class="field-label">Access Token MercadoPago (suscripciones) <small style="color:var(--color-texto-secundario)">[sensible]</small></label>
+            <label class="field-label">Access Token MercadoPago (suscripciones y donaciones) <small style="color:var(--color-texto-secundario)">[sensible]</small></label>
             <input v-model="config.mercadopago_access_token" type="password" placeholder="APP_USR-...">
           </div>
           <button class="btn btn-primary" type="submit">Guardar</button>

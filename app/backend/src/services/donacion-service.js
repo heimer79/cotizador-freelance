@@ -48,7 +48,7 @@ async function crearDonacion(db, { profesionalId, monto, referencia, ahora = new
 
     const resultado = await tx.run(
       `INSERT INTO donacion (profesional_id, monto, estado, referencia_pasarela, pasarela, fecha_creacion)
-       VALUES (?, ?, 'pendiente', ?, 'wompi', ?)`,
+       VALUES (?, ?, 'pendiente', ?, 'mercadopago', ?)`,
       [profesionalId, monto, referencia, ahora.toISOString()]
     );
 
@@ -60,30 +60,12 @@ function generarReferencia() {
   return `DON-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
 }
 
-const ESTADOS_WOMPI = {
-  APPROVED: 'exitosa',
-  DECLINED: 'fallida',
-  ERROR: 'fallida',
-  VOIDED: 'cancelada'
+const ESTADOS_MERCADOPAGO = {
+  approved: 'exitosa',
+  rejected: 'fallida',
+  cancelled: 'cancelada',
+  refunded: 'cancelada'
 };
-
-function enlaceCheckoutWompi({ publicKey, integritySecret, monto, referencia, urlRetorno }) {
-  const montoEnCentavos = monto * 100;
-  const firma = crypto
-    .createHash('sha256')
-    .update(`${referencia}${montoEnCentavos}COP${integritySecret}`)
-    .digest('hex');
-
-  const parametros = new URLSearchParams({
-    'public-key': publicKey,
-    currency: 'COP',
-    'amount-in-cents': String(montoEnCentavos),
-    reference: referencia,
-    'signature:integrity': firma,
-    'redirect-url': urlRetorno
-  });
-  return `https://checkout.wompi.co/p/?${parametros.toString()}`;
-}
 
 async function listarDonaciones(db, profesionalId, pagina, porPagina) {
   const totalRow = await db.get('SELECT COUNT(*) AS total FROM donacion WHERE profesional_id = ?', [profesionalId]);
@@ -106,7 +88,6 @@ module.exports = {
   rangoDiaBogota,
   crearDonacion,
   generarReferencia,
-  ESTADOS_WOMPI,
-  enlaceCheckoutWompi,
+  ESTADOS_MERCADOPAGO,
   listarDonaciones
 };

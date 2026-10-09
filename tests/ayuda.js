@@ -1,6 +1,6 @@
-const { abrirBaseDatos, db } = require('../backend/db');
-const { crearApp } = require('../backend/server');
-const { hashPassword, crearSesion, NOMBRE_COOKIE } = require('../backend/auth');
+const { abrirBaseDatos, db } = require('../app/backend/db');
+const { crearApp } = require('../app/backend/server');
+const { hashPassword, crearSesion, NOMBRE_COOKIE } = require('../app/backend/auth');
 
 let initialized = false;
 

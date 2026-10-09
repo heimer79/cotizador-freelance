@@ -1,7 +1,7 @@
 const express = require('express');
 const { obtener } = require('../models/configuracion-plataforma');
 
-// Enlaces públicos de donación configurados por el admin (FR-026/FR-027). No expone mercadopago_access_token (sensible, uso exclusivo de suscripciones).
+// Enlaces públicos de donación configurados por el admin (FR-026/FR-027). No expone mercadopago_access_token (sensible, usado para cobrar suscripciones y donaciones vía API).
 function crearRutasConfigDonaciones() {
   const router = express.Router();
 

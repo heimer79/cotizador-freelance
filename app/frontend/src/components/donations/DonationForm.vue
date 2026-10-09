@@ -24,7 +24,7 @@ async function donar() {
   enviando.value = false;
 }
 
-// Al volver de Wompi, la URL trae ?donacion=ID. El estado real lo confirma el webhook, así que puede seguir pendiente.
+// Al volver de MercadoPago, la URL trae ?donacion=ID. El estado real lo confirma el webhook, así que puede seguir pendiente.
 onMounted(async () => {
   const params = new URLSearchParams(window.location.search);
   if (!params.has('donacion')) return;

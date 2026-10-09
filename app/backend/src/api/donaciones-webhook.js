@@ -1,58 +1,54 @@
-const crypto = require('crypto');
 const express = require('express');
-const { ESTADOS_WOMPI } = require('../services/donacion-service');
+const { ESTADOS_MERCADOPAGO } = require('../services/donacion-service');
 const { aFormatoApi } = require('../models/donacion');
+const { obtener } = require('../models/configuracion-plataforma');
 
-function firmaValida(cuerpo, secreto) {
-  const firma = cuerpo.signature;
-  if (!firma || !Array.isArray(firma.properties) || typeof firma.checksum !== 'string') return false;
-
-  const valores = firma.properties.map((ruta) =>
-    ruta.split('.').reduce((obj, clave) => (obj ? obj[clave] : undefined), cuerpo.data)
-  );
-  if (valores.some((v) => v === undefined)) return false;
-
-  const esperado = crypto
-    .createHash('sha256')
-    .update(`${valores.join('')}${cuerpo.timestamp}${secreto}`)
-    .digest('hex');
-
-  const a = Buffer.from(esperado);
-  const b = Buffer.from(firma.checksum);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
+async function obtenerAccessTokenMercadoPago() {
+  try {
+    return (await obtener('mercadopago_access_token')) || process.env.MERCADOPAGO_ACCESS_TOKEN;
+  } catch {
+    return process.env.MERCADOPAGO_ACCESS_TOKEN;
+  }
 }
 
 function crearRutasWebhookDonaciones(db, correo) {
   const router = express.Router();
 
   router.post('/', async (req, res) => {
-    const secreto = process.env.WOMPI_INTEGRITY_SECRET;
-    if (!secreto) return res.status(503).json({ error: 'Webhook no configurado' });
+    const { type, data } = req.body || {};
+    if (type !== 'payment' || !data?.id) return res.status(200).end();
 
-    const cuerpo = req.body || {};
-    if (!firmaValida(cuerpo, secreto)) {
-      return res.status(400).json({ error: 'Firma inválida' });
+    const accessToken = await obtenerAccessTokenMercadoPago();
+    if (!accessToken) return res.status(200).end();
+
+    // Consultamos el pago directamente en la API de MercadoPago en vez de confiar en el cuerpo del webhook.
+    let pago;
+    try {
+      const { MercadoPagoConfig, Payment } = require('mercadopago');
+      const mpClient = new MercadoPagoConfig({ accessToken });
+      const payment = new Payment(mpClient);
+      pago = await payment.get({ id: data.id });
+    } catch (e) {
+      console.error('Webhook donaciones - error consultando el pago:', e.message);
+      return res.status(200).end();
     }
 
-    const transaccion = cuerpo.data && cuerpo.data.transaction;
-    if (!transaccion || !transaccion.reference) {
-      return res.status(400).json({ error: 'Payload no reconocido' });
-    }
+    const referencia = pago.external_reference;
+    if (!referencia) return res.json({ ok: true, ignorado: true });
 
     const donacion = await db.get(
       `SELECT d.*, u.email, u.nombre_completo FROM donacion d
        JOIN usuarios u ON u.id = d.profesional_id
        WHERE d.referencia_pasarela = ?`,
-      [transaccion.reference]
+      [referencia]
     );
     if (!donacion) return res.json({ ok: true, ignorado: true });
-
     if (donacion.estado !== 'pendiente') return res.json({ ok: true, ignorado: true });
 
-    const nuevoEstado = ESTADOS_WOMPI[transaccion.status];
+    const nuevoEstado = ESTADOS_MERCADOPAGO[pago.status];
     if (!nuevoEstado) return res.json({ ok: true, ignorado: true });
 
-    if (nuevoEstado === 'exitosa' && transaccion.amount_in_cents !== donacion.monto * 100) {
+    if (nuevoEstado === 'exitosa' && pago.transaction_amount !== donacion.monto) {
       return res.status(400).json({ error: 'El monto no coincide con la donación' });
     }
 

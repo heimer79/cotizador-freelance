@@ -1,55 +1,69 @@
-const { test, beforeEach, afterEach } = require('node:test');
+const { test, beforeEach, afterEach, mock } = require('node:test');
 const assert = require('node:assert');
-const crypto = require('crypto');
-const { conServidor, usuarioVerificado, json } = require('../../../tests/ayuda');
+const { conServidor, usuarioVerificado, json } = require('../../../../tests/ayuda');
 
-const CLAVES = {
-  WOMPI_PUBLIC_KEY: 'pub_test_123',
-  WOMPI_INTEGRITY_SECRET: 'secreto_integridad_test'
-};
+// Mock del SDK de MercadoPago: evita llamadas reales a la API en los tests.
+const pagosSimulados = new Map();
+const preferenciasCreadas = [];
+let contadorPreferencias = 0;
+
+mock.module('mercadopago', {
+  exports: {
+    MercadoPagoConfig: class MercadoPagoConfig {
+      constructor({ accessToken }) { this.accessToken = accessToken; }
+    },
+    Preference: class Preference {
+      constructor(client) { this.client = client; }
+      async create({ body }) {
+        contadorPreferencias += 1;
+        preferenciasCreadas.push(body);
+        const id = `pref-${contadorPreferencias}`;
+        return { id, init_point: `https://mercadopago.test/checkout/${id}` };
+      }
+    },
+    Payment: class Payment {
+      constructor(client) { this.client = client; }
+      async get({ id }) {
+        const pago = pagosSimulados.get(String(id));
+        if (!pago) throw new Error('Pago no encontrado en el mock');
+        return pago;
+      }
+    }
+  }
+});
+
+function simularPago(id, datos) {
+  pagosSimulados.set(String(id), datos);
+}
 
 let anteriores;
 beforeEach(() => {
   anteriores = { ...process.env };
-  Object.assign(process.env, CLAVES, { APP_URL: 'http://localhost:3000' });
+  Object.assign(process.env, { MERCADOPAGO_ACCESS_TOKEN: 'TEST-token-123', APP_URL: 'http://localhost:3000' });
+  pagosSimulados.clear();
+  preferenciasCreadas.length = 0;
+  contadorPreferencias = 0;
 });
 afterEach(() => {
   process.env = anteriores;
 });
 
-function eventoFirmado(transaccion, timestamp = 1700000000) {
-  const propiedades = ['transaction.id', 'transaction.status', 'transaction.amount_in_cents'];
-  const valores = propiedades.map((p) => transaccion[p.split('.')[1]]);
-  const checksum = crypto
-    .createHash('sha256')
-    .update(`${valores.join('')}${timestamp}${CLAVES.WOMPI_INTEGRITY_SECRET}`)
-    .digest('hex');
-  return {
-    event: 'transaction.updated',
-    data: { transaction: transaccion },
-    signature: { properties: propiedades, checksum },
-    timestamp
-  };
-}
-
-test('POST /api/donaciones crea la donación pendiente y devuelve un enlace de checkout firmado', async () => {
+test('POST /api/donaciones crea la donación pendiente y devuelve la preferencia de MercadoPago', async () => {
   await conServidor(async (base, db) => {
     const { cookie } = await usuarioVerificado(db);
     const r = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 10000 } });
 
     assert.strictEqual(r.status, 201);
     assert.strictEqual(r.cuerpo.estado, 'pendiente');
-    assert.match(r.cuerpo.checkout_url, /^https:\/\/checkout\.wompi\.co\/p\/\?/);
-    const url = new URL(r.cuerpo.checkout_url);
-    assert.strictEqual(url.searchParams.get('amount-in-cents'), '1000000');
-    assert.strictEqual(url.searchParams.get('public-key'), CLAVES.WOMPI_PUBLIC_KEY);
+    assert.match(r.cuerpo.checkout_url, /^https:\/\/mercadopago\.test\/checkout\//);
 
-    const referencia = url.searchParams.get('reference');
-    const firma = crypto
-      .createHash('sha256')
-      .update(`${referencia}1000000COP${CLAVES.WOMPI_INTEGRITY_SECRET}`)
-      .digest('hex');
-    assert.strictEqual(url.searchParams.get('signature:integrity'), firma);
+    const fila = await db.get('SELECT referencia_pasarela, pasarela FROM donacion WHERE id = ?', [r.cuerpo.donacion_id]);
+    assert.strictEqual(fila.pasarela, 'mercadopago');
+
+    const preferencia = preferenciasCreadas[preferenciasCreadas.length - 1];
+    assert.strictEqual(preferencia.external_reference, fila.referencia_pasarela);
+    assert.strictEqual(preferencia.items[0].unit_price, 10000);
+    assert.strictEqual(preferencia.items[0].currency_id, 'COP');
   });
 });
 
@@ -80,8 +94,8 @@ test('el 4.º intento del día responde 429', async () => {
   });
 });
 
-test('sin claves de Wompi configuradas responde 503 con mensaje amigable (EC3)', async () => {
-  delete process.env.WOMPI_PUBLIC_KEY;
+test('sin access token de MercadoPago configurado responde 503 con mensaje amigable (EC3)', async () => {
+  delete process.env.MERCADOPAGO_ACCESS_TOKEN;
   await conServidor(async (base, db) => {
     const { cookie } = await usuarioVerificado(db);
     const r = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 10000 } });
@@ -103,14 +117,15 @@ test('GET /api/donaciones lista solo las donaciones del profesional, paginadas',
   });
 });
 
-test('webhook APPROVED con firma válida marca la donación exitosa y envía la confirmación', async () => {
+test('webhook de pago approved marca la donación exitosa y envía la confirmación', async () => {
   await conServidor(async (base, db, correo) => {
     const { cookie, id } = await usuarioVerificado(db, 'donante@ejemplo.com');
     const creada = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 20000 } });
-    const referencia = new URL(creada.cuerpo.checkout_url).searchParams.get('reference');
+    const fila = await db.get('SELECT referencia_pasarela FROM donacion WHERE id = ?', [creada.cuerpo.donacion_id]);
 
-    const evento = eventoFirmado({ id: 'txn-1', reference: referencia, status: 'APPROVED', amount_in_cents: 2000000 });
-    const r = await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: evento });
+    simularPago('pago-1', { status: 'approved', external_reference: fila.referencia_pasarela, transaction_amount: 20000 });
+
+    const r = await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: { type: 'payment', data: { id: 'pago-1' } } });
     assert.strictEqual(r.status, 200);
     assert.strictEqual(r.cuerpo.donacion.estado, 'exitosa');
 
@@ -119,41 +134,54 @@ test('webhook APPROVED con firma válida marca la donación exitosa y envía la 
     assert.strictEqual(confirmaciones[0].monto, 20000);
     assert.strictEqual(confirmaciones[0].para, 'donante@ejemplo.com');
 
-    await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: evento });
+    await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: { type: 'payment', data: { id: 'pago-1' } } });
     assert.strictEqual(correo.enviados.filter((m) => m.tipo === 'donacion').length, 1);
     assert.ok(id);
   });
 });
 
-test('webhook con firma inválida responde 400 y no cambia la donación', async () => {
+test('webhook ignora notificaciones que no son de tipo payment', async () => {
+  await conServidor(async (base) => {
+    const r = await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: { type: 'merchant_order', data: { id: '1' } } });
+    assert.strictEqual(r.status, 200);
+  });
+});
+
+test('webhook ignora pagos con referencia desconocida', async () => {
+  await conServidor(async (base) => {
+    simularPago('pago-x', { status: 'approved', external_reference: 'NO-EXISTE', transaction_amount: 1 });
+    const r = await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: { type: 'payment', data: { id: 'pago-x' } } });
+    assert.strictEqual(r.status, 200);
+    assert.strictEqual(r.cuerpo.ignorado, true);
+  });
+});
+
+test('webhook rechaza cuando el monto no coincide con la donación', async () => {
   await conServidor(async (base, db) => {
     const { cookie } = await usuarioVerificado(db);
     const creada = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 20000 } });
-    const referencia = new URL(creada.cuerpo.checkout_url).searchParams.get('reference');
+    const fila = await db.get('SELECT referencia_pasarela FROM donacion WHERE id = ?', [creada.cuerpo.donacion_id]);
 
-    const evento = eventoFirmado({ id: 'txn-2', reference: referencia, status: 'APPROVED', amount_in_cents: 2000000 });
-    evento.signature.checksum = 'falsificado';
-    const r = await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: evento });
+    simularPago('pago-2', { status: 'approved', external_reference: fila.referencia_pasarela, transaction_amount: 999 });
+    const r = await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: { type: 'payment', data: { id: 'pago-2' } } });
     assert.strictEqual(r.status, 400);
 
-    const estado = await db.get('SELECT estado FROM donacion WHERE referencia_pasarela = ?', [referencia]);
+    const estado = await db.get('SELECT estado FROM donacion WHERE referencia_pasarela = ?', [fila.referencia_pasarela]);
     assert.strictEqual(estado.estado, 'pendiente');
   });
 });
 
-test('webhook DECLINED marca la donación como fallida y no envía correo', async () => {
+test('webhook rejected marca la donación como fallida y no envía correo', async () => {
   await conServidor(async (base, db, correo) => {
     const { cookie } = await usuarioVerificado(db);
     const creada = await json(`${base}/api/donaciones`, { method: 'POST', cookie, body: { monto: 5000 } });
-    const referencia = new URL(creada.cuerpo.checkout_url).searchParams.get('reference');
+    const fila = await db.get('SELECT referencia_pasarela FROM donacion WHERE id = ?', [creada.cuerpo.donacion_id]);
 
-    await json(`${base}/api/donaciones/webhook`, {
-      method: 'POST',
-      body: eventoFirmado({ id: 'txn-3', reference: referencia, status: 'DECLINED', amount_in_cents: 500000 })
-    });
+    simularPago('pago-3', { status: 'rejected', external_reference: fila.referencia_pasarela, transaction_amount: 5000 });
+    await json(`${base}/api/donaciones/webhook`, { method: 'POST', body: { type: 'payment', data: { id: 'pago-3' } } });
 
-    const fila = await db.get('SELECT estado FROM donacion WHERE referencia_pasarela = ?', [referencia]);
-    assert.strictEqual(fila.estado, 'fallida');
+    const estado = await db.get('SELECT estado FROM donacion WHERE referencia_pasarela = ?', [fila.referencia_pasarela]);
+    assert.strictEqual(estado.estado, 'fallida');
     assert.strictEqual(correo.enviados.length, 0);
   });
 });

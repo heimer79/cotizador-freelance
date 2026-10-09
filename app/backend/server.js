@@ -152,9 +152,11 @@ async function iniciar() {
   setInterval(() => tareasPeriodicas(db, correoService).catch(() => {}), 6 * 60 * 60 * 1000);
 }
 
-iniciar().catch((err) => {
-  console.error('Error al iniciar la aplicación:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  iniciar().catch((err) => {
+    console.error('Error al iniciar la aplicación:', err);
+    process.exit(1);
+  });
+}
 
 module.exports = { crearApp };

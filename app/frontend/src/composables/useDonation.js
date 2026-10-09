@@ -1,7 +1,7 @@
 import { ref } from 'vue';
 import { donaciones } from '../api.js';
 
-// Estado y acciones de donaciones. El cobro lo hace Wompi; aquí solo se crea la intención y se lista el historial.
+// Estado y acciones de donaciones. El cobro lo hace MercadoPago; aquí solo se crea la intención y se lista el historial.
 export function useDonation() {
   const historial = ref([]);
   const total = ref(0);

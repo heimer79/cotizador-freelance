@@ -5,16 +5,17 @@ const {
   MontoDonacionError,
   crearDonacion,
   generarReferencia,
-  enlaceCheckoutWompi,
   listarDonaciones
 } = require('../services/donacion-service');
 const { aFormatoApi } = require('../models/donacion');
+const { obtener } = require('../models/configuracion-plataforma');
 
-function configuracionWompi() {
-  const publicKey = process.env.WOMPI_PUBLIC_KEY;
-  const integritySecret = process.env.WOMPI_INTEGRITY_SECRET;
-  if (!publicKey || !integritySecret) return null;
-  return { publicKey, integritySecret };
+async function obtenerAccessTokenMercadoPago() {
+  try {
+    return (await obtener('mercadopago_access_token')) || process.env.MERCADOPAGO_ACCESS_TOKEN;
+  } catch {
+    return process.env.MERCADOPAGO_ACCESS_TOKEN;
+  }
 }
 
 function crearRutasDonaciones(db) {
@@ -23,8 +24,8 @@ function crearRutasDonaciones(db) {
   router.post('/', async (req, res) => {
     const monto = req.body.monto;
 
-    const wompi = configuracionWompi();
-    if (!wompi) {
+    const accessToken = await obtenerAccessTokenMercadoPago();
+    if (!accessToken) {
       return res.status(503).json({
         error: 'La pasarela de pagos no está disponible en este momento. Intenta más tarde.'
       });
@@ -43,21 +44,33 @@ function crearRutasDonaciones(db) {
       throw error;
     }
 
-    const urlRetorno = `${process.env.APP_URL || 'http://localhost:3000'}/?donacion=${donacion.id}`;
-    const checkoutUrl = enlaceCheckoutWompi({
-      ...wompi,
-      monto: donacion.monto,
-      referencia: donacion.referencia_pasarela,
-      urlRetorno
-    });
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const urlRetorno = `${appUrl}/?donacion=${donacion.id}`;
 
-    res.status(201).json({
-      donacion_id: donacion.id,
-      monto: donacion.monto,
-      estado: donacion.estado,
-      checkout_url: checkoutUrl,
-      fecha_creacion: donacion.fecha_creacion
-    });
+    try {
+      const { MercadoPagoConfig, Preference } = require('mercadopago');
+      const mpClient = new MercadoPagoConfig({ accessToken });
+      const pref = new Preference(mpClient);
+
+      const preferencia = await pref.create({
+        body: {
+          items: [{ title: 'Donación a PresupuestosPro', quantity: 1, unit_price: donacion.monto, currency_id: 'COP' }],
+          external_reference: donacion.referencia_pasarela,
+          back_urls: { success: urlRetorno, failure: urlRetorno, pending: urlRetorno },
+          notification_url: `${appUrl}/api/donaciones/webhook`
+        }
+      });
+
+      res.status(201).json({
+        donacion_id: donacion.id,
+        monto: donacion.monto,
+        estado: donacion.estado,
+        checkout_url: preferencia.init_point,
+        fecha_creacion: donacion.fecha_creacion
+      });
+    } catch (e) {
+      res.status(503).json({ error: 'La pasarela de pagos no está disponible en este momento. Intenta más tarde.' });
+    }
   });
 
   router.get('/', async (req, res) => {
