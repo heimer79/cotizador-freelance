@@ -30,10 +30,9 @@ function descifrar(texto) {
   try {
     const [ivHex, cifradoHex] = texto.split(':');
     const clave = Buffer.from(CLAVE_CIFRADO.padEnd(32).slice(0, 32));
-    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ivHex, 'hex'), Buffer.from(ivHex, 'hex'));
     const iv = Buffer.from(ivHex, 'hex');
-    const d = crypto.createDecipheriv('aes-256-cbc', clave, iv);
-    return Buffer.concat([d.update(Buffer.from(cifradoHex, 'hex')), d.final()]).toString('utf8');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', clave, iv);
+    return Buffer.concat([decipher.update(Buffer.from(cifradoHex, 'hex')), decipher.final()]).toString('utf8');
   } catch {
     return texto;
   }
