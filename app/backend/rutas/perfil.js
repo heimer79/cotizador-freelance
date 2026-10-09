@@ -29,8 +29,11 @@ function crearRutasPerfil(db) {
     if (regimen && !REGIMENES.includes(regimen)) {
       return res.status(400).json({ error: 'El régimen tributario debe ser ordinario, simple o no responsable de IVA' });
     }
-    if (logoBase64 && !String(logoBase64).startsWith('data:image/')) {
-      return res.status(400).json({ error: 'El logo debe ser una imagen' });
+    if (logoBase64) {
+      const str = String(logoBase64);
+      if (!str.startsWith('data:image/jpeg;base64,') && !str.startsWith('data:image/png;base64,') && !str.startsWith('data:image/webp;base64,')) {
+        return res.status(400).json({ error: 'El logo debe ser una imagen JPG, PNG o WebP' });
+      }
     }
     if (tipoEmisor && !TIPOS_EMISOR.includes(tipoEmisor)) {
       return res.status(400).json({ error: 'El tipo de emisor debe ser persona_natural o persona_juridica' });

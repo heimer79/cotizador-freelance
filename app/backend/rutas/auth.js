@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const {
   NOMBRE_COOKIE,
   hashPassword,
@@ -12,6 +13,23 @@ const {
   crearMiddlewareSesion,
   passport
 } = require('../auth');
+const { cifrar, descifrar } = require('../src/models/configuracion-plataforma');
+
+const limitadorLogin = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiados intentos. Espera 15 minutos antes de intentar de nuevo.' }
+});
+
+const limitadorReset = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Demasiadas solicitudes de restablecimiento. Espera 1 hora.' }
+});
 
 const TIPOS_DOCUMENTO = ['CC', 'NIT', 'CE', 'pasaporte'];
 const EMAIL_VALIDO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -130,7 +148,7 @@ function crearRutasAuth(db, correo) {
     }
   });
 
-  router.post('/login', async (req, res) => {
+  router.post('/login', limitadorLogin, async (req, res) => {
     try {
       const { email, password } = req.body;
       const usuario = await db.get(
@@ -153,7 +171,7 @@ function crearRutasAuth(db, correo) {
         if (!totp2fa) {
           return res.status(500).json({ error: 'Configuración 2FA inválida. Contacta soporte.' });
         }
-        const totp = new TOTP({ secret: Secret.fromBase32(totp2fa.secreto_cifrado) });
+        const totp = new TOTP({ secret: Secret.fromBase32(descifrar(totp2fa.secreto_cifrado)) });
         const delta = totp.validate({ token: String(codigo2fa).replace(/\s/g, ''), window: 1 });
         if (delta === null) {
           return res.status(401).json({ requiere2fa: true, error: 'Código 2FA incorrecto o expirado' });
@@ -214,7 +232,7 @@ function crearRutasAuth(db, correo) {
     res.json({ ok: true });
   });
 
-  router.post('/olvide', async (req, res) => {
+  router.post('/olvide', limitadorReset, async (req, res) => {
     const usuario = await db.get(
       'SELECT * FROM usuarios WHERE email = ?',
       [String(req.body.email || '').trim().toLowerCase()]
@@ -320,7 +338,7 @@ function crearRutasAuth(db, correo) {
       await db.run(
         `INSERT INTO totp_2fa (usuario_id, secreto_cifrado) VALUES (?, ?)
          ON DUPLICATE KEY UPDATE secreto_cifrado = VALUES(secreto_cifrado), fecha_activacion = CURRENT_TIMESTAMP`,
-        [req.usuario.id, secretBase32]
+        [req.usuario.id, cifrar(secretBase32)]
       );
 
       res.json({ qr: qrDataUrl, secret: secretBase32 });
@@ -340,7 +358,7 @@ function crearRutasAuth(db, correo) {
       const fila = await db.get('SELECT * FROM totp_2fa WHERE usuario_id = ?', [req.usuario.id]);
       if (!fila) return res.status(400).json({ error: 'No hay 2FA pendiente de activar' });
 
-      const totp = new TOTP({ secret: Secret.fromBase32(fila.secreto_cifrado) });
+      const totp = new TOTP({ secret: Secret.fromBase32(descifrar(fila.secreto_cifrado)) });
       const delta = totp.validate({ token: String(codigo).replace(/\s/g, ''), window: 1 });
 
       if (delta === null) {

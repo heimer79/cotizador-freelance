@@ -22,7 +22,7 @@ function crearRutasCrearEnlace(db, requiereSesion, verificarPremiumMw) {
 
     if (!fs.existsSync(PDF_DIR)) fs.mkdirSync(PDF_DIR, { recursive: true });
 
-    const nombreArchivo = nombre || `cotizacion-${cotizacion.numero}.pdf`;
+    const nombreArchivo = path.basename(nombre || `cotizacion-${cotizacion.numero}.pdf`);
     const rutaRelativa = path.join('datos/pdfs-temporales', `${Date.now()}-${nombreArchivo}`);
     const rutaAbsoluta = path.join(__dirname, '../../', rutaRelativa);
 

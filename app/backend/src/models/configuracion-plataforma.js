@@ -4,6 +4,9 @@ const path = require('path');
 const { db } = require('../../db');
 
 const CLAVE_CIFRADO = process.env.CONFIG_ENCRYPTION_KEY || 'presupuestospro-default-key-32ch';
+if (!process.env.CONFIG_ENCRYPTION_KEY) {
+  console.warn('[SEGURIDAD] CONFIG_ENCRYPTION_KEY no está definida. Se usa clave por defecto — configúrala en producción.');
+}
 const RUTA_ADS_CONFIG = path.join(__dirname, '..', 'config', 'ads-config.json');
 
 // Un espacio publicitario necesita Slot ID de AdSense si lo usa directamente o como fallback (FR-008).
@@ -79,4 +82,4 @@ async function establecerSeccion(seccion, valores) {
   }
 }
 
-module.exports = { obtener, establecer, obtenerSeccion, establecerSeccion };
+module.exports = { obtener, establecer, obtenerSeccion, establecerSeccion, cifrar, descifrar };
