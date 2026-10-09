@@ -1,7 +1,22 @@
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 const { db } = require('../../db');
 
 const CLAVE_CIFRADO = process.env.CONFIG_ENCRYPTION_KEY || 'presupuestospro-default-key-32ch';
+const RUTA_ADS_CONFIG = path.join(__dirname, '..', 'config', 'ads-config.json');
+
+// Un espacio publicitario necesita Slot ID de AdSense si lo usa directamente o como fallback (FR-008).
+function clavesSlotsAdsense() {
+  try {
+    const { espacios } = JSON.parse(fs.readFileSync(RUTA_ADS_CONFIG, 'utf8'));
+    return espacios
+      .filter((espacio) => espacio.tipo === 'adsense' || espacio.fallback === 'adsense')
+      .map((espacio) => `adsense_slot__${espacio.id}`);
+  } catch {
+    return [];
+  }
+}
 
 function cifrar(texto) {
   const clave = Buffer.from(CLAVE_CIFRADO.padEnd(32).slice(0, 32));
@@ -42,7 +57,7 @@ async function establecer(clave, valor, sensible = false) {
 
 async function obtenerSeccion(seccion) {
   const prefijos = {
-    adsense: ['adsense_id'],
+    adsense: ['adsense_id', ...clavesSlotsAdsense()],
     pasarelas: ['mercadopago_enlace_donacion', 'paypal_enlace_donacion', 'mercadopago_access_token'],
     auth_social: ['google_oauth_client_id', 'google_oauth_client_secret', 'facebook_oauth_app_id', 'facebook_oauth_app_secret'],
     correo: ['gmail_client_id', 'gmail_client_secret', 'gmail_refresh_token', 'gmail_correo_remitente']
