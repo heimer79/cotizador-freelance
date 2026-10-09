@@ -144,7 +144,25 @@ async function obtenerCliente(db, clienteId, usuarioId) {
   return db.get('SELECT * FROM clientes WHERE id = ? AND usuario_id = ?', [clienteId, usuarioId]);
 }
 
-async function datosEmisor(db, usuarioId) {
+// Si se eligió un emisor adicional (no principal), sus datos vienen de la tabla `emisores`.
+// El emisor principal sigue viniendo de `perfil` (que es también la fuente de la verdad
+// para el aviso de "perfil fiscal incompleto" y conserva el campo de régimen tributario).
+async function datosEmisor(db, usuarioId, emisorId) {
+  if (emisorId) {
+    const emisor = await db.get(
+      'SELECT * FROM emisores WHERE id = ? AND usuario_id = ? AND es_principal = 0',
+      [emisorId, usuarioId]
+    );
+    if (emisor) {
+      return {
+        emisor_nombre: emisor.nombre || null,
+        emisor_documento: emisor.documento || null,
+        emisor_contacto: emisor.telefono || emisor.email || null,
+        emisor_regimen: null,
+        emisor_logo_base64: emisor.logo_base64 || null
+      };
+    }
+  }
   const perfil = (await db.get('SELECT * FROM perfil WHERE usuario_id = ?', [usuarioId])) || {};
   return {
     emisor_nombre: perfil.nombre || null,
@@ -153,6 +171,14 @@ async function datosEmisor(db, usuarioId) {
     emisor_regimen: perfil.regimen || null,
     emisor_logo_base64: perfil.logo_base64 || null
   };
+}
+
+// T073: solo cuentas premium pueden usar un emisor distinto al principal (EC-7)
+async function emisorIdPermitido(db, usuario, emisorIdCandidato) {
+  if (!emisorIdCandidato) return null;
+  if (usuario.tipoCuenta === 'premium' || usuario.rol === 'admin') return emisorIdCandidato;
+  const fila = await db.get('SELECT es_principal FROM emisores WHERE id = ? AND usuario_id = ?', [emisorIdCandidato, usuario.id]);
+  return fila && fila.es_principal ? emisorIdCandidato : null;
 }
 
 function crearRutasCotizaciones(db) {
@@ -197,7 +223,6 @@ function crearRutasCotizaciones(db) {
     if (fiscal.error) return res.status(422).json({ error: fiscal.error });
 
     const ahora = new Date();
-    const emisor = await datosEmisor(db, req.usuario.id);
 
     const limite = req.usuario.rol === 'admin' ? null : (LIMITE_COTIZACIONES[req.usuario.tipoCuenta] ?? LIMITE_COTIZACIONES.gratuita);
     if (limite !== null) {
@@ -214,12 +239,8 @@ function crearRutasCotizaciones(db) {
     const reteica = req.body.reteica || {};
     const plantillaPdf = req.body.plantillaPdf || 'profesional';
     const coloresPdf = req.body.coloresPdf ? JSON.stringify(req.body.coloresPdf) : null;
-    let emisorId = req.body.emisorId || null;
-    // T073: non-premium users can only use their principal emitter (EC-7)
-    if (emisorId && req.usuario.tipoCuenta !== 'premium' && req.usuario.rol !== 'admin') {
-      const emisorFila = await db.get('SELECT es_principal FROM emisores WHERE id = ? AND usuario_id = ?', [emisorId, req.usuario.id]);
-      if (!emisorFila || !emisorFila.es_principal) emisorId = null;
-    }
+    const emisorId = await emisorIdPermitido(db, req.usuario, req.body.emisorId || null);
+    const emisor = await datosEmisor(db, req.usuario.id, emisorId);
 
     const cotizacionId = await db.transaction(async (tx) => {
       const numero = await siguienteNumero(tx, req.usuario.id, ahora);
@@ -293,12 +314,14 @@ function crearRutasCotizaciones(db) {
     );
     if (fiscal.error) return res.status(422).json({ error: fiscal.error });
 
-    const emisor = await datosEmisor(db, req.usuario.id);
     const reteivaPut = req.body.reteiva || {};
     const reteicaPut = req.body.reteica || {};
     const plantillaPdfPut = req.body.plantillaPdf !== undefined ? req.body.plantillaPdf : (fila.plantilla_pdf || 'profesional');
     const coloresPdfPut = req.body.coloresPdf !== undefined ? JSON.stringify(req.body.coloresPdf) : fila.colores_pdf;
-    const emisorIdPut = req.body.emisorId !== undefined ? req.body.emisorId : fila.emisor_id;
+    const emisorIdPut = req.body.emisorId !== undefined
+      ? await emisorIdPermitido(db, req.usuario, req.body.emisorId)
+      : fila.emisor_id;
+    const emisor = await datosEmisor(db, req.usuario.id, emisorIdPut);
 
     await db.run(
       `UPDATE cotizaciones SET

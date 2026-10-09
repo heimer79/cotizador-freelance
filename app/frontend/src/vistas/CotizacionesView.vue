@@ -2,7 +2,7 @@
 import { ref, computed, inject, onMounted, watch } from 'vue';
 import { calcularTotales } from '../calculo.js';
 import { cotizaciones as apiCotizaciones, clientes as apiClientes, catalogo as apiCatalogo, perfil as apiPerfil, compartir as apiCompartir } from '../api.js';
-import { generarPdf, generarPdfBase64, previsualizarPdf } from '../pdf.js';
+import { generarPdf, generarPdfBase64, generarPdfArchivo, previsualizarPdf } from '../pdf.js';
 import DirectAdSlot from '../components/ads/DirectAdSlot.vue';
 import ClienteSelector from '../components/ClienteSelector.vue';
 import NuevoClienteForm from '../components/NuevoClienteForm.vue';
@@ -20,6 +20,7 @@ const props = defineProps({
 const requireLogin = inject('requireLogin');
 const toast = inject('toast', null);
 const isPremium = inject('isPremium', ref(false));
+const cambiarVista = inject('cambiarVista', null);
 const compartiendoWhatsapp = ref(false);
 const guardando = ref(false);
 
@@ -222,6 +223,7 @@ function eliminarLineaLocal(id) {
 
 function cargarFiscal(cot) {
   clienteId.value = cot.cliente.id;
+  emisorId.value = cot.emisor?.id || null;
   ivaTarifa.value = cot.ivaTarifa || 19;
   ivaResponsable.value = cot.ivaResponsable !== undefined ? cot.ivaResponsable : true;
   retencionActiva.value = cot.retencion ? cot.retencion.activada : false;
@@ -317,6 +319,7 @@ async function guardarFiscal() {
   try {
     const cot = await apiCotizaciones.actualizar(actual.value.id, {
       clienteId: Number(clienteId.value),
+      emisorId: emisorId.value || null,
       ivaTarifa: ivaTarifa.value,
       ivaResponsable: ivaResponsable.value,
       retencion: { activada: retencionActiva.value, concepto: retencionConcepto.value, porcentaje: Number(retencionPorcentaje.value) },
@@ -326,11 +329,23 @@ async function guardarFiscal() {
     });
     actual.value = cot;
     lineasActuales.value = cot.lineas || [];
+    emisorId.value = cot.emisor?.id || null;
     aviso.value = 'Cambios guardados.';
   } catch (e) {
     error.value = e.message;
     if (actual.value) cargarFiscal(actual.value);
   }
+}
+
+// Se dispara al elegir otro emisor o al guardar la edición de sus datos desde el propio
+// editor de la cotización: persiste de inmediato para que el PDF/WhatsApp usen los datos correctos.
+async function onEmisorActualizado(emisor) {
+  if (!actual.value || !borrador.value) return;
+  emisorId.value = emisor ? emisor.id : emisorId.value;
+  await guardarFiscal();
+  // Si se editó el emisor principal, refresca el perfil local para que el aviso de
+  // "perfil fiscal incompleto" se actualice sin necesidad de recargar la página.
+  try { perfil.value = await apiPerfil.obtener(); } catch { /* silencioso */ }
 }
 
 function elegirServicio() {
@@ -401,6 +416,7 @@ async function guardarLinea() {
     actual.value = lineaEditandoId.value
       ? await apiCotizaciones.actualizarLinea(actual.value.id, lineaEditandoId.value, datos)
       : await apiCotizaciones.crearLinea(actual.value.id, datos);
+    lineasActuales.value = actual.value.lineas || [];
     limpiarLinea();
   } catch (e) {
     error.value = e.message;
@@ -412,6 +428,7 @@ async function eliminarLinea(linea) {
   try {
     await apiCotizaciones.eliminarLinea(actual.value.id, linea.id);
     actual.value = await apiCotizaciones.obtener(actual.value.id);
+    lineasActuales.value = actual.value.lineas || [];
   } catch (e) {
     error.value = e.message;
   }
@@ -556,21 +573,34 @@ function compartirWhatsapp() {
     compartiendoWhatsapp.value = true;
     try {
       const cot = await guardarEnBackend();
-      const pdfBase64 = generarPdfBase64(cot, perfil.value, { plantilla: plantillaPdf.value, colores: coloresPdf.value });
-      const { url } = await apiCompartir.crearEnlace({
-        pdfBase64,
-        cotizacionId: cot.id,
-        nombre: `cotizacion-${cot.numero}.pdf`
-      });
-      const texto = `Hola, te comparto la cotización Nro. ${cot.numero}: ${url}`;
-      // T047: Web Share API con fallback a wa.me (FR-032)
-      if (navigator.share) {
-        await navigator.share({ title: `Cotización ${cot.numero}`, text: texto, url });
+      const opcionesPdf = { plantilla: plantillaPdf.value, colores: coloresPdf.value };
+
+      // FR-030: intentar compartir el PDF como archivo adjunto (Web Share API Level 2).
+      // Si el navegador no soporta compartir archivos (p. ej. escritorio sin esa capacidad),
+      // navigator.share igual existiría pero abriría el selector genérico del sistema SIN el
+      // PDF adjunto, que es justo el comportamiento confuso que se quiere evitar aquí.
+      const archivo = generarPdfArchivo(cot, perfil.value, opcionesPdf);
+      const puedeCompartirArchivo = !!(navigator.canShare && navigator.share && navigator.canShare({ files: [archivo] }));
+
+      if (puedeCompartirArchivo) {
+        await navigator.share({
+          title: `Cotización ${cot.numero}`,
+          text: `Hola, te comparto la cotización Nro. ${cot.numero}.`,
+          files: [archivo]
+        });
       } else {
+        // FR-031: fallback a enlace wa.me con URL de descarga temporal del PDF.
+        const pdfBase64 = generarPdfBase64(cot, perfil.value, opcionesPdf);
+        const { url } = await apiCompartir.crearEnlace({
+          pdfBase64,
+          cotizacionId: cot.id,
+          nombre: `cotizacion-${cot.numero}.pdf`
+        });
+        const texto = `Hola, te comparto la cotización Nro. ${cot.numero}: ${url}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank', 'noopener');
       }
     } catch (e) {
-      error.value = e.message;
+      if (e?.name !== 'AbortError') error.value = e.message;
     } finally {
       compartiendoWhatsapp.value = false;
     }
@@ -1002,14 +1032,29 @@ watch(() => props.modo, (nuevoModo) => {
       </div>
 
       <p v-if="actual.estado === 'emitida'" class="nota">Cotización emitida: solo lectura.</p>
-      <aside v-if="perfilIncompleto" class="aviso-verificacion">
-        Tu perfil fiscal está incompleto (nombre, NIT o régimen). Puedes seguir, pero el PDF saldrá con datos fiscales incompletos.
+      <aside v-if="perfilIncompleto" class="aviso-verificacion" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap">
+        <span>Tu perfil fiscal está incompleto (nombre, NIT o régimen). Puedes seguir, pero el PDF saldrá con datos fiscales incompletos.</span>
+        <button v-if="cambiarVista" class="btn btn-secondary btn-sm" type="button" @click="cambiarVista('perfil')">Completar perfil fiscal</button>
       </aside>
       <p v-if="error" class="error" role="alert">{{ error }}</p>
       <p v-if="aviso" class="exito" role="status">{{ aviso }}</p>
 
       <div class="workspace-split">
         <div class="workspace-col">
+          <fieldset :disabled="!borrador" class="card" style="border: 1px solid var(--color-borde-light); padding: 0">
+            <div class="card-header">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="#6B7280" stroke-width="1.4"/><path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#6B7280" stroke-width="1.4" stroke-linecap="round"/></svg>
+              Emisor
+            </div>
+            <div class="card-body">
+              <EmisorSelector
+                v-model="emisorId"
+                :tipo-cuenta="isPremium ? 'premium' : 'gratuita'"
+                @change="onEmisorActualizado"
+              />
+            </div>
+          </fieldset>
+
           <fieldset :disabled="!borrador" class="card" style="border: 1px solid var(--color-borde-light); padding: 0">
             <div class="card-header">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="12" rx="2.5" stroke="#6B7280" stroke-width="1.4"/><path d="M5.5 6.5h5M5.5 9h3" stroke="#6B7280" stroke-width="1.4" stroke-linecap="round"/></svg>

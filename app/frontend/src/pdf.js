@@ -333,6 +333,12 @@ export function generarPdfBase64(cotizacion, perfil = {}, opciones = {}) {
   return construirDoc(cotizacion, perfil, opciones).output('datauristring');
 }
 
+// Para Web Share API (navigator.share con files): requiere un File/Blob real, no un data URI.
+export function generarPdfArchivo(cotizacion, perfil = {}, opciones = {}) {
+  const blob = construirDoc(cotizacion, perfil, opciones).output('blob');
+  return new File([blob], `cotizacion-${cotizacion.numero}.pdf`, { type: 'application/pdf' });
+}
+
 export function previsualizarPdf(cotizacion, perfil = {}, opciones = {}) {
   const url = construirDoc(cotizacion, perfil, opciones).output('bloburl');
   window.open(url, '_blank', 'noopener');

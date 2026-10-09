@@ -34,6 +34,7 @@ const { estado: consentimientoAds } = useCookieConsent();
 provide('cookieConsent', consentimientoAds);
 provide('toast', toast);
 provide('isPremium', isPremium);
+provide('cambiarVista', cambiarVista);
 
 const params = new URLSearchParams(window.location.search);
 const tokenVerificar = params.get('verificar');
