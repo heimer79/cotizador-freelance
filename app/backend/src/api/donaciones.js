@@ -69,6 +69,13 @@ function crearRutasDonaciones(db) {
         fecha_creacion: donacion.fecha_creacion
       });
     } catch (e) {
+      console.error('Error creando preferencia de MercadoPago:', {
+        status: e.status,
+        error: e.error,
+        message: e.message,
+        causes: e.causes
+      });
+      await db.run(`UPDATE donacion SET estado = 'fallida' WHERE id = ?`, [donacion.id]).catch(() => {});
       res.status(503).json({ error: 'La pasarela de pagos no está disponible en este momento. Intenta más tarde.' });
     }
   });
