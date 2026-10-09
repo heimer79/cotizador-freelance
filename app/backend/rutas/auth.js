@@ -297,18 +297,6 @@ function crearRutasAuth(db, correo) {
     }
   );
 
-  router.get('/facebook', passport.authenticate('facebook', { scope: ['email'], session: false }));
-
-  router.get('/facebook/callback',
-    passport.authenticate('facebook', { session: false, failureRedirect: '/login?error=facebook_failed' }),
-    async (req, res) => {
-      if (!req.user) return res.redirect('/login?error=facebook_failed');
-      const token = await crearSesion(db, req.user.id);
-      emitirCookieSesion(res, token);
-      res.redirect('/');
-    }
-  );
-
   // ── T053-T057: 2FA endpoints (FR-037, FR-038, FR-039, FR-040) ──
 
   // T053: Iniciar activación TOTP — genera secreto y QR

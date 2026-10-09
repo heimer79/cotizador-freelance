@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue';
 import { admin } from '../../api.js';
 
-const config = ref({ google_oauth_client_id: '', google_oauth_client_secret: '', facebook_oauth_app_id: '', facebook_oauth_app_secret: '' });
+const config = ref({ google_oauth_client_id: '', google_oauth_client_secret: '' });
 const guardado = ref('');
 const error = ref('');
 const cargando = ref(true);
@@ -43,15 +43,6 @@ onMounted(cargar);
           <div>
             <label class="field-label">Client Secret de Google <small style="color:var(--color-texto-secundario)">[sensible]</small></label>
             <input v-model="config.google_oauth_client_secret" type="password" placeholder="GOCSPX-...">
-          </div>
-          <h4 style="margin: 12px 0 0">Facebook OAuth</h4>
-          <div>
-            <label class="field-label">App ID de Facebook</label>
-            <input v-model="config.facebook_oauth_app_id" placeholder="123456789012345">
-          </div>
-          <div>
-            <label class="field-label">App Secret de Facebook <small style="color:var(--color-texto-secundario)">[sensible]</small></label>
-            <input v-model="config.facebook_oauth_app_secret" type="password" placeholder="...">
           </div>
           <button class="btn btn-primary" type="submit">Guardar</button>
         </form>

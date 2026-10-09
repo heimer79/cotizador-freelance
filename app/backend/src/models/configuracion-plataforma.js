@@ -58,7 +58,7 @@ async function obtenerSeccion(seccion) {
   const prefijos = {
     adsense: ['adsense_id', ...clavesSlotsAdsense()],
     pasarelas: ['mercadopago_enlace_donacion', 'paypal_enlace_donacion', 'mercadopago_access_token'],
-    auth_social: ['google_oauth_client_id', 'google_oauth_client_secret', 'facebook_oauth_app_id', 'facebook_oauth_app_secret'],
+    auth_social: ['google_oauth_client_id', 'google_oauth_client_secret'],
     correo: ['gmail_client_id', 'gmail_client_secret', 'gmail_refresh_token', 'gmail_correo_remitente']
   };
   const claves = prefijos[seccion] || [];
@@ -72,7 +72,7 @@ async function obtenerSeccion(seccion) {
 async function establecerSeccion(seccion, valores) {
   const sensibles = new Set([
     'mercadopago_access_token', 'google_oauth_client_secret',
-    'facebook_oauth_app_secret', 'gmail_client_secret', 'gmail_refresh_token'
+    'gmail_client_secret', 'gmail_refresh_token'
   ]);
   for (const [clave, valor] of Object.entries(valores)) {
     await establecer(clave, valor, sensibles.has(clave));

@@ -140,7 +140,7 @@ onMounted(async () => {
   }
 
   if (errorAuth) {
-    const mensajes = { google_failed: 'No se pudo iniciar sesión con Google.', facebook_failed: 'No se pudo iniciar sesión con Facebook.' };
+    const mensajes = { google_failed: 'No se pudo iniciar sesión con Google.' };
     mensaje.value = mensajes[errorAuth] || 'Error al iniciar sesión.';
     window.history.replaceState({}, '', window.location.pathname);
   }

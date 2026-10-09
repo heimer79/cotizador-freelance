@@ -33,10 +33,6 @@ function loginGoogle() {
   window.location.href = '/api/auth/google';
 }
 
-function loginFacebook() {
-  window.location.href = '/api/auth/facebook';
-}
-
 function setUsuario(u) {
   usuario.value = u;
 }
@@ -52,7 +48,6 @@ export function useAuth() {
     login,
     logout,
     loginGoogle,
-    loginFacebook,
     setUsuario
   };
 }

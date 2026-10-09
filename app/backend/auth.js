@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
 
 const NOMBRE_COOKIE = 'sesion';
 const DURACION_SESION_MS = 30 * 24 * 60 * 60 * 1000;
@@ -190,25 +189,6 @@ async function configurarPassport(db) {
         const email = profile.emails?.[0]?.value;
         if (!email) return done(null, false);
         await manejarOAuth('google', profile.id, email, profile.displayName || email, done);
-      }
-    ));
-  }
-
-  const fbAppId = await obtenerCredencialOAuth(db, 'FACEBOOK_OAUTH_APP_ID', 'facebook_oauth_app_id');
-  const fbSecret = await obtenerCredencialOAuth(db, 'FACEBOOK_OAUTH_APP_SECRET', 'facebook_oauth_app_secret');
-
-  if (fbAppId && fbSecret) {
-    passport.use(new FacebookStrategy(
-      {
-        clientID: fbAppId,
-        clientSecret: fbSecret,
-        callbackURL: `${process.env.APP_URL || 'http://localhost:3000'}/api/auth/facebook/callback`,
-        profileFields: ['id', 'displayName', 'emails']
-      },
-      async (accessToken, refreshToken, profile, done) => {
-        const email = profile.emails?.[0]?.value;
-        if (!email) return done(null, false);
-        await manejarOAuth('facebook', profile.id, email, profile.displayName || email, done);
       }
     ));
   }

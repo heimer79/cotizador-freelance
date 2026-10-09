@@ -151,9 +151,6 @@ function cerrarOverlay(e) {
           <a href="/api/auth/google" class="btn btn-secondary" style="flex:1; text-align:center; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px">
             <span>G</span> Google
           </a>
-          <a href="/api/auth/facebook" class="btn btn-secondary" style="flex:1; text-align:center; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px">
-            <span>f</span> Facebook
-          </a>
         </div>
       </div>
 
