@@ -52,6 +52,7 @@ function datosPublicos(fila, proveedores = []) {
     rol: fila.rol || 'normal',
     tipoCuenta: fila.tipo_cuenta || 'gratuita',
     estado: fila.estado || 'activo',
+    totpActivo: !!fila.totp_activo,
     proveedores
   };
 }
@@ -139,6 +140,24 @@ function crearRutasAuth(db, correo) {
 
       if (!usuario || typeof password !== 'string' || !verificarPassword(password, usuario.password_hash)) {
         return res.status(401).json({ error: 'Correo o contraseña incorrectos' });
+      }
+
+      // T057: Si el usuario tiene 2FA activo, exigir código TOTP antes de emitir sesión (FR-040)
+      if (usuario.totp_activo) {
+        const { codigo2fa } = req.body;
+        if (!codigo2fa) {
+          return res.status(403).json({ requiere2fa: true, error: 'Se requiere el código de verificación 2FA' });
+        }
+        const { TOTP, Secret } = require('otpauth');
+        const totp2fa = await db.get('SELECT * FROM totp_2fa WHERE usuario_id = ?', [usuario.id]);
+        if (!totp2fa) {
+          return res.status(500).json({ error: 'Configuración 2FA inválida. Contacta soporte.' });
+        }
+        const totp = new TOTP({ secret: Secret.fromBase32(totp2fa.secreto_cifrado) });
+        const delta = totp.validate({ token: String(codigo2fa).replace(/\s/g, ''), window: 1 });
+        if (delta === null) {
+          return res.status(401).json({ requiere2fa: true, error: 'Código 2FA incorrecto o expirado' });
+        }
       }
 
       emitirCookieSesion(res, await crearSesion(db, usuario.id));
@@ -289,6 +308,113 @@ function crearRutasAuth(db, correo) {
       res.redirect('/');
     }
   );
+
+  // ── T053-T057: 2FA endpoints (FR-037, FR-038, FR-039, FR-040) ──
+
+  // T053: Iniciar activación TOTP — genera secreto y QR
+  router.post('/2fa/activar', requiereSesion, async (req, res) => {
+    try {
+      const { TOTP, Secret } = require('otpauth');
+      const qrcode = require('qrcode');
+
+      const usuario = await db.get('SELECT * FROM usuarios WHERE id = ?', [req.usuario.id]);
+      if (usuario.totp_activo) {
+        return res.status(400).json({ error: '2FA ya está activado. Desactívalo primero.' });
+      }
+
+      const secretObj = new Secret();
+      const secretBase32 = secretObj.base32;
+
+      const totp = new TOTP({ issuer: 'PresupuestosPro', label: usuario.email, secret: secretObj });
+      const otpUri = totp.toString();
+      const qrDataUrl = await qrcode.toDataURL(otpUri);
+
+      await db.run(
+        `INSERT INTO totp_2fa (usuario_id, secreto_cifrado) VALUES (?, ?)
+         ON DUPLICATE KEY UPDATE secreto_cifrado = VALUES(secreto_cifrado), fecha_activacion = CURRENT_TIMESTAMP`,
+        [req.usuario.id, secretBase32]
+      );
+
+      res.json({ qr: qrDataUrl, secret: secretBase32 });
+    } catch (e) {
+      console.error('[auth] POST /2fa/activar:', e);
+      res.status(500).json({ error: 'Error al iniciar activación 2FA' });
+    }
+  });
+
+  // T054: Verificar y confirmar TOTP
+  router.post('/2fa/verificar', requiereSesion, async (req, res) => {
+    try {
+      const { TOTP, Secret } = require('otpauth');
+      const { codigo } = req.body;
+      if (!codigo) return res.status(400).json({ error: 'El código es obligatorio' });
+
+      const fila = await db.get('SELECT * FROM totp_2fa WHERE usuario_id = ?', [req.usuario.id]);
+      if (!fila) return res.status(400).json({ error: 'No hay 2FA pendiente de activar' });
+
+      const totp = new TOTP({ secret: Secret.fromBase32(fila.secreto_cifrado) });
+      const delta = totp.validate({ token: String(codigo).replace(/\s/g, ''), window: 1 });
+
+      if (delta === null) {
+        return res.status(400).json({ error: 'Código incorrecto o expirado' });
+      }
+
+      // Generar códigos de recuperación
+      const crypto = require('crypto');
+      const codigos = Array.from({ length: 8 }, () => crypto.randomBytes(5).toString('hex'));
+
+      await db.run('UPDATE usuarios SET totp_activo = 1 WHERE id = ?', [req.usuario.id]);
+      await db.run('DELETE FROM codigos_recuperacion WHERE usuario_id = ?', [req.usuario.id]);
+      for (const c of codigos) {
+        const hash = require('crypto').createHash('sha256').update(c).digest('hex');
+        await db.run('INSERT INTO codigos_recuperacion (usuario_id, codigo_hash) VALUES (?, ?)', [req.usuario.id, hash]);
+      }
+
+      res.json({ ok: true, codigos });
+    } catch (e) {
+      console.error('[auth] POST /2fa/verificar:', e);
+      res.status(500).json({ error: 'Error al verificar 2FA' });
+    }
+  });
+
+  // T055: Recuperar acceso con código de recuperación
+  router.post('/2fa/recuperar', async (req, res) => {
+    try {
+      const { email, password, codigo } = req.body;
+      if (!email || !password || !codigo) return res.status(400).json({ error: 'Faltan datos' });
+
+      const usuario = await db.get('SELECT * FROM usuarios WHERE email = ?', [String(email).trim().toLowerCase()]);
+      const { verificarPassword } = require('../auth');
+      if (!usuario || !verificarPassword(password, usuario.password_hash)) {
+        return res.status(401).json({ error: 'Credenciales incorrectas' });
+      }
+
+      const codigoHash = require('crypto').createHash('sha256').update(String(codigo).trim().toLowerCase()).digest('hex');
+      const fila = await db.get(
+        'SELECT * FROM codigos_recuperacion WHERE usuario_id = ? AND codigo_hash = ? AND usado = 0',
+        [usuario.id, codigoHash]
+      );
+      if (!fila) return res.status(401).json({ error: 'Código de recuperación inválido o ya usado' });
+
+      await db.run('UPDATE codigos_recuperacion SET usado = 1 WHERE id = ?', [fila.id]);
+      emitirCookieSesion(res, await crearSesion(db, usuario.id));
+      res.json({ usuario: datosPublicos(usuario) });
+    } catch (e) {
+      res.status(500).json({ error: 'Error en recuperación 2FA' });
+    }
+  });
+
+  // T056: Desactivar 2FA
+  router.delete('/2fa', requiereSesion, async (req, res) => {
+    try {
+      await db.run('DELETE FROM totp_2fa WHERE usuario_id = ?', [req.usuario.id]);
+      await db.run('UPDATE usuarios SET totp_activo = 0 WHERE id = ?', [req.usuario.id]);
+      await db.run('DELETE FROM codigos_recuperacion WHERE usuario_id = ?', [req.usuario.id]);
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: 'Error al desactivar 2FA' });
+    }
+  });
 
   return router;
 }

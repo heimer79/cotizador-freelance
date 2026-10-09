@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, inject } from 'vue';
+import { ref, onMounted, inject, computed } from 'vue';
 import { perfil as apiPerfil, auth as apiAuth, suscripcion as apiSuscripcion } from '../api.js';
 import { useAuth } from '../composables/useAuth.js';
 import { useCookieConsent } from '../composables/useCookieConsent.js';
@@ -7,6 +7,7 @@ import DonationButton from '../components/donations/DonationButton.vue';
 import DonationForm from '../components/donations/DonationForm.vue';
 import DonationHistory from '../components/donations/DonationHistory.vue';
 import DirectAdSlot from '../components/ads/DirectAdSlot.vue';
+import Configuracion2FA from '../components/Configuracion2FA.vue';
 
 const REGIMENES = [
   { valor: 'ordinario', etiqueta: 'Régimen ordinario' },
@@ -124,16 +125,78 @@ async function cargarActividad() {
   } catch { /* silencioso */ }
 }
 
+// T037: Gestión de emisores (FR-019)
+const emisores = ref([]);
+const emisorError = ref('');
+const emisorAviso = ref('');
+const mostrarFormEmisor = ref(false);
+const emisorEditando = ref(null);
+const formEmisor = ref({ nombre: '', documento: '', email: '', telefono: '' });
+
+const esPremium = computed(() => usuario.value?.tipoCuenta === 'premium' || usuario.value?.rol === 'admin');
+
+async function cargarEmisores() {
+  if (!esPremium.value) return;
+  try {
+    emisores.value = await apiPerfil.emisores();
+  } catch { /* silencioso */ }
+}
+
+function nuevoEmisor() {
+  emisorEditando.value = null;
+  formEmisor.value = { nombre: '', documento: '', email: '', telefono: '' };
+  mostrarFormEmisor.value = true;
+}
+
+function editarEmisor(e) {
+  emisorEditando.value = e;
+  formEmisor.value = { nombre: e.nombre, documento: e.documento, email: e.email, telefono: e.telefono };
+  mostrarFormEmisor.value = true;
+}
+
+async function guardarEmisor() {
+  emisorError.value = '';
+  try {
+    if (emisorEditando.value) {
+      const actualizado = await apiPerfil.actualizarEmisor(emisorEditando.value.id, formEmisor.value);
+      const idx = emisores.value.findIndex(e => e.id === actualizado.id);
+      if (idx >= 0) emisores.value[idx] = actualizado;
+    } else {
+      const creado = await apiPerfil.crearEmisor(formEmisor.value);
+      emisores.value.push(creado);
+    }
+    mostrarFormEmisor.value = false;
+    emisorAviso.value = 'Emisor guardado.';
+  } catch (e) {
+    emisorError.value = e.message;
+  }
+}
+
+async function eliminarEmisor(e) {
+  if (!confirm(`¿Eliminar el emisor "${e.nombre}"?`)) return;
+  emisorError.value = '';
+  try {
+    await apiPerfil.eliminarEmisor(e.id);
+    emisores.value = emisores.value.filter(x => x.id !== e.id);
+  } catch (err) {
+    emisorError.value = err.message;
+  }
+}
+
 onMounted(async () => {
   await cargar();
-  await Promise.all([cargarSuscripcion(), cargarActividad()]);
+  await Promise.all([cargarSuscripcion(), cargarActividad(), cargarEmisores()]);
 });
 </script>
 
 <template>
-  <section class="page-container">
-    <div class="cabecera-seccion">
-      <h2>Perfil profesional</h2>
+  <section class="page-container page-container--wide">
+    <div class="page-header">
+      <div>
+        <p class="page-eyebrow">Tu cuenta</p>
+        <h2>Perfil profesional</h2>
+        <p class="page-header__sub">Datos fiscales, seguridad y preferencias de tu cuenta.</p>
+      </div>
     </div>
 
     <DirectAdSlot espacio-id="adsense-perfil" />
@@ -182,6 +245,24 @@ onMounted(async () => {
 
       <!-- Configuración y donaciones -->
       <div style="display: flex; flex-direction: column; gap: 16px">
+        <!-- Datos de la cuenta -->
+        <div v-if="usuario" class="card">
+          <div class="card-header">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="#6B7280" stroke-width="1.4"/><path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#6B7280" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Datos de la cuenta
+          </div>
+          <div class="card-body" style="display: flex; flex-direction: column; gap: 6px">
+            <p style="margin: 0"><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+            <p style="margin: 0">
+              <strong>Correo:</strong> {{ usuario.email }}
+              <span v-if="usuario.verificado" class="badge gratis" style="margin-left: 6px; font-size: 0.7rem">verificado</span>
+              <span v-else class="badge" style="margin-left: 6px; font-size: 0.7rem">sin verificar</span>
+            </p>
+            <p style="margin: 0"><strong>Tipo de cuenta:</strong> {{ usuario.tipoCuenta === 'premium' ? 'Premium' : 'Gratuita' }}</p>
+            <p v-if="proveedores.length" style="margin: 0"><strong>Inicio de sesión:</strong> {{ proveedores.join(', ') }}</p>
+          </div>
+        </div>
+
         <!-- Privacidad -->
         <div class="card">
           <div class="card-header">
@@ -218,7 +299,10 @@ onMounted(async () => {
 
     <!-- Establecer contraseña para usuarios solo-social -->
     <div v-if="usuario && !proveedores.includes('email')" class="card" style="margin-bottom: 16px">
-      <div class="card-header">🔑 Establecer contraseña</div>
+      <div class="card-header">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="5.5" cy="5.5" r="3" stroke="#6B7280" stroke-width="1.4"/><path d="M7.8 7.8L14 14M11.5 10.5L13.5 12.5" stroke="#6B7280" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Establecer contraseña
+      </div>
       <div class="card-body">
         <p class="nota">Tu cuenta usa solo inicio de sesión social. Puedes establecer una contraseña para también iniciar sesión con correo.</p>
         <p v-if="passwordError" class="error" role="alert">{{ passwordError }}</p>
@@ -230,9 +314,23 @@ onMounted(async () => {
       </div>
     </div>
 
+    <!-- T058: Configuración 2FA (FR-037) -->
+    <div v-if="usuario" class="card" style="margin-bottom: 16px">
+      <div class="card-header">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l5.5 2.5v3c0 3.5-2.3 6.3-5.5 7.5-3.2-1.2-5.5-4-5.5-7.5V4l5.5-2.5z" stroke="#6B7280" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Seguridad de la cuenta
+      </div>
+      <div class="card-body">
+        <Configuracion2FA :totp-activo="!!(usuario && usuario.totpActivo)" @change="(v) => { if (usuario) usuario.totpActivo = v }" />
+      </div>
+    </div>
+
     <!-- Suscripción premium -->
     <div v-if="usuario && usuario.tipoCuenta === 'premium' && estadoSuscripcion" class="card" style="margin-bottom: 16px">
-      <div class="card-header">⭐ Mi suscripción premium</div>
+      <div class="card-header">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.9 3.85 4.25.62-3.08 3 .73 4.23L8 11.2l-3.8 2 .73-4.23-3.08-3 4.25-.62L8 1.5z" stroke="#6B7280" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        Mi suscripción premium
+      </div>
       <div class="card-body">
         <p><strong>Estado:</strong> {{ estadoSuscripcion.estado }}</p>
         <p v-if="estadoSuscripcion.fecha_vencimiento"><strong>Vence:</strong> {{ new Date(estadoSuscripcion.fecha_vencimiento).toLocaleDateString('es-CO') }}</p>
@@ -258,7 +356,10 @@ onMounted(async () => {
 
     <!-- CTA para usuarios sin suscripción premium -->
     <div v-else-if="usuario && usuario.tipoCuenta !== 'premium'" class="card" style="margin-bottom: 16px; border: 2px solid var(--color-primario, #2563eb)">
-      <div class="card-header" style="color: var(--color-primario, #2563eb)">⭐ Pásate a Premium</div>
+      <div class="card-header" style="color: var(--color-primario, #2563eb)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1.5l1.9 3.85 4.25.62-3.08 3 .73 4.23L8 11.2l-3.8 2 .73-4.23-3.08-3 4.25-.62L8 1.5z" stroke="var(--color-primario, #2563eb)" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        Pásate a Premium
+      </div>
       <div class="card-body">
         <p>Obtén cotizaciones ilimitadas, clientes ilimitados, grupos y más por <strong>$20 USD al año</strong>.</p>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
@@ -266,6 +367,61 @@ onMounted(async () => {
             {{ iniciandoPago ? 'Redirigiendo…' : 'Suscribirse por $20 USD/año' }}
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- T037: Emisores adicionales (solo premium, FR-019) -->
+    <div v-if="esPremium" class="card" style="margin-bottom: 16px">
+      <div class="card-header" style="justify-content: space-between">
+        <span>Emisores adicionales</span>
+        <button class="btn btn-primary btn-sm" @click="nuevoEmisor" :disabled="emisores.length >= 5">+ Nuevo emisor</button>
+      </div>
+      <div class="card-body">
+        <p class="nota">Puedes tener hasta 5 emisores. El principal se toma de tu perfil fiscal.</p>
+        <p v-if="emisorError" class="error" role="alert">{{ emisorError }}</p>
+        <p v-if="emisorAviso" class="exito" role="status">{{ emisorAviso }}</p>
+
+        <div v-if="mostrarFormEmisor" class="formulario" style="margin: 12px 0; padding: 12px; border: 1px solid var(--color-borde); border-radius: 8px; display:flex; flex-direction:column; gap:8px">
+          <div class="fila-doble">
+            <div>
+              <label class="field-label">Nombre *</label>
+              <input v-model="formEmisor.nombre" placeholder="Razón social o nombre" required>
+            </div>
+            <div>
+              <label class="field-label">NIT / Documento</label>
+              <input v-model="formEmisor.documento" placeholder="NIT o cédula">
+            </div>
+          </div>
+          <div class="fila-doble">
+            <div>
+              <label class="field-label">Correo</label>
+              <input v-model="formEmisor.email" type="email" placeholder="correo@empresa.com">
+            </div>
+            <div>
+              <label class="field-label">Teléfono</label>
+              <input v-model="formEmisor.telefono" type="tel" placeholder="+57 310 000 0000">
+            </div>
+          </div>
+          <div style="display:flex; gap:8px">
+            <button class="btn btn-primary btn-sm" type="button" @click="guardarEmisor">Guardar</button>
+            <button class="btn btn-secondary btn-sm" type="button" @click="mostrarFormEmisor = false">Cancelar</button>
+          </div>
+        </div>
+
+        <ul v-if="emisores.length" style="margin:8px 0 0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px">
+          <li v-for="e in emisores" :key="e.id" style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding:8px; background:#f9fafb; border-radius:6px">
+            <div>
+              <strong>{{ e.nombre }}</strong>
+              <span v-if="e.esPrincipal" class="badge gratis" style="margin-left:6px; font-size:0.7rem">principal</span>
+              <span v-if="e.documento" class="nota" style="display:block; font-size:0.78rem">{{ e.documento }}</span>
+            </div>
+            <div style="display:flex; gap:6px">
+              <button class="btn btn-secondary btn-sm" @click="editarEmisor(e)">Editar</button>
+              <button v-if="!e.esPrincipal" class="btn btn-danger btn-sm" @click="eliminarEmisor(e)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+        <p v-else-if="!mostrarFormEmisor" class="nota" style="margin-top:8px">Aún no tienes emisores adicionales.</p>
       </div>
     </div>
 

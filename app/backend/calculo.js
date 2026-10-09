@@ -1,4 +1,4 @@
-const TARIFAS_IVA = [19, 5, 0];
+const TARIFAS_IVA = [0, 5, 19];
 
 // Porcentajes de retención en la fuente por concepto (FR-029).
 const CONCEPTOS_RETENCION = {
@@ -51,11 +51,82 @@ function calcularCotizacion({ lineas, ivaTarifa, retencionActivada, retencionPor
   };
 }
 
+/**
+ * Calcula todos los impuestos colombianos sobre una cotización.
+ * Fuente de verdad única para backend y frontend (T010).
+ *
+ * @param {object} params
+ * @param {Array<{cantidad: number, precioUnitario: number}>} params.lineas
+ * @param {number}  params.ivaTarifa           - 0 o 19 (porcentaje)
+ * @param {boolean} params.ivaResponsable       - si el emisor es responsable de IVA
+ * @param {boolean} params.retencionActivada
+ * @param {number}  params.retencionPorcentaje  - 4, 6, 10, 11 o personalizado
+ * @param {boolean} params.reteivaActivada
+ * @param {number}  params.reteivaPorcentaje    - % sobre monto IVA (típicamente 15)
+ * @param {boolean} params.reteicaActivada
+ * @param {number}  params.reteicaPorcentaje    - % por municipio
+ * @param {boolean} params.compensarRetencion   - ajustar precio para absorber retención
+ */
+function calcularTotales({
+  lineas,
+  ivaTarifa = 0,
+  ivaResponsable = true,
+  retencionActivada = false,
+  retencionPorcentaje = 0,
+  reteivaActivada = false,
+  reteivaPorcentaje = 15,
+  reteicaActivada = false,
+  reteicaPorcentaje = 0,
+  compensarRetencion = false
+}) {
+  if (!lineas || lineas.length === 0) {
+    return { baseGravable: 0, iva: 0, retencion: 0, reteiva: 0, reteica: 0, compensacion: 0, totalNeto: 0 };
+  }
+
+  let baseGravable;
+  let compensacion = 0;
+
+  if (compensarRetencion && retencionActivada && retencionPorcentaje > 0) {
+    // Ajustar precio unitario para que el neto recibido cubra el precio original
+    const factor = 1 - retencionPorcentaje / 100;
+    const baseOriginal = lineas.reduce((s, l) => s + l.cantidad * l.precioUnitario, 0);
+    baseGravable = baseOriginal / factor;
+    compensacion = redondear(baseGravable - baseOriginal);
+    baseGravable = redondear(baseGravable);
+  } else {
+    baseGravable = redondear(calcularBaseGravable(lineas));
+  }
+
+  const tarifaIva = ivaResponsable ? (ivaTarifa || 0) : 0;
+  const ivaExacto = (baseGravable * tarifaIva) / 100;
+  const retencionExacta = retencionActivada ? (baseGravable * retencionPorcentaje) / 100 : 0;
+  const reteivaExacto = reteivaActivada ? (ivaExacto * reteivaPorcentaje) / 100 : 0;
+  const reteicaExacto = reteicaActivada ? (baseGravable * reteicaPorcentaje) / 100 : 0;
+
+  const iva = redondear(ivaExacto);
+  const retencion = redondear(retencionExacta);
+  const reteiva = redondear(reteivaExacto);
+  const reteica = redondear(reteicaExacto);
+
+  const totalNeto = baseGravable + iva - retencion - reteiva - reteica;
+
+  return {
+    baseGravable,
+    iva,
+    retencion,
+    reteiva,
+    reteica,
+    compensacion,
+    totalNeto: redondear(totalNeto)
+  };
+}
+
 module.exports = {
   TARIFAS_IVA,
   CONCEPTOS_RETENCION,
   redondear,
   calcularBaseGravable,
   validarRetencion,
-  calcularCotizacion
+  calcularCotizacion,
+  calcularTotales
 };

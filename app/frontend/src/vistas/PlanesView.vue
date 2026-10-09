@@ -22,13 +22,20 @@ async function iniciarSuscripcion() {
   }
 }
 
+// T063: Plan comparison updated with all new features (FR-045)
 const caracteristicas = [
   { nombre: 'Cotizaciones guardadas', gratuita: 'Hasta 20', premium: 'Hasta 500' },
   { nombre: 'Clientes guardados', gratuita: 'Hasta 10', premium: 'Hasta 200' },
+  { nombre: 'Catálogo de servicios', gratuita: 'Hasta 20 servicios', premium: 'Hasta 200 servicios' },
+  { nombre: 'Logo en cliente / cotización', gratuita: 'Incluido', premium: 'Incluido' },
+  { nombre: 'Impuestos colombianos (IVA, retención, reteIVA, reteICA)', gratuita: 'Incluido', premium: 'Incluido' },
+  { nombre: 'Compartir por WhatsApp / Web Share', gratuita: 'Incluido', premium: 'Incluido' },
+  { nombre: 'Descarga PDF', gratuita: 'Plantilla profesional', premium: 'Plantilla profesional' },
+  { nombre: 'Plantillas PDF (Moderna, Ejecutiva)', gratuita: 'No disponible', premium: 'Incluido' },
+  { nombre: 'Colores personalizados en PDF', gratuita: 'No disponible', premium: 'Incluido' },
+  { nombre: 'Múltiples emisores', gratuita: 'No disponible', premium: 'Hasta 5' },
+  { nombre: 'Autenticación en dos factores (2FA)', gratuita: 'Incluido', premium: 'Incluido' },
   { nombre: 'Grupos de clientes', gratuita: 'No disponible', premium: 'Incluido' },
-  { nombre: 'Compartir por WhatsApp y descargar PDF', gratuita: 'Incluido', premium: 'Incluido' },
-  { nombre: 'Catálogo de servicios', gratuita: 'Incluido', premium: 'Incluido' },
-  { nombre: 'Perfil profesional', gratuita: 'Incluido', premium: 'Incluido' },
   { nombre: 'Sin publicidad', gratuita: 'No', premium: 'Sí' },
   { nombre: 'Soporte', gratuita: 'Comunidad', premium: 'Prioritario por correo' }
 ];

@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-error": "#ffffff",
+          "secondary-container": "#6cf8bb",
+          "on-tertiary-container": "#d9d8ff",
+          "on-surface-variant": "#464555",
+          "on-background": "#131b2e",
+          "error": "#ba1a1a",
+          "surface-container-low": "#f2f3ff",
+          "on-secondary": "#ffffff",
+          "primary-fixed-dim": "#c3c0ff",
+          "tertiary-fixed": "#e1e0ff",
+          "on-secondary-fixed-variant": "#005236",
+          "surface-bright": "#faf8ff",
+          "background": "#faf8ff",
+          "inverse-surface": "#283044",
+          "surface-tint": "#4d44e3",
+          "tertiary": "#3130c0",
+          "on-primary": "#ffffff",
+          "outline": "#777587",
+          "surface": "#faf8ff",
+          "on-error-container": "#93000a",
+          "surface-dim": "#d2d9f4",
+          "surface-container": "#eaedff",
+          "on-surface": "#131b2e",
+          "on-secondary-container": "#00714d",
+          "on-tertiary": "#ffffff",
+          "on-secondary-fixed": "#002113",
+          "tertiary-fixed-dim": "#c0c1ff",
+          "inverse-primary": "#c3c0ff",
+          "surface-container-highest": "#dae2fd",
+          "inverse-on-surface": "#eef0ff",
+          "on-tertiary-fixed": "#07006c",
+          "surface-container-high": "#e2e7ff",
+          "on-primary-fixed-variant": "#3323cc",
+          "primary-container": "#4f46e5",
+          "secondary-fixed-dim": "#4edea3",
+          "on-primary-container": "#dad7ff",
+          "surface-variant": "#dae2fd",
+          "secondary": "#006c49",
+          "primary-fixed": "#e2dfff",
+          "outline-variant": "#c7c4d8",
+          "primary": "#3525cd",
+          "on-primary-fixed": "#0f0069",
+          "tertiary-container": "#4b4dd8",
+          "on-tertiary-fixed-variant": "#2f2ebe",
+          "secondary-fixed": "#6ffbbe",
+          "surface-container-lowest": "#ffffff",
+          "error-container": "#ffdad6"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "gutter": "1.25rem",
+          "space-sm": "0.5rem",
+          "margin-mobile": "1rem",
+          "margin": "2rem",
+          "gutter-mobile": "0.75rem",
+          "space-md": "1rem",
+          "space-xl": "2.5rem"
+        },
+        "fontFamily": {
+          "currency-display": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-md": [
+            "Plus Jakarta Sans"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-xl-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-xl": [
+            "Plus Jakarta Sans"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "currency-display": [
+            "28px",
+            {
+              "lineHeight": "34px",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-lg": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "18px",
+            {
+              "lineHeight": "26px",
+              "fontWeight": "600"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl-mobile": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "fontWeight": "700"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-sm": [
+            "15px",
+            {
+              "lineHeight": "22px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "fontWeight": "700"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-[1200px] mx-auto px-margin flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><img alt="Quotizador Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XxCjTwZVAIFIoCmqI0gjGPZ9V6r-iFfSP7pbunW9nuumhvCZs6EBd8F46VMtnT6q4nmvjBRJkaryegGrwfSC2TSMIaSKpjyVUYo7JiZu6T6Q8CB878TIOEU5DgmnZgmUDbdMCTeNwlR2Mxe1TedQe6Of9DvcpZcv3wa-UkEgTTZJGdBlgYghXTAUxwc9zQVSJFum94Jp4MuoAZUwPsgOkHmXnINYB80bpUtfVbA6sYR-zpLrfV5sHi9x8"/><span class="font-headline-md text-headline-md tracking-tight text-on-surface">Quotizador</span></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-on-surface font-headline-sm"><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="cotizador" href="#">Cotizador</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="mis-cotizaciones" href="#">Mis cotizaciones</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="clientes" href="#">Clientes</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="catalogo" href="#">Catálogo</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="perfil" href="#">Perfil</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="planes" href="#">Planes</a></nav></div><div class="flex items-center gap-space-sm"><a class="hidden sm:inline-flex items-center px-space-sm py-space-xs rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md hover:bg-secondary-fixed-dim hover:text-on-secondary-fixed transition-colors" data-path="apoyanos" href="#"><span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5"></span>Apóyanos</a><button aria-label="Ayuda y Soporte" class="p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-full transition-colors flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">help</span></button><a class="hidden md:inline-flex items-center gap-space-xs bg-primary-container text-on-primary font-headline-sm text-headline-sm px-space-md py-space-xs rounded-lg shadow-sm hover:bg-primary transition-colors active:scale-[0.98]" data-path="cotizador" href="#"><span class="material-symbols-outlined text-[18px]">add</span>Nueva Cotización</a><div class="flex items-center pl-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUtJNltzCMT27XvsoWnjYbbRmH16XwSSunBLlZ364TVtUHJhm_xB8yVAnT2y5mOdBPqkNyV7ub7K2_mJ164yQRCpu3TJ9L_GVBZIEkGcLMdqsMGB7Kc_-krE9dfn0ubc1zSk5cEFkrcP7a2bCl2GmNaFNx0lwex-A-I6Af_oZ2NOogxaC5pPLT_GJNYquySHRoS6w3LagsNnchj28dpANjwgotKyx0-eIRa3WlyUCteYwEpmZkrPmt"/></div></div></div></header><main class="w-full flex-1 pt-16 bg-surface"><div class="flex flex-col w-full">
+<div class="max-w-[1200px] w-full mx-auto px-margin py-space-lg flex flex-col gap-space-lg">
+<!-- Top Breadcrumb & Metadata Overview -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm mb-1 uppercase tracking-wider">
+<span class="text-primary font-bold">Gestión Comercial</span>
+<span>/</span>
+<span>Catálogo de Tarifas COP</span>
+<span>/</span>
+<span class="text-secondary font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Actualizado DIAN 2025
+          </span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Catálogo de Servicios y Productos</h1>
+<span class="font-label-md text-label-md px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant" id="active-count-badge">20 conceptos</span>
+</div>
+</div>
+<!-- Quick Metrics Ribbon & Primary Action -->
+<div class="flex items-center flex-wrap gap-space-sm">
+<div class="flex items-center bg-surface-container-lowest rounded-lg p-space-xs shadow-sm">
+<div class="px-space-sm py-1 border-r border-surface-container">
+<div class="font-label-sm text-label-sm text-on-surface-variant">Servicios Activos</div>
+<div class="font-headline-sm text-headline-sm text-primary">14 ítems</div>
+</div>
+<div class="px-space-sm py-1">
+<div class="font-label-sm text-label-sm text-on-surface-variant">Productos / Licencias</div>
+<div class="font-headline-sm text-headline-sm text-secondary">6 ítems</div>
+</div>
+</div>
+<button class="inline-flex items-center gap-space-xs bg-primary-container text-on-primary font-headline-sm text-headline-sm px-space-md py-space-sm rounded-lg shadow-sm hover:bg-primary transition-all active:scale-[0.98]" id="open-modal-btn">
+<span class="material-symbols-outlined text-[18px]">add_box</span>
+<span>+ Crear nuevo concepto</span>
+</button>
+</div>
+</div>
+<!-- Quick Stats Cards & Fiscal Benchmark -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-md">
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center gap-space-md relative overflow-hidden">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]">receipt_long</span>
+</div>
+<div class="min-w-0">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Tarifa Promedio Honorarios</p>
+<p class="font-headline-md text-headline-md text-on-surface truncate">$ 3.250.000 <span class="font-label-sm text-label-sm text-outline">COP</span></p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center gap-space-md relative overflow-hidden">
+<div class="w-12 h-12 rounded-lg bg-secondary-container/60 flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-[26px]">percent</span>
+</div>
+<div class="min-w-0">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">ReteFuente Frecuente</p>
+<p class="font-headline-md text-headline-md text-on-surface truncate">11.0% <span class="font-label-sm text-label-sm text-outline">Personas Jurídicas / Nat.</span></p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center gap-space-md relative overflow-hidden">
+<div class="w-12 h-12 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[26px]">account_balance</span>
+</div>
+<div class="min-w-0">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Tratamiento IVA General</p>
+<p class="font-headline-md text-headline-md text-on-surface truncate">19% Responsable</p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex items-center justify-between gap-space-xs">
+<div>
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Soporte Electrónico</p>
+<p class="font-headline-sm text-headline-sm text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">verified</span> Habilitado DIAN
+          </p>
+<p class="font-body-sm text-body-sm text-outline-variant">CUFE &amp; Radicación</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+</div>
+</div>
+<!-- Main Workspace: Interactive Catalog Layout (2 columns: Filtered Cards + Side Quick Adder/Cart) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Catalog Center (Left 8 Cols) -->
+<div class="lg:col-span-8 flex flex-col gap-space-md">
+<!-- Search & Filter Controls -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-sm">
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-space-sm">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary-container" id="catalog-search" placeholder="Buscar por código SKU, servicio o descripción fiscal..." type="text"/>
+</div>
+<div class="flex items-center gap-space-xs">
+<select class="bg-surface-container-low text-on-surface font-body-sm text-body-sm rounded-lg px-3 py-2.5 focus:outline-none cursor-pointer" id="sort-select">
+<option value="recent">Recientes primero</option>
+<option value="price-desc">Mayor tarifa COP</option>
+<option value="price-asc">Menor tarifa COP</option>
+</select>
+</div>
+</div>
+<!-- Category Filter Tabs -->
+<div class="flex items-center gap-space-xs overflow-x-auto pb-1 pt-1 scrollbar-none" id="category-pills">
+<button class="cat-pill px-3 py-1.5 rounded-full font-label-md text-label-md bg-primary-container text-on-primary transition-all" data-cat="all">Todos los ítems (20)</button>
+<button class="cat-pill px-3 py-1.5 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" data-cat="dev">Desarrollo de Software</button>
+<button class="cat-pill px-3 py-1.5 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" data-cat="design">Diseño UX/UI</button>
+<button class="cat-pill px-3 py-1.5 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" data-cat="legal">Consultoría Legal &amp; SARLAFT</button>
+<button class="cat-pill px-3 py-1.5 rounded-full font-label-md text-label-md bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" data-cat="cloud">Infraestructura Cloud</button>
+</div>
+</div>
+<!-- Catalog Items Grid -->
+<div class="flex flex-col gap-space-sm" id="catalog-list">
+<!-- Item 1: UX/UI Design -->
+<div class="catalog-item bg-surface-container-lowest rounded-xl p-space-md shadow-sm transition-all hover:shadow-md" data-category="design" data-name="Diseño de Sistema Design Tokens Figma" data-price="3800000" data-sku="DSGN-201">
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-space-sm">
+<div class="flex gap-space-sm items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">draw</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-2 py-0.5 rounded">SKU: DSGN-201</span>
+<span class="font-label-sm text-label-sm bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded-full">Diseño UX/UI</span>
+<span class="font-label-sm text-label-sm bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Activo
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1">Diseño de Sistema Design Tokens Figma</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">
+                    Construcción de arquitectura visual, tipografía dinámica, palette variables y componentes atómicos documentados con auto-layout responsive.
+                  </p>
+</div>
+</div>
+<!-- Price Box -->
+<div class="sm:text-right shrink-0">
+<div class="font-label-sm text-label-sm text-on-surface-variant">Tarifa Base</div>
+<div class="font-currency-display text-currency-display text-primary">$ 3.800.000 <span class="text-body-sm font-label-md">COP</span></div>
+<span class="font-label-sm text-label-sm text-outline">Proyecto cerrado</span>
+</div>
+</div>
+<!-- Colombian Tax Specs Ledger Row -->
+<div class="mt-space-sm pt-space-xs bg-surface-container-low rounded-lg p-space-sm grid grid-cols-2 sm:grid-cols-4 gap-space-xs">
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Modalidad</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Entrega Final</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Tratamiento IVA</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">19% (Tarifa Plena)</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">ReteFuente Sugerida</span>
+<span class="font-headline-sm text-headline-sm text-error">11.0% (- $418.000)</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">ReteICA Bogotá</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">9.66 x 1000</span>
+</div>
+</div>
+<!-- Card Actions -->
+<div class="mt-space-sm flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span>
+                Validador fiscal DIAN al día
+              </span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-colors" onclick="editConcept('DSGN-201', 'Diseño de Sistema Design Tokens Figma', '3800000', '19', '11')">
+                  Editar tarifa
+                </button>
+<button class="px-space-md py-1.5 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center gap-1 hover:bg-primary transition-all active:scale-95 shadow-sm" onclick="addConceptToDoc('DSGN-201', 'Diseño de Sistema Tokens', 3800000, 19, 11)">
+<span class="material-symbols-outlined text-[16px]">add</span> Añadir a cotización
+                </button>
+</div>
+</div>
+</div>
+<!-- Item 2: Software Development -->
+<div class="catalog-item bg-surface-container-lowest rounded-xl p-space-md shadow-sm transition-all hover:shadow-md" data-category="dev" data-name="Desarrollo API REST Backend Node &amp; NestJS" data-price="1800000" data-sku="DEV-104">
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-space-sm">
+<div class="flex gap-space-sm items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">code</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-2 py-0.5 rounded">SKU: DEV-104</span>
+<span class="font-label-sm text-label-sm bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded-full">Desarrollo Software</span>
+<span class="font-label-sm text-label-sm bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Activo
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1">Desarrollo Módulo API REST NestJS &amp; PostgreSQL</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">
+                    Implementación de endpoints seguros, autenticación JWT, migraciones Prisma ORM, pruebas unitarias y empaquetado Docker container.
+                  </p>
+</div>
+</div>
+<!-- Price Box -->
+<div class="sm:text-right shrink-0">
+<div class="font-label-sm text-label-sm text-on-surface-variant">Tarifa Base Mensual</div>
+<div class="font-currency-display text-currency-display text-primary">$ 1.800.000 <span class="text-body-sm font-label-md">COP</span></div>
+<span class="font-label-sm text-label-sm text-outline">Bolsa x 40 Horas</span>
+</div>
+</div>
+<!-- Colombian Tax Specs Ledger Row -->
+<div class="mt-space-sm pt-space-xs bg-surface-container-low rounded-lg p-space-sm grid grid-cols-2 sm:grid-cols-4 gap-space-xs">
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Modalidad</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Horas / Sprint</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Tratamiento IVA</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">19% (Tarifa General)</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">ReteFuente Sugerida</span>
+<span class="font-headline-sm text-headline-sm text-error">4.0% Contrato Serv.</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">ReteICA</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">11.04 x 1000</span>
+</div>
+</div>
+<!-- Card Actions -->
+<div class="mt-space-sm flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">update</span>
+                Contrato marco configurable
+              </span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-colors" onclick="editConcept('DEV-104', 'Desarrollo Módulo API REST NestJS', '1800000', '19', '4')">
+                  Editar tarifa
+                </button>
+<button class="px-space-md py-1.5 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center gap-1 hover:bg-primary transition-all active:scale-95 shadow-sm" onclick="addConceptToDoc('DEV-104', 'Módulo API REST NestJS', 1800000, 19, 4)">
+<span class="material-symbols-outlined text-[16px]">add</span> Añadir a cotización
+                </button>
+</div>
+</div>
+</div>
+<!-- Item 3: Legal & SARLAFT Advisory -->
+<div class="catalog-item bg-surface-container-lowest rounded-xl p-space-md shadow-sm transition-all hover:shadow-md" data-category="legal" data-name="Auditoría SAGRILAFT / SARLAFT 2.0 y Compliance" data-price="5400000" data-sku="LEG-808">
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-space-sm">
+<div class="flex gap-space-sm items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">policy</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-2 py-0.5 rounded">SKU: LEG-808</span>
+<span class="font-label-sm text-label-sm bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded-full">Legal &amp; SARLAFT</span>
+<span class="font-label-sm text-label-sm bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Activo
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1">Implementación Sistema SARLAFT &amp; Sagrilaft Circular Básica Jurídica</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">
+                    Manual de prevención del riesgo LA/FT, debida diligencia intensificada a contrapartes, matriz de riesgos y acta de oficial de cumplimiento para Supersociedades.
+                  </p>
+</div>
+</div>
+<!-- Price Box -->
+<div class="sm:text-right shrink-0">
+<div class="font-label-sm text-label-sm text-on-surface-variant">Honorario Integral</div>
+<div class="font-currency-display text-currency-display text-primary">$ 5.400.000 <span class="text-body-sm font-label-md">COP</span></div>
+<span class="font-label-sm text-label-sm text-outline">Proyecto Llave en Mano</span>
+</div>
+</div>
+<!-- Colombian Tax Specs Ledger Row -->
+<div class="mt-space-sm pt-space-xs bg-surface-container-low rounded-lg p-space-sm grid grid-cols-2 sm:grid-cols-4 gap-space-xs">
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Modalidad</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Proyecto</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Tratamiento IVA</span>
+<span class="font-headline-sm text-headline-sm text-secondary">Exento Art. 476 ET</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">ReteFuente Honorarios</span>
+<span class="font-headline-sm text-headline-sm text-error">11.0% (- $594.000)</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">ReteICA</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">9.66 x 1000</span>
+</div>
+</div>
+<!-- Card Actions -->
+<div class="mt-space-sm flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">gavel</span>
+                Cumple normatividad Superintendencia de Sociedades
+              </span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-colors" onclick="editConcept('LEG-808', 'Auditoría SAGRILAFT / SARLAFT', '5400000', '0', '11')">
+                  Editar tarifa
+                </button>
+<button class="px-space-md py-1.5 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center gap-1 hover:bg-primary transition-all active:scale-95 shadow-sm" onclick="addConceptToDoc('LEG-808', 'Auditoría SAGRILAFT / SARLAFT', 5400000, 0, 11)">
+<span class="material-symbols-outlined text-[16px]">add</span> Añadir a cotización
+                </button>
+</div>
+</div>
+</div>
+<!-- Item 4: Cloud Infrastructure -->
+<div class="catalog-item bg-surface-container-lowest rounded-xl p-space-md shadow-sm transition-all hover:shadow-md" data-category="cloud" data-name="Arquitectura y Despliegue AWS / Cloudflare Zero Trust" data-price="2750000" data-sku="CLD-512">
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-space-sm">
+<div class="flex gap-space-sm items-start">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[22px]">cloud_sync</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs flex-wrap">
+<span class="font-label-sm text-label-sm bg-surface-container text-on-surface-variant px-2 py-0.5 rounded">SKU: CLD-512</span>
+<span class="font-label-sm text-label-sm bg-primary-fixed text-on-primary-fixed px-2 py-0.5 rounded-full">Infraestructura Cloud</span>
+<span class="font-label-sm text-label-sm bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Activo
+                    </span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1">Configuración y Despliegue AWS / Cloudflare Zero Trust</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">
+                    Infraestructura como código (Terraform), VPC peering, balanceadores ALB, WAF y configuración de backup de bases de datos de alta disponibilidad.
+                  </p>
+</div>
+</div>
+<!-- Price Box -->
+<div class="sm:text-right shrink-0">
+<div class="font-label-sm text-label-sm text-on-surface-variant">Tarifa Setup Base</div>
+<div class="font-currency-display text-currency-display text-primary">$ 2.750.000 <span class="text-body-sm font-label-md">COP</span></div>
+<span class="font-label-sm text-label-sm text-outline">Setup Único</span>
+</div>
+</div>
+<!-- Colombian Tax Specs Ledger Row -->
+<div class="mt-space-sm pt-space-xs bg-surface-container-low rounded-lg p-space-sm grid grid-cols-2 sm:grid-cols-4 gap-space-xs">
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Modalidad</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Setup &amp; Hardening</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Tratamiento IVA</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">19% (Tarifa General)</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">ReteFuente Sugerida</span>
+<span class="font-headline-sm text-headline-sm text-error">4.0% (- $110.000)</span>
+</div>
+<div>
+<span class="block font-label-sm text-label-sm text-on-surface-variant">ReteICA</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">11.04 x 1000</span>
+</div>
+</div>
+<!-- Card Actions -->
+<div class="mt-space-sm flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-secondary">shield</span>
+                Garantía SLA de 99.9%
+              </span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-colors" onclick="editConcept('CLD-512', 'AWS / Cloudflare Zero Trust', '2750000', '19', '4')">
+                  Editar tarifa
+                </button>
+<button class="px-space-md py-1.5 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm flex items-center gap-1 hover:bg-primary transition-all active:scale-95 shadow-sm" onclick="addConceptToDoc('CLD-512', 'Cloud Zero Trust Setup', 2750000, 19, 4)">
+<span class="material-symbols-outlined text-[16px]">add</span> Añadir a cotización
+                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right 4 Cols: Quick Add Concept Panel & Cotizador Staging Cart -->
+<div class="lg:col-span-4 flex flex-col gap-space-md sticky top-20">
+<!-- Live Staging Cart (Added items to quote) -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-surface-container">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">shopping_cart_checkout</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Cotización en curso</h2>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-semibold" id="staging-count">1 ítem</span>
+</div>
+<div class="mt-space-sm flex flex-col gap-space-xs max-h-56 overflow-y-auto pr-1" id="staging-items-container">
+<div class="p-space-xs rounded bg-surface-container-low flex items-center justify-between text-body-sm">
+<div class="truncate pr-2">
+<span class="font-headline-sm text-headline-sm block truncate text-on-surface">Diseño de Sistema Tokens</span>
+<span class="text-outline font-label-sm">DSGN-201 • 1x Base</span>
+</div>
+<div class="text-right shrink-0">
+<span class="font-headline-sm text-headline-sm text-primary block">$ 3.800.000</span>
+<button class="text-error font-label-sm hover:underline" onclick="this.parentElement.parentElement.remove(); updateStagingTotals();">Quitar</button>
+</div>
+</div>
+</div>
+<!-- Real-time Tax Ledger breakdown -->
+<div class="mt-space-md pt-space-xs border-t border-surface-container flex flex-col gap-1.5 font-body-sm text-body-sm">
+<div class="flex justify-between text-on-surface-variant">
+<span>Subtotal Servicios</span>
+<span class="font-medium text-on-surface" id="cart-subtotal">$ 3.800.000 COP</span>
+</div>
+<div class="flex justify-between text-on-surface-variant">
+<span>IVA Calculado (19%)</span>
+<span class="font-medium text-on-surface" id="cart-iva">+ $ 722.000 COP</span>
+</div>
+<div class="flex justify-between text-error font-body-sm">
+<span>ReteFuente (11.0%)</span>
+<span id="cart-retefuente">- $ 418.000 COP</span>
+</div>
+<div class="flex justify-between text-outline-variant font-label-sm">
+<span>ReteICA Bogotá (9.66‰)</span>
+<span id="cart-reteica">- $ 36.708 COP</span>
+</div>
+<div class="mt-space-xs pt-space-xs border-t border-surface-container-high flex justify-between items-baseline">
+<span class="font-headline-md text-headline-md text-on-surface">Neto a Recibir</span>
+<span class="font-currency-display text-currency-display text-primary" id="cart-neto">$ 4.065.292 <span class="font-label-sm text-label-sm">COP</span></span>
+</div>
+</div>
+<!-- Execution Triggers -->
+<div class="mt-space-md flex flex-col gap-space-xs">
+<a class="w-full text-center bg-primary-container text-on-primary font-headline-sm text-headline-sm py-2.5 rounded-lg shadow-sm hover:bg-primary transition-all flex items-center justify-center gap-space-xs" data-path="cotizador" href="#">
+<span class="material-symbols-outlined text-[18px]">open_in_new</span> Continuar al Cotizador
+            </a>
+<button class="w-full text-center bg-secondary text-on-secondary font-headline-sm text-headline-sm py-2 rounded-lg hover:opacity-95 transition-all flex items-center justify-center gap-space-xs" onclick="shareWhatsAppQuote()">
+<span class="material-symbols-outlined text-[18px]">send_to_mobile</span> Compartir resumen rápido
+            </button>
+</div>
+</div>
+<!-- Colombian Fiscal Tips Banner -->
+<div class="bg-surface-container-high/60 rounded-xl p-space-md">
+<div class="flex items-center gap-space-xs text-primary mb-1">
+<span class="material-symbols-outlined text-[20px]">info</span>
+<span class="font-headline-sm text-headline-sm">Tarifario &amp; UVT 2025</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Las retenciones sobre servicios técnicos u honorarios calificados aplican a partir de 4 UVT para declarantes de renta. Quotizador aplica la retención adecuada automáticamente al exportar a PDF o Factura Electrónica.
+          </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Persistent Sticky Dock for Rapid Operational Feedback -->
+<div class="sticky bottom-0 z-40 bg-surface/90 backdrop-blur-md border-t border-surface-container py-space-xs shadow-lg">
+<div class="max-w-[1200px] mx-auto px-margin flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="hidden sm:flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Catálogo Comercial Vigente</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Base imponible colombiana estandarizada</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container-high text-on-surface font-headline-sm text-headline-sm hover:bg-surface-container-highest transition-colors flex items-center gap-1" id="dock-preview-btn">
+<span class="material-symbols-outlined text-[18px]">visibility</span> Vista previa de tarifas
+        </button>
+<button class="px-space-md py-1.5 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm shadow-sm hover:bg-primary transition-all flex items-center gap-1" onclick="exportCatalogPDF()">
+<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span> Exportar PDF
+        </button>
+</div>
+</div>
+</div>
+<!-- Modal for Creating / Editing Concept (Low-profile overlay) -->
+<div class="fixed inset-0 z-50 bg-inverse-surface/40 backdrop-blur-sm hidden items-center justify-center p-space-md" id="concept-modal">
+<div class="bg-surface-container-lowest max-w-lg w-full rounded-xl shadow-xl p-space-lg flex flex-col gap-space-md animate-fadeIn">
+<div class="flex items-center justify-between border-b border-surface-container pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[24px]">inventory_2</span>
+<h3 class="font-headline-lg text-headline-lg text-on-surface" id="modal-title">Crear nuevo concepto</h3>
+</div>
+<button class="p-1 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors" id="close-modal-btn">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<form class="flex flex-col gap-space-sm" id="concept-form" onsubmit="handleSaveConcept(event)">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Nombre del Servicio o Producto</label>
+<input class="w-full px-3 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container" id="form-name" placeholder="Ej: Consultoría en Arquitectura Cloud" required="" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Código / SKU</label>
+<input class="w-full px-3 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container" id="form-sku" placeholder="Ej: SRV-009" required="" type="text"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Categoría</label>
+<select class="w-full px-3 py-2 bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none" id="form-category">
+<option value="dev">Desarrollo de Software</option>
+<option value="design">Diseño UX/UI</option>
+<option value="legal">Consultoría Legal &amp; SARLAFT</option>
+<option value="cloud">Infraestructura Cloud</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Tarifa Base por Defecto (COP)</label>
+<div class="relative">
+<span class="absolute left-3 top-2 font-headline-sm text-on-surface-variant">$</span>
+<input class="w-full pl-8 pr-3 py-2 bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-primary focus:outline-none focus:ring-2 focus:ring-primary-container" id="form-price" placeholder="2500000" required="" step="1000" type="number"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Tratamiento IVA</label>
+<select class="w-full px-3 py-2 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none" id="form-iva">
+<option value="19">19% (General Bienes y Servicios)</option>
+<option value="5">5% (Canasta / Especial)</option>
+<option value="0">0% (Exento / Excluido Art. 476)</option>
+</select>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">ReteFuente DIAN Sugerida</label>
+<select class="w-full px-3 py-2 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none" id="form-rete">
+<option value="11">11% (Honorarios calificados PJ)</option>
+<option value="10">10% (Honorarios no declarantes)</option>
+<option value="4">4% (Servicios generales PJ)</option>
+<option value="2.5">2.5% (Compras generales)</option>
+<option value="0">0% (No aplica retención)</option>
+</select>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Descripción para Propuestas Comerciales</label>
+<textarea class="w-full px-3 py-2 bg-surface-container-low rounded-lg font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container" id="form-desc" placeholder="Detalle los entregables, alcance e hitos correspondientes..." rows="2"></textarea>
+</div>
+<div class="mt-space-sm flex items-center justify-end gap-space-xs pt-space-xs border-t border-surface-container">
+<button class="px-space-md py-2 rounded-lg bg-surface-container-high text-on-surface font-label-md text-label-md hover:bg-surface-container-highest transition-colors" id="cancel-modal-btn" type="button">Cancelar</button>
+<button class="px-space-lg py-2 rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm shadow-sm hover:bg-primary transition-all" type="submit">Guardar concepto</button>
+</div>
+</form>
+</div>
+</div>
+<script>
+    // Tab Category Filtering
+    const categoryButtons = document.querySelectorAll('.cat-pill');
+    const catalogCards = document.querySelectorAll('.catalog-item');
+    const searchInput = document.getElementById('catalog-search');
+
+    categoryButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        categoryButtons.forEach(b => {
+          b.classList.remove('bg-primary-container', 'text-on-primary');
+          b.classList.add('bg-surface-container', 'text-on-surface-variant');
+        });
+        btn.classList.add('bg-primary-container', 'text-on-primary');
+        btn.classList.remove('bg-surface-container', 'text-on-surface-variant');
+
+        const cat = btn.getAttribute('data-cat');
+        filterCards(cat, searchInput.value.toLowerCase());
+      });
+    });
+
+    searchInput.addEventListener('input', (e) => {
+      const activeBtn = document.querySelector('.cat-pill.bg-primary-container');
+      const cat = activeBtn ? activeBtn.getAttribute('data-cat') : 'all';
+      filterCards(cat, e.target.value.toLowerCase());
+    });
+
+    function filterCards(cat, term) {
+      catalogCards.forEach(card => {
+        const itemCat = card.getAttribute('data-category');
+        const text = card.textContent.toLowerCase();
+        const matchesCat = (cat === 'all' || itemCat === cat);
+        const matchesSearch = text.includes(term);
+
+        if (matchesCat && matchesSearch) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    // Modal Interaction
+    const modal = document.getElementById('concept-modal');
+    const openBtn = document.getElementById('open-modal-btn');
+    const closeBtn = document.getElementById('close-modal-btn');
+    const cancelBtn = document.getElementById('cancel-modal-btn');
+
+    const toggleModal = (show) => {
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    };
+
+    openBtn.addEventListener('click', () => {
+      document.getElementById('modal-title').textContent = 'Crear nuevo concepto';
+      document.getElementById('concept-form').reset();
+      toggleModal(true);
+    });
+
+    closeBtn.addEventListener('click', () => toggleModal(false));
+    cancelBtn.addEventListener('click', () => toggleModal(false));
+
+    function editConcept(sku, name, price, iva, rete) {
+      document.getElementById('modal-title').textContent = `Editar concepto: ${sku}`;
+      document.getElementById('form-name').value = name;
+      document.getElementById('form-sku').value = sku;
+      document.getElementById('form-price').value = price;
+      document.getElementById('form-iva').value = iva;
+      document.getElementById('form-rete').value = rete;
+      toggleModal(true);
+    }
+
+    function handleSaveConcept(e) {
+      e.preventDefault();
+      const sku = document.getElementById('form-sku').value;
+      const name = document.getElementById('form-name').value;
+      const price = parseFloat(document.getElementById('form-price').value) || 0;
+      const iva = parseFloat(document.getElementById('form-iva').value) || 0;
+      const rete = parseFloat(document.getElementById('form-rete').value) || 0;
+      
+      addConceptToDoc(sku, name, price, iva, rete);
+      toggleModal(false);
+      showNotification(`Concepto "${name}" guardado exitosamente`);
+    }
+
+    // Cart / Staging calculation
+    let quoteItems = [
+      { sku: 'DSGN-201', name: 'Diseño de Sistema Tokens', price: 3800000, iva: 19, rete: 11 }
+    ];
+
+    function addConceptToDoc(sku, name, price, iva, rete) {
+      quoteItems.push({ sku, name, price, iva, rete });
+      renderStaging();
+      showNotification(`"${name}" agregado a cotización`);
+    }
+
+    function renderStaging() {
+      const container = document.getElementById('staging-items-container');
+      container.innerHTML = '';
+
+      quoteItems.forEach((item, index) => {
+        const row = document.createElement('div');
+        row.className = 'p-space-xs rounded bg-surface-container-low flex items-center justify-between text-body-sm';
+        row.innerHTML = `
+          <div class="truncate pr-2">
+            <span class="font-headline-sm text-headline-sm block truncate text-on-surface">${item.name}</span>
+            <span class="text-outline font-label-sm">${item.sku} &bull; IVA ${item.iva}%</span>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="font-headline-sm text-headline-sm text-primary block">$ ${item.price.toLocaleString('es-CO')}</span>
+            <button onclick="removeStagingItem(${index})" class="text-error font-label-sm hover:underline">Quitar</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      document.getElementById('staging-count').textContent = `${quoteItems.length} ítem${quoteItems.length === 1 ? '' : 's'}`;
+      updateStagingTotals();
+    }
+
+    function removeStagingItem(index) {
+      quoteItems.splice(index, 1);
+      renderStaging();
+    }
+
+    function updateStagingTotals() {
+      let subtotal = 0;
+      let totalIva = 0;
+      let totalRete = 0;
+
+      quoteItems.forEach(item => {
+        subtotal += item.price;
+        totalIva += item.price * (item.iva / 100);
+        totalRete += item.price * (item.rete / 100);
+      });
+
+      const reteIca = subtotal * 0.00966; // 9.66 x mil promedio Bogotá
+      const neto = (subtotal + totalIva) - (totalRete + reteIca);
+
+      document.getElementById('cart-subtotal').textContent = `$ ${Math.round(subtotal).toLocaleString('es-CO')} COP`;
+      document.getElementById('cart-iva').textContent = `+ $ ${Math.round(totalIva).toLocaleString('es-CO')} COP`;
+      document.getElementById('cart-retefuente').textContent = `- $ ${Math.round(totalRete).toLocaleString('es-CO')} COP`;
+      document.getElementById('cart-reteica').textContent = `- $ ${Math.round(reteIca).toLocaleString('es-CO')} COP`;
+      document.getElementById('cart-neto').innerHTML = `$ ${Math.round(neto).toLocaleString('es-CO')} <span class="font-label-sm text-label-sm">COP</span>`;
+    }
+
+    function showNotification(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-16 right-6 z-50 bg-inverse-surface text-inverse-on-surface px-4 py-2.5 rounded-lg shadow-xl font-body-sm text-body-sm flex items-center gap-2 animate-bounce';
+      toast.innerHTML = `<span class="material-symbols-outlined text-[18px] text-secondary-container">check</span> ${msg}`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2800);
+    }
+
+    function exportCatalogPDF() {
+      showNotification('Generando catálogo PDF estructurado...');
+    }
+
+    function shareWhatsAppQuote() {
+      const text = encodeURIComponent(`Hola, te comparto el resumen de servicios y tarifas cotizadas desde Quotizador: Total COP en base imponible.`);
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+  </script>
+</div></main><footer class="w-full bg-surface-container-low py-space-md shadow-[0_-1px_8px_rgba(0,0,0,0.02)]"><div class="max-w-[1200px] mx-auto px-margin flex flex-col md:flex-row items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><span class="font-headline-sm text-headline-sm text-on-surface">Quotizador Colombia</span><span>•</span><span>Facturación &amp; Cotización Fiscal Ágil</span></div><nav class="flex items-center flex-wrap justify-center gap-space-md" data-active-classes="text-on-surface font-label-md"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="politica-de-privacidad" href="#">Política de Privacidad</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="sarlaft" href="#">SARLAFT</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="terminos-de-uso" href="#">Términos de Uso</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="planes" href="#">Planes</a></nav></div></footer></body></html>

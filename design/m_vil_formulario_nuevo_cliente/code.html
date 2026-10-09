@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-error": "#ffffff", "secondary-container": "#6cf8bb", "on-tertiary-container": "#d9d8ff", "on-surface-variant": "#464555", "on-background": "#131b2e", "error": "#ba1a1a", "surface-container-low": "#f2f3ff", "on-secondary": "#ffffff", "primary-fixed-dim": "#c3c0ff", "tertiary-fixed": "#e1e0ff", "on-secondary-fixed-variant": "#005236", "surface-bright": "#faf8ff", "background": "#faf8ff", "inverse-surface": "#283044", "surface-tint": "#4d44e3", "tertiary": "#3130c0", "on-primary": "#ffffff", "outline": "#777587", "surface": "#faf8ff", "on-error-container": "#93000a", "surface-dim": "#d2d9f4", "surface-container": "#eaedff", "on-surface": "#131b2e", "on-secondary-container": "#00714d", "on-tertiary": "#ffffff", "on-secondary-fixed": "#002113", "tertiary-fixed-dim": "#c0c1ff", "inverse-primary": "#c3c0ff", "surface-container-highest": "#dae2fd", "inverse-on-surface": "#eef0ff", "on-tertiary-fixed": "#07006c", "surface-container-high": "#e2e7ff", "on-primary-fixed-variant": "#3323cc", "primary-container": "#4f46e5", "secondary-fixed-dim": "#4edea3", "on-primary-container": "#dad7ff", "surface-variant": "#dae2fd", "secondary": "#006c49", "primary-fixed": "#e2dfff", "outline-variant": "#c7c4d8", "primary": "#3525cd", "on-primary-fixed": "#0f0069", "tertiary-container": "#4b4dd8", "on-tertiary-fixed-variant": "#2f2ebe", "secondary-fixed": "#6ffbbe", "surface-container-lowest": "#ffffff", "error-container": "#ffdad6" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "space-lg": "1.5rem", "gutter": "1.25rem", "space-sm": "0.5rem", "margin-mobile": "1rem", "margin": "2rem", "gutter-mobile": "0.75rem", "space-md": "1rem", "space-xl": "2.5rem" }, "fontFamily": { "currency-display": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "label-md": ["Inter"], "headline-xl-mobile": ["Plus Jakarta Sans"], "body-sm": ["Inter"], "headline-sm": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "label-sm": ["Inter"], "body-md": ["Inter"] }, "fontSize": { "currency-display": ["28px", { "lineHeight": "34px", "fontWeight": "700" }], "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "headline-md": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }], "headline-xl-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-sm": ["15px", { "lineHeight": "22px", "fontWeight": "600" }], "headline-xl": ["32px", { "lineHeight": "40px", "fontWeight": "700" }], "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-gutter-mobile flex items-center justify-between gap-space-xs"><button aria-label="Regresar" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container transition-colors shrink-0" onclick="window.history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><div class="flex-1 min-w-0 text-center"><h1 class="font-headline-sm text-headline-sm text-on-surface truncate px-space-xs">Nuevo Registro / Formulario</h1></div><button aria-label="Cerrar formulario" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors shrink-0" onclick="window.history.back()"><span class="material-symbols-outlined text-[24px]">close</span></button></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-6 bg-surface"><div class="flex flex-col w-full pb-28">
+<div class="px-gutter-mobile pt-2 pb-3 flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+        Borrador
+      </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">verified</span>
+        DIAN Sync Activo
+      </span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">bolt</span>
+      Autovalidación
+    </span>
+</div>
+<div class="px-gutter-mobile mb-4">
+<div class="bg-surface-container p-1 rounded-xl flex items-center shadow-sm">
+<button class="flex-1 py-2 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 bg-surface-container-lowest text-primary shadow-sm font-semibold" id="btn-juridica" onclick="setPersonType('juridica')" type="button">
+<span class="material-symbols-outlined text-[16px]">domain</span>
+        Persona Jurídica
+      </button>
+<button class="flex-1 py-2 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 text-on-surface-variant font-medium" id="btn-natural" onclick="setPersonType('natural')" type="button">
+<span class="material-symbols-outlined text-[16px]">person</span>
+        Persona Natural
+      </button>
+</div>
+</div>
+<div class="px-gutter-mobile flex flex-col gap-3.5">
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-4 transition-all">
+<div class="flex items-center justify-between pb-3">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">badge</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Datos Principales</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Identificación legal para tributación</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px]">expand_less</span>
+</div>
+<div class="flex flex-col gap-3 pt-1">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1" id="label-name">RAZÓN SOCIAL *</label>
+<div class="bg-surface-container-low rounded-lg px-3 py-2 flex items-center gap-2 focus-within:bg-surface-container-lowest focus-within:shadow-md transition-all">
+<span class="material-symbols-outlined text-[18px] text-outline">apartment</span>
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-outline" id="input-razon" placeholder="Ej. Soluciones Digitales SAS" type="text" value="Innovatech Colombia S.A.S."/>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1">NÚMERO DE IDENTIFICACIÓN (NIT) *</label>
+<div class="flex items-center gap-2">
+<div class="flex-1 bg-surface-container-low rounded-lg px-3 py-2 flex items-center gap-2 focus-within:bg-surface-container-lowest focus-within:shadow-md transition-all">
+<span class="material-symbols-outlined text-[18px] text-outline">tag</span>
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-outline" id="nit-input" oninput="calculateDV(this.value)" pattern="[0-9]*" placeholder="901234567" type="number" value="901452389"/>
+</div>
+<div class="flex flex-col items-center justify-center bg-surface-container px-3 py-1.5 rounded-lg shrink-0">
+<span class="font-label-sm text-label-sm text-on-surface-variant">DV</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold" id="dv-badge">1</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-sm" title="Algoritmo Módulo 11 DIAN">
+<span class="material-symbols-outlined text-[18px]">check</span>
+</div>
+</div>
+<p class="font-body-sm text-body-sm text-on-secondary-container flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-[14px]">task_alt</span>
+            Dígito DIAN calculado: Módulo 11 oficial
+          </p>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1">NOMBRE COMERCIAL (OPCIONAL)</label>
+<div class="bg-surface-container-low rounded-lg px-3 py-2 flex items-center gap-2 focus-within:bg-surface-container-lowest focus-within:shadow-md transition-all">
+<span class="material-symbols-outlined text-[18px] text-outline">storefront</span>
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-outline" placeholder="Ej. InnovaTech Studio" type="text" value="InnovaTech Labs"/>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-4 transition-all">
+<div class="flex items-center justify-between pb-3">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">contact_mail</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Contacto &amp; Notificación</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Recepción legal de facturas XML / PDF</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px]">expand_less</span>
+</div>
+<div class="flex flex-col gap-3 pt-1">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1">CORREO FACTURACIÓN ELECTRÓNICA *</label>
+<div class="bg-surface-container-low rounded-lg px-3 py-2 flex items-center gap-2 focus-within:bg-surface-container-lowest focus-within:shadow-md transition-all">
+<span class="material-symbols-outlined text-[18px] text-primary">mail</span>
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-outline" placeholder="facturacion@empresa.com" type="email" value="recepcion.facturas@innovatech.co"/>
+<span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-semibold bg-primary-fixed text-on-primary-fixed uppercase">DIAN XML</span>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1">TELÉFONO &amp; WHATSAPP DIRECTO</label>
+<div class="flex items-center gap-2">
+<div class="flex-1 bg-surface-container-low rounded-lg px-3 py-2 flex items-center gap-2 focus-within:bg-surface-container-lowest focus-within:shadow-md transition-all">
+<span class="font-label-sm text-label-sm text-on-surface-variant">+57</span>
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-outline" placeholder="300 123 4567" type="tel" value="312 890 4421"/>
+</div>
+<a aria-label="Abrir WhatsApp" class="w-10 h-10 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0 shadow-sm active:scale-95 transition-transform" href="https://wa.me/573128904421" target="_blank">
+<svg class="w-5 h-5 fill-current" viewbox="0 0 24 24">
+<path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2m.01 1.67c4.55 0 8.24 3.7 8.24 8.24 0 2.2-.86 4.28-2.42 5.83-1.56 1.56-3.63 2.41-5.83 2.41-1.46 0-2.89-.39-4.14-1.14l-.3-.18-3.08.81.82-3-.2-.31a8.216 8.216 0 01-1.26-4.42c0-4.54 3.7-8.24 8.25-8.24m4.5 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.65.81-.8 1-.15.15-.29.17-.54.04-.25-.13-1.04-.38-1.99-1.22-.73-.65-1.23-1.46-1.37-1.71-.15-.25-.02-.38.11-.51.11-.11.25-.29.38-.44.12-.14.17-.25.25-.42.08-.17.04-.32-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.49-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.88.86-.88 2.1 0 1.24.9 2.44 1.03 2.61.12.17 1.78 2.71 4.3 3.8.6.26 1.07.41 1.43.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.59.21-1.09.15-1.18-.06-.11-.23-.17-.48-.29z"></path>
+</svg>
+</a>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1">REPRESENTANTE O PERSONA DE CONTACTO</label>
+<div class="bg-surface-container-low rounded-lg px-3 py-2 flex items-center gap-2 focus-within:bg-surface-container-lowest focus-within:shadow-md transition-all">
+<span class="material-symbols-outlined text-[18px] text-outline">badge</span>
+<input class="w-full bg-transparent font-body-md text-body-md text-on-surface outline-none placeholder:text-outline" placeholder="Nombre completo" type="text" value="Dra. Mariana Gómez Silva"/>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-4 transition-all">
+<div class="flex items-center justify-between pb-3">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">account_balance</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Configuración Fiscal DIAN</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Reglas de retención e impuestos aplicables</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px]">expand_less</span>
+</div>
+<div class="flex flex-col gap-3 pt-1">
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low">
+<div class="flex-1 pr-3">
+<p class="font-headline-sm text-headline-sm text-on-surface">¿Responsable de IVA?</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Genera liquidación de IVA general al 19%</p>
+</div>
+<button class="w-12 h-7 rounded-full bg-primary flex items-center p-0.5 transition-colors" data-active="true" id="toggle-iva" onclick="toggleSwitch(this)" type="button">
+<div class="w-6 h-6 rounded-full bg-on-primary shadow-sm transform translate-x-5 transition-transform"></div>
+</button>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-surface-container-low">
+<div class="flex-1 pr-3">
+<p class="font-headline-sm text-headline-sm text-on-surface">Agente de Retención en la Fuente</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Aplica retención (ReteFuente) sobre servicios</p>
+</div>
+<button class="w-12 h-7 rounded-full bg-primary flex items-center p-0.5 transition-colors" data-active="true" id="toggle-retefuente" onclick="toggleSwitch(this)" type="button">
+<div class="w-6 h-6 rounded-full bg-on-primary shadow-sm transform translate-x-5 transition-transform"></div>
+</button>
+</div>
+<div class="p-3 rounded-lg bg-surface-container-low">
+<div class="flex items-center justify-between mb-2">
+<label class="font-headline-sm text-headline-sm text-on-surface">Municipio para ICA (Industria y Comercio)</label>
+<span class="font-label-sm text-label-sm text-primary font-bold">ReteICA</span>
+</div>
+<div class="grid grid-cols-3 gap-2">
+<button class="city-pill p-2 rounded-lg bg-primary text-on-primary text-center font-label-md text-label-md transition-all shadow-sm" onclick="selectCity(this, 'Bogotá', '9.66 por mil')" type="button">
+<span class="block font-semibold">Bogotá</span>
+<span class="block text-[10px] opacity-90">9.66 ‰</span>
+</button>
+<button class="city-pill p-2 rounded-lg bg-surface-container text-on-surface-variant text-center font-label-md text-label-md transition-all" onclick="selectCity(this, 'Medellín', '8.00 por mil')" type="button">
+<span class="block font-semibold">Medellín</span>
+<span class="block text-[10px] opacity-75">8.00 ‰</span>
+</button>
+<button class="city-pill p-2 rounded-lg bg-surface-container text-on-surface-variant text-center font-label-md text-label-md transition-all" onclick="selectCity(this, 'Cali', '7.70 por mil')" type="button">
+<span class="block font-semibold">Cali</span>
+<span class="block text-[10px] opacity-75">7.70 ‰</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-2 flex items-center gap-1" id="city-feedback">
+<span class="material-symbols-outlined text-[14px] text-primary">info</span>
+            Tarifa territorial aplicada: Bogotá D.C. (9.66 x 1.000)
+          </p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest rounded-xl shadow-sm p-4 transition-all">
+<div class="flex items-center justify-between pb-3">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Términos Comerciales Rápidos</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Condiciones de pago en cotización</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px]">expand_less</span>
+</div>
+<div class="flex flex-col gap-2 pt-1">
+<label class="font-label-sm text-label-sm text-on-surface-variant">PLAZO DE CRÉDITO POR DEFECTO</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="credit-pill p-2.5 rounded-lg bg-surface-container text-on-surface-variant font-label-md text-label-md text-center transition-all flex flex-col items-center gap-1" onclick="selectCredit(this)" type="button">
+<span class="material-symbols-outlined text-[18px]">price_check</span>
+<span>Contado</span>
+</button>
+<button class="credit-pill p-2.5 rounded-lg bg-surface-container text-on-surface-variant font-label-md text-label-md text-center transition-all flex flex-col items-center gap-1" onclick="selectCredit(this)" type="button">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>15 Días</span>
+</button>
+<button class="credit-pill p-2.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md text-center transition-all flex flex-col items-center gap-1 shadow-sm font-semibold" onclick="selectCredit(this)" type="button">
+<span class="material-symbols-outlined text-[18px]">event_repeat</span>
+<span>30 Días</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-high rounded-xl p-3 flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">security</span>
+</div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface">Certificación DIAN Anexo 1.8</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Estructura validada contra catálogos vigentes de la DIAN.</p>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 inset-x-0 z-40 bg-surface-container-lowest/90 backdrop-blur-md p-3 shadow-xl pb-safe">
+<div class="max-w-md mx-auto flex items-center gap-3">
+<div class="flex-1">
+<div class="flex items-center gap-1.5 text-secondary">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-sm text-label-sm font-bold tracking-tight">FICHA VALIDADA</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">NIT 901.452.389-1 OK</p>
+</div>
+<button class="px-5 py-3 rounded-xl bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center gap-2 shadow-md active:scale-95 transition-all" id="save-btn" onclick="handleSaveClient()" type="button">
+<span class="material-symbols-outlined text-[20px]">save</span>
+<span>Guardar Cliente</span>
+</button>
+</div>
+</div>
+<div class="fixed top-20 inset-x-4 z-50 transform -translate-y-24 opacity-0 transition-all duration-300 pointer-events-none flex justify-center" id="toast">
+<div class="bg-inverse-surface text-inverse-on-surface px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 max-w-sm">
+<span class="material-symbols-outlined text-secondary-fixed text-[22px]">verified</span>
+<div>
+<p class="font-label-md text-label-md font-semibold">Cliente creado con éxito</p>
+<p class="font-body-sm text-body-sm opacity-90">Listo para facturar electrónicamente en Quotizador</p>
+</div>
+</div>
+</div>
+<script>
+    function calculateDV(nit) {
+      const dvBadge = document.getElementById('dv-badge');
+      if (!nit || nit.length === 0) {
+        dvBadge.textContent = '-';
+        return;
+      }
+      const cleanNit = nit.toString().replace(/\D/g, '');
+      const weights = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71];
+      let sum = 0;
+      for (let i = 0; i < cleanNit.length; i++) {
+        const digit = parseInt(cleanNit[cleanNit.length - 1 - i], 10);
+        sum += digit * weights[i];
+      }
+      const remainder = sum % 11;
+      let dv = 0;
+      if (remainder === 0 || remainder === 1) {
+        dv = remainder;
+      } else {
+        dv = 11 - remainder;
+      }
+      dvBadge.textContent = dv;
+    }
+
+    function setPersonType(type) {
+      const btnJuridica = document.getElementById('btn-juridica');
+      const btnNatural = document.getElementById('btn-natural');
+      const labelName = document.getElementById('label-name');
+      const inputRazon = document.getElementById('input-razon');
+
+      if (type === 'juridica') {
+        btnJuridica.className = 'flex-1 py-2 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 bg-surface-container-lowest text-primary shadow-sm font-semibold';
+        btnNatural.className = 'flex-1 py-2 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 text-on-surface-variant font-medium';
+        labelName.textContent = 'RAZÓN SOCIAL *';
+        inputRazon.placeholder = 'Ej. Soluciones Digitales SAS';
+      } else {
+        btnNatural.className = 'flex-1 py-2 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 bg-surface-container-lowest text-primary shadow-sm font-semibold';
+        btnJuridica.className = 'flex-1 py-2 rounded-lg font-label-md text-label-md transition-all flex items-center justify-center gap-1.5 text-on-surface-variant font-medium';
+        labelName.textContent = 'NOMBRES Y APELLIDOS *';
+        inputRazon.placeholder = 'Ej. Carlos Alberto Pérez Torres';
+      }
+    }
+
+    function toggleSwitch(btn) {
+      const isActive = btn.getAttribute('data-active') === 'true';
+      const indicator = btn.querySelector('div');
+      if (isActive) {
+        btn.setAttribute('data-active', 'false');
+        btn.classList.remove('bg-primary');
+        btn.classList.add('bg-surface-container-highest');
+        indicator.classList.remove('translate-x-5');
+        indicator.classList.add('translate-x-0');
+      } else {
+        btn.setAttribute('data-active', 'true');
+        btn.classList.add('bg-primary');
+        btn.classList.remove('bg-surface-container-highest');
+        indicator.classList.add('translate-x-5');
+        indicator.classList.remove('translate-x-0');
+      }
+    }
+
+    function selectCity(el, name, rate) {
+      document.querySelectorAll('.city-pill').forEach(btn => {
+        btn.className = 'city-pill p-2 rounded-lg bg-surface-container text-on-surface-variant text-center font-label-md text-label-md transition-all';
+      });
+      el.className = 'city-pill p-2 rounded-lg bg-primary text-on-primary text-center font-label-md text-label-md transition-all shadow-sm font-semibold';
+      document.getElementById('city-feedback').innerHTML = '<span class="material-symbols-outlined text-[14px] text-primary">info</span> Tarifa territorial aplicada: ' + name + ' (' + rate + ')';
+    }
+
+    function selectCredit(el) {
+      document.querySelectorAll('.credit-pill').forEach(btn => {
+        btn.className = 'credit-pill p-2.5 rounded-lg bg-surface-container text-on-surface-variant font-label-md text-label-md text-center transition-all flex flex-col items-center gap-1';
+      });
+      el.className = 'credit-pill p-2.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md text-center transition-all flex flex-col items-center gap-1 shadow-sm font-semibold';
+    }
+
+    function handleSaveClient() {
+      const toast = document.getElementById('toast');
+      const saveBtn = document.getElementById('save-btn');
+      
+      saveBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span><span>Validando...</span>';
+      
+      setTimeout(() => {
+        saveBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">check</span><span>¡Guardado!</span>';
+        toast.classList.remove('-translate-y-24', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+        
+        setTimeout(() => {
+          toast.classList.remove('translate-y-0', 'opacity-100');
+          toast.classList.add('-translate-y-24', 'opacity-0');
+          saveBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">save</span><span>Guardar Cliente</span>';
+        }, 2600);
+      }, 700);
+    }
+  </script>
+</div></main></body></html>

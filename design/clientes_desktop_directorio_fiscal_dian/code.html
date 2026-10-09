@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-error": "#ffffff",
+          "secondary-container": "#6cf8bb",
+          "on-tertiary-container": "#d9d8ff",
+          "on-surface-variant": "#464555",
+          "on-background": "#131b2e",
+          "error": "#ba1a1a",
+          "surface-container-low": "#f2f3ff",
+          "on-secondary": "#ffffff",
+          "primary-fixed-dim": "#c3c0ff",
+          "tertiary-fixed": "#e1e0ff",
+          "on-secondary-fixed-variant": "#005236",
+          "surface-bright": "#faf8ff",
+          "background": "#faf8ff",
+          "inverse-surface": "#283044",
+          "surface-tint": "#4d44e3",
+          "tertiary": "#3130c0",
+          "on-primary": "#ffffff",
+          "outline": "#777587",
+          "surface": "#faf8ff",
+          "on-error-container": "#93000a",
+          "surface-dim": "#d2d9f4",
+          "surface-container": "#eaedff",
+          "on-surface": "#131b2e",
+          "on-secondary-container": "#00714d",
+          "on-tertiary": "#ffffff",
+          "on-secondary-fixed": "#002113",
+          "tertiary-fixed-dim": "#c0c1ff",
+          "inverse-primary": "#c3c0ff",
+          "surface-container-highest": "#dae2fd",
+          "inverse-on-surface": "#eef0ff",
+          "on-tertiary-fixed": "#07006c",
+          "surface-container-high": "#e2e7ff",
+          "on-primary-fixed-variant": "#3323cc",
+          "primary-container": "#4f46e5",
+          "secondary-fixed-dim": "#4edea3",
+          "on-primary-container": "#dad7ff",
+          "surface-variant": "#dae2fd",
+          "secondary": "#006c49",
+          "primary-fixed": "#e2dfff",
+          "outline-variant": "#c7c4d8",
+          "primary": "#3525cd",
+          "on-primary-fixed": "#0f0069",
+          "tertiary-container": "#4b4dd8",
+          "on-tertiary-fixed-variant": "#2f2ebe",
+          "secondary-fixed": "#6ffbbe",
+          "surface-container-lowest": "#ffffff",
+          "error-container": "#ffdad6"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "gutter": "1.25rem",
+          "space-sm": "0.5rem",
+          "margin-mobile": "1rem",
+          "margin": "2rem",
+          "gutter-mobile": "0.75rem",
+          "space-md": "1rem",
+          "space-xl": "2.5rem"
+        },
+        "fontFamily": {
+          "currency-display": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-md": [
+            "Plus Jakarta Sans"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-xl-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-xl": [
+            "Plus Jakarta Sans"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "currency-display": [
+            "28px",
+            {
+              "lineHeight": "34px",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-lg": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "18px",
+            {
+              "lineHeight": "26px",
+              "fontWeight": "600"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl-mobile": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "fontWeight": "700"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-sm": [
+            "15px",
+            {
+              "lineHeight": "22px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "fontWeight": "700"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-[1200px] mx-auto px-margin flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><img alt="Quotizador Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XxCjTwZVAIFIoCmqI0gjGPZ9V6r-iFfSP7pbunW9nuumhvCZs6EBd8F46VMtnT6q4nmvjBRJkaryegGrwfSC2TSMIaSKpjyVUYo7JiZu6T6Q8CB878TIOEU5DgmnZgmUDbdMCTeNwlR2Mxe1TedQe6Of9DvcpZcv3wa-UkEgTTZJGdBlgYghXTAUxwc9zQVSJFum94Jp4MuoAZUwPsgOkHmXnINYB80bpUtfVbA6sYR-zpLrfV5sHi9x8"/><span class="font-headline-md text-headline-md tracking-tight text-on-surface">Quotizador</span></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-on-surface font-headline-sm"><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="cotizador" href="#">Cotizador</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="mis-cotizaciones" href="#">Mis cotizaciones</a><a aria-current="page" class="px-space-sm py-space-xs rounded transition-colors bg-surface-container-high text-on-surface font-headline-sm" data-path="clientes" href="#">Clientes</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="catalogo" href="#">Catálogo</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="perfil" href="#">Perfil</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="planes" href="#">Planes</a></nav></div><div class="flex items-center gap-space-sm"><a class="hidden sm:inline-flex items-center px-space-sm py-space-xs rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md hover:bg-secondary-fixed-dim hover:text-on-secondary-fixed transition-colors" data-path="apoyanos" href="#"><span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5"></span>Apóyanos</a><button aria-label="Ayuda y Soporte" class="p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-full transition-colors flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">help</span></button><a class="hidden md:inline-flex items-center gap-space-xs bg-primary-container text-on-primary font-headline-sm text-headline-sm px-space-md py-space-xs rounded-lg shadow-sm hover:bg-primary transition-colors active:scale-[0.98]" data-path="cotizador" href="#"><span class="material-symbols-outlined text-[18px]">add</span>Nueva Cotización</a><div class="flex items-center pl-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUtJNltzCMT27XvsoWnjYbbRmH16XwSSunBLlZ364TVtUHJhm_xB8yVAnT2y5mOdBPqkNyV7ub7K2_mJ164yQRCpu3TJ9L_GVBZIEkGcLMdqsMGB7Kc_-krE9dfn0ubc1zSk5cEFkrcP7a2bCl2GmNaFNx0lwex-A-I6Af_oZ2NOogxaC5pPLT_GJNYquySHRoS6w3LagsNnchj28dpANjwgotKyx0-eIRa3WlyUCteYwEpmZkrPmt"/></div></div></div></header><main class="w-full flex-1 pt-16 bg-surface"><div class="flex flex-col w-full">
+<div class="max-w-[1200px] w-full mx-auto px-margin py-space-lg flex flex-col gap-space-lg">
+<!-- Header Section with Key Metrics -->
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md uppercase tracking-wider mb-1">
+<span class="inline-block w-2 h-2 rounded-full bg-secondary"></span>
+          Directorio Tributario &amp; Facturación
+        </div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight">Directorio de Clientes</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+          Gestión centralizada de terceros, calidad fiscal ante la DIAN y perfiles de retención en la fuente.
+        </p>
+</div>
+<!-- Quick Action Buttons -->
+<div class="flex items-center gap-space-sm flex-wrap">
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-headline-sm text-headline-sm transition-all duration-150" id="exportCsvBtn" type="button">
+<span class="material-symbols-outlined text-[18px]">cloud_download</span>
+<span>Exportar RUT / CSV</span>
+</button>
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm shadow-md hover:bg-primary transition-all duration-150 active:scale-[0.98]" id="openNewClientModal" type="button">
+<span class="material-symbols-outlined text-[20px]">person_add</span>
+<span>+ Nuevo Cliente</span>
+</button>
+</div>
+</div>
+<!-- Metrics Bento Strip -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- Metric 1: Total Clientes -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group">
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="font-label-md text-label-md uppercase tracking-wide">Total Registrados</span>
+<span class="p-1.5 rounded-lg bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">corporate_fare</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl text-on-surface">28</span>
+<span class="inline-flex items-center text-secondary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">arrow_upward</span> +4 este mes
+          </span>
+</div>
+<div class="mt-3 flex items-center gap-2">
+<div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+<div class="bg-primary h-1.5 rounded-full" style="width: 78%"></div>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant whitespace-nowrap">22 Jurídicos</span>
+</div>
+</div>
+<!-- Metric 2: Agentes Retenedores -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group">
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="font-label-md text-label-md uppercase tracking-wide">Agentes Retenedores DIAN</span>
+<span class="p-1.5 rounded-lg bg-secondary-container text-on-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl text-on-surface">12</span>
+<span class="font-label-md text-label-md px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">
+            42.8% del total
+          </span>
+</div>
+<div class="mt-3 flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
+<span>Aplica ReteFuente &amp; ReteICA auto</span>
+<span class="font-headline-sm text-headline-sm text-secondary">Activo</span>
+</div>
+</div>
+<!-- Metric 3: Facturación Acumulada -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between relative overflow-hidden group">
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="font-label-md text-label-md uppercase tracking-wide">Facturación Acumulada</span>
+<span class="p-1.5 rounded-lg bg-surface-container-high text-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-currency-display text-currency-display text-on-surface">$ 64.800.000</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">COP</span>
+</div>
+<div class="mt-3 flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> 38 cotizaciones cerradas
+          </span>
+<span class="text-primary font-headline-sm text-headline-sm hover:underline cursor-pointer">Ver histórico</span>
+</div>
+</div>
+</div>
+<!-- Main Workspace: Asymmetric 8:4 Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Left Column (8 Cols): Directory & Table Management -->
+<div class="lg:col-span-8 flex flex-col gap-space-md">
+<!-- Search & Segment Filters Bar -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col sm:flex-row gap-space-sm items-stretch sm:items-center justify-between">
+<!-- Search input -->
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full h-[42px] pl-10 pr-4 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary-container transition-all" id="searchInput" placeholder="Buscar por Razón Social, NIT (ej: 900.123.456) o contacto..." type="text"/>
+</div>
+<!-- Filter Pills -->
+<div class="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0" id="filterPills">
+<button class="filter-tab px-3 py-1.5 rounded-lg font-label-md text-label-md whitespace-nowrap bg-primary-container text-on-primary transition-colors" data-filter="all" type="button">
+              Todos (28)
+            </button>
+<button class="filter-tab px-3 py-1.5 rounded-lg font-label-md text-label-md whitespace-nowrap bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-colors" data-filter="juridica" type="button">
+              Jurídicas (22)
+            </button>
+<button class="filter-tab px-3 py-1.5 rounded-lg font-label-md text-label-md whitespace-nowrap bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-colors" data-filter="retenedor" type="button">
+              Retenedores (12)
+            </button>
+<button class="filter-tab px-3 py-1.5 rounded-lg font-label-md text-label-md whitespace-nowrap bg-surface-container-low text-on-surface-variant hover:text-on-surface transition-colors" data-filter="natural" type="button">
+              Naturales (6)
+            </button>
+</div>
+</div>
+<!-- Clients Interactive Ledger Table -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col">
+<!-- Table Header -->
+<div class="px-space-md py-3 bg-surface-container-low grid grid-cols-12 gap-2 text-on-surface-variant font-label-md text-label-md uppercase tracking-wider items-center">
+<div class="col-span-5 flex items-center gap-1 cursor-pointer select-none">
+<span>Cliente / Razón Social</span>
+<span class="material-symbols-outlined text-[14px]">unfold_more</span>
+</div>
+<div class="col-span-3">Identificación (DIAN)</div>
+<div class="col-span-2">Régimen Fiscal</div>
+<div class="col-span-2 text-right">Acciones</div>
+</div>
+<!-- Dynamic Client Rows -->
+<div class="flex flex-col" id="clientsTableBody">
+<!-- Item 1: Nestlé Colombia S.A.S -->
+<div class="client-row px-space-md py-space-sm grid grid-cols-12 gap-2 items-center hover:bg-surface-container-low transition-colors duration-150 group" data-tax="retenedor" data-type="juridica">
+<div class="col-span-5 flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center font-headline-md text-headline-md text-primary font-bold flex-shrink-0">
+                  N
+                </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Nestlé de Colombia S.A.</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-secondary-container text-on-secondary-container" title="Gran Contribuyente DIAN">GC</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">compras.corp@nestle.com.co • Bogotá D.C.</span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface font-mono tracking-tight">860.002.554-1</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Persona Jurídica</span>
+</div>
+<div class="col-span-2 flex flex-col gap-1">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Retenedor
+                </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">ReteFuente 2.5%</span>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1.5">
+<a class="p-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary transition-colors flex items-center justify-center" data-path="cotizador" href="#" title="Crear Cotización Directa">
+<span class="material-symbols-outlined text-[18px]">post_add</span>
+</a>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-center" title="Editar Información" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-error hover:bg-error-container transition-colors flex items-center justify-center" title="Eliminar de Directorio" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Item 2: Grupo Nutresa S.A. -->
+<div class="client-row px-space-md py-space-sm grid grid-cols-12 gap-2 items-center hover:bg-surface-container-low transition-colors duration-150 group" data-tax="retenedor" data-type="juridica">
+<div class="col-span-5 flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center font-headline-md text-headline-md text-primary font-bold flex-shrink-0">
+                  GN
+                </div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Grupo Nutresa S.A.</span>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-secondary-container text-on-secondary-container" title="Gran Contribuyente DIAN">GC</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">facturacion@nutresa.com • Medellín, ANT</span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface font-mono tracking-tight">890.900.050-1</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Persona Jurídica</span>
+</div>
+<div class="col-span-2 flex flex-col gap-1">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Retenedor
+                </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">ReteICA 9.66‰</span>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1.5">
+<a class="p-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary transition-colors flex items-center justify-center" data-path="cotizador" href="#" title="Crear Cotización Directa">
+<span class="material-symbols-outlined text-[18px]">post_add</span>
+</a>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-center" title="Editar Información" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-error hover:bg-error-container transition-colors flex items-center justify-center" title="Eliminar de Directorio" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Item 3: Crepes & Waffles Bogotá -->
+<div class="client-row px-space-md py-space-sm grid grid-cols-12 gap-2 items-center hover:bg-surface-container-low transition-colors duration-150 group" data-tax="comun" data-type="juridica">
+<div class="col-span-5 flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center font-headline-md text-headline-md text-primary font-bold flex-shrink-0">
+                  CW
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Crepes &amp; Waffles Arte Culinario S.A.S.</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">administracion@crepes.com • Bogotá D.C.</span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface font-mono tracking-tight">860.518.234-8</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Persona Jurídica</span>
+</div>
+<div class="col-span-2 flex flex-col gap-1">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant w-fit">
+                  Régimen Ordinario
+                </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">No autoretenedor</span>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1.5">
+<a class="p-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary transition-colors flex items-center justify-center" data-path="cotizador" href="#" title="Crear Cotización Directa">
+<span class="material-symbols-outlined text-[18px]">post_add</span>
+</a>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-center" title="Editar Información" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-error hover:bg-error-container transition-colors flex items-center justify-center" title="Eliminar de Directorio" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Item 4: Carlos Mario Arango Restrepo (Persona Natural) -->
+<div class="client-row px-space-md py-space-sm grid grid-cols-12 gap-2 items-center hover:bg-surface-container-low transition-colors duration-150 group" data-tax="natural" data-type="natural">
+<div class="col-span-5 flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center font-headline-md text-headline-md text-primary font-bold flex-shrink-0">
+                  CA
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Carlos Mario Arango Restrepo</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">carlos.arango.arq@gmail.com • +57 312 459 2831</span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface font-mono tracking-tight">CC 71.392.481</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Persona Natural</span>
+</div>
+<div class="col-span-2 flex flex-col gap-1">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant w-fit">
+                  No Responsable IVA
+                </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Exento ReteFuente</span>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1.5">
+<a class="p-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary transition-colors flex items-center justify-center" data-path="cotizador" href="#" title="Crear Cotización Directa">
+<span class="material-symbols-outlined text-[18px]">post_add</span>
+</a>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-center" title="Editar Información" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-error hover:bg-error-container transition-colors flex items-center justify-center" title="Eliminar de Directorio" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+<!-- Item 5: Studio Alfa Arquitectura S.A.S -->
+<div class="client-row px-space-md py-space-sm grid grid-cols-12 gap-2 items-center hover:bg-surface-container-low transition-colors duration-150 group" data-tax="retenedor" data-type="juridica">
+<div class="col-span-5 flex items-center gap-space-sm min-w-0">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center font-headline-md text-headline-md text-primary font-bold flex-shrink-0">
+                  SA
+                </div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">Studio Alfa Arquitectura S.A.S.</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">contacto@studioalfa.co • Cali, Valle</span>
+</div>
+</div>
+<div class="col-span-3 flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface font-mono tracking-tight">901.442.819-3</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Persona Jurídica</span>
+</div>
+<div class="col-span-2 flex flex-col gap-1">
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container w-fit">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Retenedor
+                </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">ReteFuente 3.5%</span>
+</div>
+<div class="col-span-2 flex items-center justify-end gap-1.5">
+<a class="p-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary transition-colors flex items-center justify-center" data-path="cotizador" href="#" title="Crear Cotización Directa">
+<span class="material-symbols-outlined text-[18px]">post_add</span>
+</a>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors flex items-center justify-center" title="Editar Información" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-error hover:bg-error-container transition-colors flex items-center justify-center" title="Eliminar de Directorio" type="button">
+<span class="material-symbols-outlined text-[18px]">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Table Footer Pagination and Counters -->
+<div class="p-space-md bg-surface-container-low flex flex-col sm:flex-row items-center justify-between gap-space-sm">
+<span class="font-body-sm text-body-sm text-on-surface-variant">
+              Mostrando <strong class="text-on-surface">5</strong> de <strong class="text-on-surface">28</strong> clientes registrados
+            </span>
+<div class="flex items-center gap-1">
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="px-2.5 py-1 rounded-lg bg-primary-container text-on-primary font-label-md text-label-md">1</button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface-variant font-label-md text-label-md hover:text-on-surface">2</button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface-variant font-label-md text-label-md hover:text-on-surface">3</button>
+<button class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- DIAN Tax Compliance Notice -->
+<div class="p-space-md rounded-xl bg-surface-container-low flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[24px] flex-shrink-0 mt-0.5">verified</span>
+<div class="flex flex-col gap-0.5">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Normativa DIAN y Estatuto Tributario</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Al marcar a una entidad como <strong>Agente Retenedor</strong>, el motor de cálculo de Quotizador aplicará automáticamente el descuento en los recibos de caja y cotizaciones finales para servicios (2.5% o 3.5%) o compras generales.
+            </p>
+</div>
+</div>
+</div>
+<!-- Right Column (4 Cols): Fast Creation Dock & Verification Tool -->
+<div class="lg:col-span-4 flex flex-col gap-space-md sticky top-20">
+<!-- Quick Client Creation Card -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="p-1.5 rounded-lg bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">badge</span>
+</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Nuevo Cliente</h2>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+              Rápido
+            </span>
+</div>
+<form class="flex flex-col gap-space-sm" id="newClientForm" onsubmit="event.preventDefault(); window.addNewClient();">
+<!-- Nombre o Razón Social -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="clientName">
+                Nombre o Razón Social <span class="text-error">*</span>
+</label>
+<input class="h-[42px] px-3 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container focus:outline-none transition-all" id="clientName" placeholder="Ej: Grupo Aval S.A. o Juan Pérez" required="" type="text"/>
+</div>
+<!-- Identificación & Dígito DIAN -->
+<div class="grid grid-cols-12 gap-2">
+<div class="col-span-8 flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="clientId">
+                  NIT / Cédula <span class="text-error">*</span>
+</label>
+<input class="h-[42px] px-3 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container focus:outline-none transition-all" id="clientId" placeholder="900123456" required="" type="text"/>
+</div>
+<div class="col-span-4 flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="clientDv">
+                  DV <span class="text-secondary">(Auto)</span>
+</label>
+<input class="h-[42px] text-center rounded-lg bg-surface-container font-headline-md text-headline-md font-mono text-primary font-bold" id="clientDv" placeholder="-" readonly="" type="text"/>
+</div>
+</div>
+<!-- Tipo de Persona -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="clientType">
+                Naturaleza Fiscal
+              </label>
+<select class="h-[42px] px-3 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container focus:outline-none transition-all cursor-pointer" id="clientType">
+<option value="juridica">Persona Jurídica (S.A.S, S.A, Ltda)</option>
+<option value="natural">Persona Natural (Cédula Ciudadanía)</option>
+<option value="extranjera">Entidad del Exterior</option>
+</select>
+</div>
+<!-- Correo Electrónico & Celular -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="clientEmail">
+                  Correo Facturación
+                </label>
+<input class="h-[42px] px-3 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container focus:outline-none transition-all" id="clientEmail" placeholder="facturacion@..." type="email"/>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="clientPhone">
+                  Teléfono / Móvil
+                </label>
+<input class="h-[42px] px-3 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container focus:outline-none transition-all" id="clientPhone" placeholder="+57 300 000 0000" type="tel"/>
+</div>
+</div>
+<!-- Ciudad / Municipio (ICA) -->
+<div class="flex flex-col gap-1">
+<label class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider" for="clientCity">
+                Municipio de Operación (Tarifa ICA)
+              </label>
+<select class="h-[42px] px-3 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container focus:outline-none transition-all cursor-pointer" id="clientCity">
+<option value="bogota">Bogotá D.C. (9.66‰ / 11.04‰)</option>
+<option value="medellin">Medellín (7.0‰ / 8.0‰)</option>
+<option value="cali">Cali (6.0‰ / 7.7‰)</option>
+<option value="barranquilla">Barranquilla (10.0‰)</option>
+<option value="otro">Otro Municipio Nacional</option>
+</select>
+</div>
+<!-- Checkbox Fiscal: Agente Retenedor -->
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-start gap-space-sm cursor-pointer select-none mt-1">
+<input checked="" class="mt-1 w-4 h-4 rounded text-primary-container focus:ring-primary-container cursor-pointer" id="clientWithholder" type="checkbox"/>
+<label class="flex flex-col cursor-pointer" for="clientWithholder">
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Agente Retenedor en la Fuente</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Habilitar deducciones automáticas de ReteFuente (2.5%) y ReteICA al cotizar.</span>
+</label>
+</div>
+<!-- Submit Action Button -->
+<button class="mt-2 w-full h-[44px] rounded-lg bg-primary-container text-on-primary font-headline-sm text-headline-sm shadow-md hover:bg-primary transition-all duration-150 flex items-center justify-center gap-space-xs active:scale-[0.99]" type="submit">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>Guardar en Directorio</span>
+</button>
+</form>
+</div>
+<!-- Fast NIT Verifier Micro-widget (Colombian DIAN Algorithm) -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[20px]">calculate</span>
+<span class="font-headline-sm text-headline-sm font-semibold">Comprobador DIAN en Vivo</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Validación algorítmica de módulo 11 para confirmar que el número de identificación fiscal sea válido antes de facturar electrónicamente.
+          </p>
+<div class="mt-2 flex items-center gap-2 text-secondary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>Algoritmo Art. 555-2 E.T. activado</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Client-Side Vanilla Interactivity for DIAN DV & Realtime Search -->
+<script>
+    (function initClientModule() {
+      // Colombian DIAN Module 11 Verification Digit Algorithm
+      function calculateColombianDV(nit) {
+        if (!nit) return '';
+        var cleanNit = nit.replace(/[^0-9]/g, '');
+        if (cleanNit.length === 0) return '';
+        var primes = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71];
+        var total = 0;
+        var len = cleanNit.length;
+        for (var i = 0; i < len; i++) {
+          var digit = parseInt(cleanNit.charAt(len - 1 - i), 10);
+          total += digit * primes[i];
+        }
+        var remainder = total % 11;
+        if (remainder > 1) {
+          return (11 - remainder).toString();
+        }
+        return remainder.toString();
+      }
+
+      var nitInput = document.getElementById('clientId');
+      var dvInput = document.getElementById('clientDv');
+
+      if (nitInput && dvInput) {
+        nitInput.addEventListener('input', function() {
+          var val = nitInput.value;
+          if (val.length >= 6) {
+            dvInput.value = calculateColombianDV(val);
+          } else {
+            dvInput.value = '-';
+          }
+        });
+      }
+
+      // Filter Tabs behavior
+      var filterTabs = document.querySelectorAll('.filter-tab');
+      var rows = document.querySelectorAll('.client-row');
+
+      filterTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          filterTabs.forEach(function(t) {
+            t.classList.remove('bg-primary-container', 'text-on-primary');
+            t.classList.add('bg-surface-container-low', 'text-on-surface-variant');
+          });
+          this.classList.remove('bg-surface-container-low', 'text-on-surface-variant');
+          this.classList.add('bg-primary-container', 'text-on-primary');
+
+          var target = this.getAttribute('data-filter');
+          rows.forEach(function(row) {
+            if (target === 'all') {
+              row.style.display = 'grid';
+            } else if (target === 'juridica' && row.getAttribute('data-type') === 'juridica') {
+              row.style.display = 'grid';
+            } else if (target === 'natural' && row.getAttribute('data-type') === 'natural') {
+              row.style.display = 'grid';
+            } else if (target === 'retenedor' && row.getAttribute('data-tax') === 'retenedor') {
+              row.style.display = 'grid';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // Quick Search in Table
+      var searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          var term = searchInput.value.toLowerCase();
+          rows.forEach(function(row) {
+            var text = row.innerText.toLowerCase();
+            row.style.display = text.indexOf(term) > -1 ? 'grid' : 'none';
+          });
+        });
+      }
+
+      // Add New Client Simulation
+      window.addNewClient = function() {
+        var name = document.getElementById('clientName').value;
+        var nit = document.getElementById('clientId').value;
+        var dv = document.getElementById('clientDv').value || calculateColombianDV(nit) || '1';
+        var type = document.getElementById('clientType').value;
+        var email = document.getElementById('clientEmail').value || 'contacto@empresa.com';
+        var isRetenedor = document.getElementById('clientWithholder').checked;
+
+        var tableBody = document.getElementById('clientsTableBody');
+        var newRow = document.createElement('div');
+        newRow.className = 'client-row px-space-md py-space-sm grid grid-cols-12 gap-2 items-center hover:bg-surface-container-low transition-colors duration-150 group';
+        newRow.setAttribute('data-type', type);
+        newRow.setAttribute('data-tax', isRetenedor ? 'retenedor' : 'comun');
+
+        var initials = name.slice(0, 2).toUpperCase();
+
+        newRow.innerHTML = `
+          <div class="col-span-5 flex items-center gap-space-sm min-w-0">
+            <div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center font-headline-md text-headline-md text-primary font-bold flex-shrink-0">
+              ${initials}
+            </div>
+            <div class="flex flex-col min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate">${name}</span>
+                ${isRetenedor ? '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-secondary-container text-on-secondary-container">RET</span>' : ''}
+              </div>
+              <span class="font-body-sm text-body-sm text-on-surface-variant truncate">${email}</span>
+            </div>
+          </div>
+          <div class="col-span-3 flex flex-col">
+            <span class="font-headline-sm text-headline-sm text-on-surface font-mono tracking-tight">${nit}-${dv}</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">${type === 'juridica' ? 'Persona Jurídica' : 'Persona Natural'}</span>
+          </div>
+          <div class="col-span-2 flex flex-col gap-1">
+            <span class="inline-flex items-center gap-1 font-label-sm text-label-sm px-2 py-0.5 rounded-full ${isRetenedor ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-high text-on-surface-variant'} w-fit">
+              ${isRetenedor ? '<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Retenedor' : 'Régimen Ordinario'}
+            </span>
+          </div>
+          <div class="col-span-2 flex items-center justify-end gap-1.5">
+            <a href="#" data-path="cotizador" class="p-1.5 rounded-lg bg-primary-container text-on-primary hover:bg-primary transition-colors flex items-center justify-center" title="Crear Cotización Directa">
+              <span class="material-symbols-outlined text-[18px]">post_add</span>
+            </a>
+            <button type="button" class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]">edit</span>
+            </button>
+            <button type="button" class="p-1.5 rounded-lg bg-surface-container text-on-surface-variant hover:text-error hover:bg-error-container transition-colors flex items-center justify-center">
+              <span class="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+          </div>
+        `;
+
+        tableBody.insertBefore(newRow, tableBody.firstChild);
+        document.getElementById('newClientForm').reset();
+        document.getElementById('clientDv').value = '-';
+      };
+    })();
+  </script>
+</div></main><footer class="w-full bg-surface-container-low py-space-md shadow-[0_-1px_8px_rgba(0,0,0,0.02)]"><div class="max-w-[1200px] mx-auto px-margin flex flex-col md:flex-row items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><span class="font-headline-sm text-headline-sm text-on-surface">Quotizador Colombia</span><span>•</span><span>Facturación &amp; Cotización Fiscal Ágil</span></div><nav class="flex items-center flex-wrap justify-center gap-space-md" data-active-classes="text-on-surface font-label-md"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="politica-de-privacidad" href="#">Política de Privacidad</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="sarlaft" href="#">SARLAFT</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="terminos-de-uso" href="#">Términos de Uso</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="planes" href="#">Planes</a></nav></div></footer></body></html>

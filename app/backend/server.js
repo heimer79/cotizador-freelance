@@ -1,6 +1,7 @@
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
+const helmet = require('helmet');
 
 const { abrirBaseDatos } = require('./db');
 const {
@@ -18,7 +19,7 @@ const { EmailService } = require('./src/services/email-service');
 const crearRutasAuth = require('./rutas/auth');
 const crearRutasClientes = require('./rutas/clientes');
 const crearRutasCatalogo = require('./rutas/catalogo');
-const crearRutasCotizaciones = require('./rutas/cotizaciones');
+const { crearRutasCotizaciones, crearRutasPlantillasPdf, crearRutasCompartirDescarga } = require('./rutas/cotizaciones');
 const crearRutasPerfil = require('./rutas/perfil');
 const crearRutasGrupos = require('./rutas/grupos');
 const crearRutasConfigAds = require('./src/api/ads-config');
@@ -39,6 +40,22 @@ function crearApp(db, opciones = {}) {
   const estadoCheck = verificarEstado();
   const protegidas = [requiereSesion, estadoCheck, soloVerificadosParaEscribir];
 
+  // T061: Seguridad HTTP headers (FR-044)
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net', 'unpkg.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'fonts.googleapis.com'],
+        fontSrc: ["'self'", 'fonts.gstatic.com'],
+        imgSrc: ["'self'", 'data:', 'blob:'],
+        connectSrc: ["'self'"],
+        frameSrc: ["'none'"],
+        objectSrc: ["'none'"]
+      }
+    },
+    crossOriginEmbedderPolicy: false
+  }));
   app.use(express.json({ limit: '2mb' }));
   app.use(passport.initialize());
 
@@ -59,6 +76,10 @@ function crearApp(db, opciones = {}) {
   // Compartir por WhatsApp está disponible para cualquier cuenta (gratuita, premium o admin).
   app.use('/api/cotizaciones/compartir', crearRutasCrearEnlace(db, requiereSesion, (req, res, next) => next()));
   app.use('/compartir', crearRutasAccesoEnlace());
+  // T038: Listado de plantillas PDF (FR-024)
+  app.use('/api/plantillas-pdf', ...protegidasConLegal, crearRutasPlantillasPdf(db));
+  // T046: Descarga pública por enlace temporal (FR-031)
+  app.use('/api/compartir/descargar', crearRutasCompartirDescarga(db));
 
   app.use(express.static(path.join(__dirname, 'public')));
 

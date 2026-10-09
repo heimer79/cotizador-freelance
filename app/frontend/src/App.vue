@@ -173,7 +173,7 @@ onBeforeUnmount(() => window.removeEventListener('sesion-expirada', sesionExpira
       <button class="btn btn-secondary btn-sm" @click="reenviarVerificacion">Reenviar correo de confirmación</button>
     </aside>
 
-    <CotizacionesView v-if="vistaActiva === 'cotizaciones'" />
+    <CotizacionesView v-if="vistaActiva === 'cotizaciones'" :modo="usuario ? 'lista' : 'editor'" />
     <CotizacionesView v-else-if="vistaActiva === 'dashboard'" modo="lista" />
     <ClientesView v-else-if="vistaActiva === 'clientes'" />
     <CatalogoView v-else-if="vistaActiva === 'catalogo'" />

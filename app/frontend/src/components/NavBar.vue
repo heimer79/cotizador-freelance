@@ -64,8 +64,17 @@ onMounted(cargarConteoNotificaciones);
       </button>
       <div class="navbar-divider"></div>
       <template v-if="usuario">
+        <button class="btn btn-primary btn-sm navbar-cta" @click="emit('cambiarVista', 'cotizaciones')">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Nueva cotización
+        </button>
         <button class="btn btn-secondary btn-sm" @click="emit('logout')">Salir</button>
-        <div class="navbar-avatar">{{ iniciales(usuario.nombre) }}</div>
+        <button
+          class="navbar-avatar"
+          type="button"
+          :aria-label="`Ver perfil de ${usuario.nombre}`"
+          @click="emit('cambiarVista', 'perfil')"
+        >{{ iniciales(usuario.nombre) }}</button>
       </template>
       <button v-else class="btn btn-primary" @click="emit('login')">Iniciar sesión</button>
     </div>

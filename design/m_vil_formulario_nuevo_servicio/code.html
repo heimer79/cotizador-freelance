@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Plus+Jakarta+Sans:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-error": "#ffffff", "secondary-container": "#6cf8bb", "on-tertiary-container": "#d9d8ff", "on-surface-variant": "#464555", "on-background": "#131b2e", "error": "#ba1a1a", "surface-container-low": "#f2f3ff", "on-secondary": "#ffffff", "primary-fixed-dim": "#c3c0ff", "tertiary-fixed": "#e1e0ff", "on-secondary-fixed-variant": "#005236", "surface-bright": "#faf8ff", "background": "#faf8ff", "inverse-surface": "#283044", "surface-tint": "#4d44e3", "tertiary": "#3130c0", "on-primary": "#ffffff", "outline": "#777587", "surface": "#faf8ff", "on-error-container": "#93000a", "surface-dim": "#d2d9f4", "surface-container": "#eaedff", "on-surface": "#131b2e", "on-secondary-container": "#00714d", "on-tertiary": "#ffffff", "on-secondary-fixed": "#002113", "tertiary-fixed-dim": "#c0c1ff", "inverse-primary": "#c3c0ff", "surface-container-highest": "#dae2fd", "inverse-on-surface": "#eef0ff", "on-tertiary-fixed": "#07006c", "surface-container-high": "#e2e7ff", "on-primary-fixed-variant": "#3323cc", "primary-container": "#4f46e5", "secondary-fixed-dim": "#4edea3", "on-primary-container": "#dad7ff", "surface-variant": "#dae2fd", "secondary": "#006c49", "primary-fixed": "#e2dfff", "outline-variant": "#c7c4d8", "primary": "#3525cd", "on-primary-fixed": "#0f0069", "tertiary-container": "#4b4dd8", "on-tertiary-fixed-variant": "#2f2ebe", "secondary-fixed": "#6ffbbe", "surface-container-lowest": "#ffffff", "error-container": "#ffdad6" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "space-lg": "1.5rem", "gutter": "1.25rem", "space-sm": "0.5rem", "margin-mobile": "1rem", "margin": "2rem", "gutter-mobile": "0.75rem", "space-md": "1rem", "space-xl": "2.5rem" }, "fontFamily": { "currency-display": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "label-md": ["Inter"], "headline-xl-mobile": ["Plus Jakarta Sans"], "body-sm": ["Inter"], "headline-sm": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "label-sm": ["Inter"], "body-md": ["Inter"] }, "fontSize": { "currency-display": ["28px", { "lineHeight": "34px", "fontWeight": "700" }], "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }], "headline-md": ["18px", { "lineHeight": "26px", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }], "headline-xl-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "700" }], "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }], "headline-sm": ["15px", { "lineHeight": "22px", "fontWeight": "600" }], "headline-xl": ["32px", { "lineHeight": "40px", "fontWeight": "700" }], "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface-container-lowest/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-16 px-gutter-mobile flex items-center justify-between gap-space-xs"><button aria-label="Regresar" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container transition-colors shrink-0" onclick="window.history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><div class="flex-1 min-w-0 text-center"><h1 class="font-headline-sm text-headline-sm text-on-surface truncate px-space-xs">Nuevo Registro / Formulario</h1></div><button aria-label="Cerrar formulario" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors shrink-0" onclick="window.history.back()"><span class="material-symbols-outlined text-[24px]">close</span></button></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-6 bg-surface"><div class="flex flex-col w-full pb-32">
+<!-- Micro Top Context Header -->
+<div class="px-gutter-mobile pt-2 pb-3 flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface text-label-sm font-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5 animate-pulse"></span>
+        Catálogo COP
+      </span>
+<span class="text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+        Sincronizado DIAN
+      </span>
+</div>
+<span class="text-label-sm font-label-sm text-primary flex items-center gap-0.5 font-semibold">
+      Paso 1 de 2
+    </span>
+</div>
+<div class="px-gutter-mobile flex flex-col gap-5">
+<!-- Segmented Type Selector -->
+<div class="p-1 rounded-xl bg-surface-container-high flex gap-1 relative shadow-sm">
+<button class="flex-1 py-2 px-3 rounded-lg text-center font-headline-sm text-headline-sm transition-all duration-200 flex items-center justify-center gap-1.5 bg-surface-container-lowest text-primary shadow-sm font-semibold" id="tab-service" onclick="setCatalogType('service')" type="button">
+<span class="material-symbols-outlined text-[18px]">engineering</span>
+<span>Servicio / Honorario</span>
+</button>
+<button class="flex-1 py-2 px-3 rounded-lg text-center font-headline-sm text-headline-sm transition-all duration-200 flex items-center justify-center gap-1.5 text-on-surface-variant hover:text-on-surface" id="tab-product" onclick="setCatalogType('product')" type="button">
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+<span>Producto / Licencia</span>
+</button>
+</div>
+<!-- Live Preview Floating Summary Card -->
+<div class="rounded-xl bg-surface-container-lowest p-4 shadow-sm relative overflow-hidden">
+<div class="flex items-start justify-between gap-2 mb-2">
+<div class="flex items-center gap-2">
+<div class="w-9 h-9 rounded-lg bg-primary-fixed text-primary flex items-center justify-center" id="preview-avatar">
+<span class="material-symbols-outlined text-[20px]">design_services</span>
+</div>
+<div>
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider block" id="preview-category-badge">Diseño UI/UX</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold truncate max-w-[180px]" id="preview-title">Diseño UI Sprint Pro</h3>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-label-sm font-label-sm font-semibold" id="preview-tax-pill">
+          IVA 19%
+        </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-3" id="preview-desc">
+        Prototipado interactivo alta fidelidad, sistema de diseño en Figma y pruebas de usabilidad guiadas.
+      </p>
+<div class="p-3 rounded-lg bg-surface-container flex items-center justify-between">
+<div>
+<span class="text-label-sm font-label-sm text-on-surface-variant block">Tarifa Sugerida</span>
+<div class="flex items-baseline gap-1">
+<span class="font-headline-md text-headline-md text-primary font-bold" id="preview-price">$ 1.800.000</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">COP</span>
+</div>
+</div>
+<div class="text-right">
+<span class="text-label-sm font-label-sm text-on-surface-variant block">Modalidad</span>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface" id="preview-modality">Por Proyecto</span>
+</div>
+</div>
+</div>
+<!-- Form Section -->
+<div class="flex flex-col gap-4">
+<!-- Item Name Input -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface flex items-center justify-between" for="service-name">
+<span>Nombre de la Tarifa o Ítem</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Requerido</span>
+</label>
+<div class="relative">
+<input class="w-full h-11 px-3 pl-10 rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md placeholder-on-surface-variant/50 focus:outline-none focus:bg-surface-container-low transition-colors shadow-sm" id="service-name" oninput="updatePreviewName(this.value)" placeholder="ej. Sprint UI/UX o Auditoría Cloud" type="text" value="Diseño UI Sprint Pro"/>
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[20px]">edit_note</span>
+</div>
+</div>
+<!-- Category Filter Chips -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface">Categoría Tributaria y Comercial</label>
+<div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-gutter-mobile px-gutter-mobile">
+<button class="cat-chip px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center gap-1.5 shrink-0 transition-transform active:scale-95 shadow-sm" onclick="selectCategory(this, 'Diseño UI/UX', 'design_services')" type="button">
+<span class="material-symbols-outlined text-[16px]">draw</span>
+<span>Diseño</span>
+</button>
+<button class="cat-chip px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-1.5 shrink-0 transition-transform active:scale-95" onclick="selectCategory(this, 'Desarrollo Web / App', 'code')" type="button">
+<span class="material-symbols-outlined text-[16px]">code</span>
+<span>Desarrollo</span>
+</button>
+<button class="cat-chip px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-1.5 shrink-0 transition-transform active:scale-95" onclick="selectCategory(this, 'Consultoría Legal', 'gavel')" type="button">
+<span class="material-symbols-outlined text-[16px]">gavel</span>
+<span>Legal</span>
+</button>
+<button class="cat-chip px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-1.5 shrink-0 transition-transform active:scale-95" onclick="selectCategory(this, 'Infraestructura Cloud', 'cloud_done')" type="button">
+<span class="material-symbols-outlined text-[16px]">cloud</span>
+<span>Infraestructura</span>
+</button>
+<button class="cat-chip px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-1.5 shrink-0 transition-transform active:scale-95" onclick="selectCategory(this, 'Marketing &amp; Growth', 'insights')" type="button">
+<span class="material-symbols-outlined text-[16px]">insights</span>
+<span>Marketing</span>
+</button>
+</div>
+</div>
+<!-- Billing Modality (3 Segment Pills) -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface">Modalidad de Cobro</label>
+<div class="grid grid-cols-3 gap-2">
+<button class="modality-btn py-2 px-2 rounded-lg bg-surface-container-lowest text-primary font-label-md text-label-md flex flex-col items-center gap-1 shadow-sm font-semibold transition-all" onclick="setModality(this, 'Por Proyecto')" type="button">
+<span class="material-symbols-outlined text-[20px]">assignment</span>
+<span>Proyecto</span>
+</button>
+<button class="modality-btn py-2 px-2 rounded-lg bg-surface-container-high text-on-surface-variant font-label-md text-label-md flex flex-col items-center gap-1 hover:text-on-surface transition-all" onclick="setModality(this, 'Por Hora')" type="button">
+<span class="material-symbols-outlined text-[20px]">schedule</span>
+<span>Por Hora</span>
+</button>
+<button class="modality-btn py-2 px-2 rounded-lg bg-surface-container-high text-on-surface-variant font-label-md text-label-md flex flex-col items-center gap-1 hover:text-on-surface transition-all" onclick="setModality(this, 'Mensual / Retainer')" type="button">
+<span class="material-symbols-outlined text-[20px]">autorenew</span>
+<span>Mensual</span>
+</button>
+</div>
+</div>
+<!-- High-Precision Base Price Input & Quick Increments -->
+<div class="rounded-xl bg-surface-container-lowest p-4 shadow-sm flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="price-input">Precio Base (COP)</label>
+<span class="text-label-sm font-label-sm text-secondary flex items-center gap-1 font-semibold">
+<span class="material-symbols-outlined text-[15px]">trending_up</span>
+            Tarifa estándar
+          </span>
+</div>
+<div class="relative flex items-center">
+<span class="absolute left-3 font-currency-display text-headline-sm text-on-surface-variant font-bold">$</span>
+<input class="w-full h-14 pl-8 pr-16 rounded-xl bg-surface-container text-on-surface font-currency-display text-currency-display font-bold focus:outline-none focus:bg-surface-container-high transition-colors" id="price-input" inputmode="numeric" oninput="formatPriceInput(this)" type="text" value="1.800.000"/>
+<span class="absolute right-3 font-label-md text-label-md text-on-surface-variant font-bold">COP</span>
+</div>
+<!-- Quick increment buttons -->
+<div class="flex gap-1.5 justify-between">
+<button class="flex-1 py-1 px-1.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm text-center active:bg-surface-container-high transition-colors" onclick="adjustPrice(250000)" type="button">
+            +$250k
+          </button>
+<button class="flex-1 py-1 px-1.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm text-center active:bg-surface-container-high transition-colors" onclick="adjustPrice(500000)" type="button">
+            +$500k
+          </button>
+<button class="flex-1 py-1 px-1.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm text-center active:bg-surface-container-high transition-colors" onclick="adjustPrice(1000000)" type="button">
+            +$1.0M
+          </button>
+<button class="py-1 px-2.5 rounded-lg bg-surface-container text-error font-label-sm text-label-sm text-center active:bg-error-container transition-colors" onclick="setPresetPrice(0)" type="button">
+<span class="material-symbols-outlined text-[14px]">backspace</span>
+</button>
+</div>
+</div>
+<!-- Colombian Tax Treatment Selection (DIAN Accordion / Radios) -->
+<div class="rounded-xl bg-surface-container-lowest p-4 shadow-sm flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[20px] text-primary">account_balance</span>
+<label class="font-label-md text-label-md text-on-surface font-semibold">Régimen &amp; Retenciones DIAN</label>
+</div>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Estatuto Tributario</span>
+</div>
+<div class="flex flex-col gap-2">
+<!-- IVA 19% Option -->
+<label class="tax-option flex items-center justify-between p-2.5 rounded-lg bg-surface-container cursor-pointer transition-colors" onclick="selectTaxOption('iva19', 'IVA 19% General', '19% IVA')">
+<div class="flex items-center gap-2.5">
+<input checked="" class="accent-primary w-4 h-4" name="tax-regime" type="radio" value="19"/>
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface block font-semibold leading-tight">IVA 19% General</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Servicios técnicos y corporativos</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-primary font-bold">+19%</span>
+</label>
+<!-- Exento Art 476 Option -->
+<label class="tax-option flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low cursor-pointer transition-colors" onclick="selectTaxOption('exento', 'Exento Art. 476', 'Exento 0%')">
+<div class="flex items-center gap-2.5">
+<input class="accent-primary w-4 h-4" name="tax-regime" type="radio" value="0"/>
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface block font-semibold leading-tight">Exento de IVA (Art. 476)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Software, hosting y desarrollo exportable</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-bold">0% IVA</span>
+</label>
+<!-- Retefuente Sugg. Row -->
+<div class="pt-2 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">savings</span>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">ReteFuente Sugerida</span>
+</div>
+<select class="py-1 px-2.5 rounded-lg bg-surface-container text-on-surface font-label-sm text-label-sm focus:outline-none" id="retefuente-select" onchange="updateTaxCalc()">
+<option value="11">11% Honorarios PJ</option>
+<option value="10">10% Honorarios PN</option>
+<option value="4">4% Servicios Generales</option>
+<option value="0">0% No aplica</option>
+</select>
+</div>
+</div>
+<!-- Mini Fiscal Breakdown Widget -->
+<div class="p-3 rounded-lg bg-surface-container-low flex flex-col gap-1.5 text-on-surface">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant">Subtotal Estimado</span>
+<span class="font-semibold" id="calc-subtotal">$ 1.800.000</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant" id="calc-iva-label">IVA (19%)</span>
+<span class="font-semibold text-primary" id="calc-iva">+ $ 342.000</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-on-surface-variant" id="calc-rete-label">ReteFuente (11%)</span>
+<span class="font-semibold text-error" id="calc-rete">- $ 198.000</span>
+</div>
+<div class="pt-1.5 flex justify-between items-center font-headline-sm text-headline-sm">
+<span class="font-bold">Total Factura Bruto</span>
+<span class="font-bold text-on-surface" id="calc-total">$ 2.142.000</span>
+</div>
+</div>
+</div>
+<!-- Scope Description & Quick Templates -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface font-semibold" for="service-scope">Alcance y Términos Clave</label>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Para propuesta en PDF</span>
+</div>
+<textarea class="w-full p-3 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md placeholder-on-surface-variant/50 focus:outline-none focus:bg-surface-container-low transition-colors resize-none shadow-sm" id="service-scope" oninput="updatePreviewDesc(this.value)" placeholder="Detalla entregables, revisiones o exclusiones del servicio..." rows="3">Prototipado interactivo alta fidelidad, sistema de diseño en Figma y pruebas de usabilidad guiadas.</textarea>
+<!-- Smart Prompt Chips -->
+<div class="flex gap-2 overflow-x-auto pb-1 scrollbar-none pt-1">
+<button class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm whitespace-nowrap active:scale-95 transition-transform flex items-center gap-1" onclick="insertPrompt('Incluye 2 rondas de ajustes, entrega de editables y soporte de 15 días posteriores.')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span>
+            + 2 Rondas de Ajustes
+          </button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm whitespace-nowrap active:scale-95 transition-transform flex items-center gap-1" onclick="insertPrompt('No incluye costos de licencias de terceros, hosting o pasarelas de pago.')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span>
+            + Excluye Licencias
+          </button>
+<button class="px-2.5 py-1 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm whitespace-nowrap active:scale-95 transition-transform flex items-center gap-1" onclick="insertPrompt('Pago: 50% anticipo al iniciar y 50% contra entrega final y acta de conformidad.')" type="button">
+<span class="material-symbols-outlined text-[13px]">add</span>
+            + 50/50 Hito de Pago
+          </button>
+</div>
+</div>
+<!-- Quick Document Attachment Visual Hint -->
+<div class="p-3.5 rounded-xl bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">attach_file</span>
+</div>
+<div>
+<span class="font-label-md text-label-md text-on-surface font-semibold block">Ficha Técnica o Broshure</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Adjuntar PDF opcional al cotizar</span>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-primary font-label-sm text-label-sm font-semibold active:scale-95 transition-transform shadow-sm" onclick="showToast('Adjuntos habilitados en plan Pro')" type="button">
+          Subir
+        </button>
+</div>
+</div>
+</div>
+<!-- Toast Notification Dynamic Target -->
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-opacity duration-300" id="toast">
+<div class="px-4 py-2 rounded-full bg-inverse-surface text-inverse-on-surface font-label-md text-label-md shadow-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">check_circle</span>
+<span id="toast-text">Ítem guardado con éxito</span>
+</div>
+</div>
+<!-- Sticky Bottom Execution Dock -->
+<div class="fixed bottom-0 inset-x-0 z-40 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_-4px_20px_rgba(0,0,0,0.06)] pb-safe">
+<div class="px-gutter-mobile py-3 flex items-center gap-2.5 max-w-lg mx-auto">
+<button class="flex-1 h-12 rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-1.5 transition-transform active:scale-98" onclick="handleSave(false)" type="button">
+<span class="material-symbols-outlined text-[20px]">save</span>
+<span>Guardar</span>
+</button>
+<button class="flex-1 h-12 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-headline-sm text-headline-sm font-bold flex items-center justify-center gap-1.5 transition-transform active:scale-98 shadow-md" onclick="handleSave(true)" type="button">
+<span class="material-symbols-outlined text-[20px]">post_add</span>
+<span>Guardar y Cotizar</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  let currentRawPrice = 1800000;
+  let currentTaxRate = 0.19;
+  let currentReteRate = 0.11;
+
+  function setCatalogType(type) {
+    const sBtn = document.getElementById('tab-service');
+    const pBtn = document.getElementById('tab-product');
+    const avatar = document.getElementById('preview-avatar');
+
+    if (type === 'service') {
+      sBtn.className = 'flex-1 py-2 px-3 rounded-lg text-center font-headline-sm text-headline-sm transition-all duration-200 flex items-center justify-center gap-1.5 bg-surface-container-lowest text-primary shadow-sm font-semibold';
+      pBtn.className = 'flex-1 py-2 px-3 rounded-lg text-center font-headline-sm text-headline-sm transition-all duration-200 flex items-center justify-center gap-1.5 text-on-surface-variant hover:text-on-surface';
+      avatar.innerHTML = '<span class="material-symbols-outlined text-[20px]">design_services</span>';
+    } else {
+      pBtn.className = 'flex-1 py-2 px-3 rounded-lg text-center font-headline-sm text-headline-sm transition-all duration-200 flex items-center justify-center gap-1.5 bg-surface-container-lowest text-primary shadow-sm font-semibold';
+      sBtn.className = 'flex-1 py-2 px-3 rounded-lg text-center font-headline-sm text-headline-sm transition-all duration-200 flex items-center justify-center gap-1.5 text-on-surface-variant hover:text-on-surface';
+      avatar.innerHTML = '<span class="material-symbols-outlined text-[20px]">inventory_2</span>';
+    }
+  }
+
+  function selectCategory(el, catName, icon) {
+    document.querySelectorAll('.cat-chip').forEach(btn => {
+      btn.className = 'cat-chip px-3 py-1.5 rounded-full bg-surface-container-high text-on-surface font-label-md text-label-md flex items-center gap-1.5 shrink-0 transition-transform active:scale-95';
+    });
+    el.className = 'cat-chip px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center gap-1.5 shrink-0 transition-transform active:scale-95 shadow-sm';
+    
+    document.getElementById('preview-category-badge').innerText = catName;
+    document.getElementById('preview-avatar').innerHTML = `<span class="material-symbols-outlined text-[20px]">${icon}</span>`;
+  }
+
+  function setModality(el, modalityName) {
+    document.querySelectorAll('.modality-btn').forEach(btn => {
+      btn.className = 'modality-btn py-2 px-2 rounded-lg bg-surface-container-high text-on-surface-variant font-label-md text-label-md flex flex-col items-center gap-1 hover:text-on-surface transition-all';
+    });
+    el.className = 'modality-btn py-2 px-2 rounded-lg bg-surface-container-lowest text-primary font-label-md text-label-md flex flex-col items-center gap-1 shadow-sm font-semibold transition-all';
+    document.getElementById('preview-modality').innerText = modalityName;
+  }
+
+  function formatCOP(num) {
+    return num.toLocaleString('es-CO');
+  }
+
+  function formatPriceInput(input) {
+    const raw = input.value.replace(/\D/g, '');
+    const num = raw === '' ? 0 : parseInt(raw, 10);
+    currentRawPrice = num;
+    input.value = formatCOP(num);
+    syncCalculations();
+  }
+
+  function adjustPrice(amount) {
+    currentRawPrice += amount;
+    document.getElementById('price-input').value = formatCOP(currentRawPrice);
+    syncCalculations();
+  }
+
+  function setPresetPrice(amount) {
+    currentRawPrice = amount;
+    document.getElementById('price-input').value = formatCOP(currentRawPrice);
+    syncCalculations();
+  }
+
+  function selectTaxOption(type, label, pillText) {
+    currentTaxRate = type === 'iva19' ? 0.19 : 0;
+    document.getElementById('preview-tax-pill').innerText = pillText;
+    document.getElementById('calc-iva-label').innerText = `IVA (${Math.round(currentTaxRate * 100)}%)`;
+    syncCalculations();
+  }
+
+  function updateTaxCalc() {
+    const reteVal = parseFloat(document.getElementById('retefuente-select').value);
+    currentReteRate = reteVal / 100;
+    document.getElementById('calc-rete-label').innerText = `ReteFuente (${reteVal}%)`;
+    syncCalculations();
+  }
+
+  function syncCalculations() {
+    document.getElementById('preview-price').innerText = `$ ${formatCOP(currentRawPrice)}`;
+    document.getElementById('calc-subtotal').innerText = `$ ${formatCOP(currentRawPrice)}`;
+    
+    const ivaAmt = Math.round(currentRawPrice * currentTaxRate);
+    const reteAmt = Math.round(currentRawPrice * currentReteRate);
+    const totalAmt = currentRawPrice + ivaAmt;
+
+    document.getElementById('calc-iva').innerText = `+ $ ${formatCOP(ivaAmt)}`;
+    document.getElementById('calc-rete').innerText = `- $ ${formatCOP(reteAmt)}`;
+    document.getElementById('calc-total').innerText = `$ ${formatCOP(totalAmt)}`;
+  }
+
+  function updatePreviewName(val) {
+    document.getElementById('preview-title').innerText = val.trim() || 'Nuevo Servicio';
+  }
+
+  function updatePreviewDesc(val) {
+    document.getElementById('preview-desc').innerText = val.trim() || 'Sin descripción detallada de alcance.';
+  }
+
+  function insertPrompt(text) {
+    const txtArea = document.getElementById('service-scope');
+    txtArea.value = (txtArea.value + ' ' + text).trim();
+    updatePreviewDesc(txtArea.value);
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toast-text');
+    toastText.innerText = msg;
+    toast.classList.remove('opacity-0');
+    toast.classList.add('opacity-100');
+    setTimeout(() => {
+      toast.classList.remove('opacity-100');
+      toast.classList.add('opacity-0');
+    }, 2400);
+  }
+
+  function handleSave(andQuote) {
+    const title = document.getElementById('preview-title').innerText;
+    showToast(andQuote ? `Creando cotización con "${title}"...` : `"${title}" agregado al Catálogo`);
+  }
+
+  // Initial Calculation Run
+  syncCalculations();
+</script></main></body></html>

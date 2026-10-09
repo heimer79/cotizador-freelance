@@ -1,113 +1,117 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Cotización UX, Impuestos y Mejoras Generales
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Branch**: `006-cotizacion-ux-impuestos` | **Date**: 2026-10-08 | **Spec**: [spec.md](spec.md)
 
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit-plan` command; its definition describes the execution workflow.
+**Input**: Feature specification from `/specs/006-cotizacion-ux-impuestos/spec.md`
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Ampliar la plataforma PresupuestosPro con gestión de clientes guardados con logo, catálogo de servicios reutilizables, distinción empresa/independiente con impuestos colombianos configurables (IVA, retención en la fuente, retención de IVA, ICA), emisores múltiples (premium), plantillas de PDF personalizables (premium), borrador con preview dinámico y autoguardado, WhatsApp con PDF adjunto, unificación de textos legales, 2FA, SEO/metadatos/Core Web Vitals, eliminación de cotizaciones y actualización de planes.
+
+El enfoque técnico extiende la arquitectura existente Express + Vue 3 + MySQL, añadiendo nuevas tablas y columnas al esquema, nuevos endpoints REST, componentes Vue y lógica de cálculo fiscal ampliada.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
+**Language/Version**: Node.js (CommonJS backend), JavaScript ES Modules (frontend)
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+**Primary Dependencies**: Express 4.x, Vue 3.4, Vite 5.x, jsPDF 2.5, mysql2, Passport.js (Google/Facebook OAuth), nodemailer/resend, MercadoPago SDK
 
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+**Storage**: MySQL (mysql2/promise pool), esquema imperativo en `db.js` con `CREATE TABLE IF NOT EXISTS` y migraciones incrementales vía `ALTER TABLE`
 
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+**Testing**: `node --test` (test runner nativo de Node.js), archivos en `tests/` y `app/backend/tests/`
 
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+**Target Platform**: Web (SPA Vue 3 servida desde Express), desplegada en Hostinger
 
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: Web application (SPA + API REST monolítica)
 
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+**Performance Goals**: Core Web Vitals zona verde (LCP < 2.5s, INP < 200ms, CLS < 0.1), vista previa actualizada en < 3s
 
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+**Constraints**: Hosting compartido Hostinger, logos en base64 (LONGTEXT MySQL), PDFs generados en cliente con jsPDF, sin ORM
 
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
-
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Scale/Scope**: Freelancers colombianos, cuentas gratuita/premium, ~13 user stories, ~51 functional requirements
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+| Principio | Veredicto | Justificación |
+|-----------|-----------|---------------|
+| I. Simplicidad ante todo | PASA | Cada funcionalidad está solicitada explícitamente en la spec. No se introducen abstracciones innecesarias. Se extiende el esquema existente en lugar de reescribirlo. |
+| II. Idioma y mercado | PASA | Todo en español de Colombia, COP. Los impuestos son los del Estatuto Tributario colombiano. |
+| III. Cero alcance fantasma | PASA | Las 13 user stories y 51 FR están definidas en la spec. No se implementa nada fuera de ellas. |
+| IV. Verificable por persona no técnica | PASA | Todos los criterios de éxito (SC-001 a SC-012) se verifican usando la app: creando cotizaciones, descargando PDFs, activando 2FA, revisando la página. |
+| V. Datos del usuario con respeto | PASA | Solo se piden datos necesarios para cotizar (emisor, cliente, servicios, impuestos). Secretos en variables de entorno. 2FA con códigos de recuperación, no datos biométricos. |
+
+**Resultado**: Sin violaciones. Se procede a Phase 0.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit-plan command output)
-├── research.md          # Phase 0 output (/speckit-plan command)
-├── data-model.md        # Phase 1 output (/speckit-plan command)
-├── quickstart.md        # Phase 1 output (/speckit-plan command)
-├── contracts/           # Phase 1 output (/speckit-plan command)
-└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
+specs/006-cotizacion-ux-impuestos/
+├── plan.md              # This file
+├── research.md          # Phase 0 output
+├── data-model.md        # Phase 1 output
+├── quickstart.md        # Phase 1 output
+├── contracts/           # Phase 1 output
+│   └── api-endpoints.md
+└── tasks.md             # Phase 2 output (NOT created by /speckit-plan)
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+app/
+├── backend/
+│   ├── server.js            # Entry point, mounts routes
+│   ├── db.js                # MySQL pool + schema creation
+│   ├── auth.js              # Session/token auth, Passport strategies
+│   ├── calculo.js           # Tax calculation logic (to extend)
+│   ├── numeracion.js        # Quote numbering
+│   ├── rutas/
+│   │   ├── auth.js          # Registration, login, password reset
+│   │   ├── clientes.js      # CRUD clientes (to extend: logo, search)
+│   │   ├── catalogo.js      # CRUD servicios catálogo
+│   │   ├── cotizaciones.js  # CRUD cotizaciones (to extend: delete, taxes, autosave)
+│   │   ├── perfil.js        # Perfil emisor (to extend: multi-emitter, tax config)
+│   │   └── grupos.js        # Grupos de clientes (premium)
+│   ├── src/
+│   │   ├── api/             # Admin, legal, donations, ads, sharing endpoints
+│   │   ├── models/          # Domain models (notifications, subscriptions, etc.)
+│   │   └── services/        # Email services (Gmail API, SMTP)
+│   ├── datos/               # SQLite (legacy), PDFs temporales
+│   └── tests/
+├── frontend/
+│   ├── src/
+│   │   ├── App.vue          # Main SPA with router-like state
+│   │   ├── api.js           # HTTP client wrapper
+│   │   ├── pdf.js           # jsPDF generation (to extend: templates, full tax breakdown)
+│   │   ├── main.js          # Vue app mount
+│   │   ├── estilos.css      # Global styles
+│   │   ├── components/      # Reusable UI components
+│   │   ├── composables/     # Vue composables (auth, subscription, etc.)
+│   │   └── vistas/          # Page-level views
+│   └── dist/                # Built output served by Express
+└── tests/                   # Integration/E2E tests
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Se mantiene la estructura monorepo existente `app/backend` + `app/frontend`. Los nuevos archivos se ubican siguiendo los patrones existentes: rutas en `rutas/`, modelos en `src/models/`, servicios en `src/services/`, vistas en `vistas/`, componentes en `components/`.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+> No hay violaciones de la Constitution que justificar. La tabla queda vacía.
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| — | — | — |
+
+## Constitution Re-Check (Post Phase 1 Design)
+
+| Principio | Veredicto | Notas |
+|-----------|-----------|-------|
+| I. Simplicidad | PASA | El data model extiende tablas existentes con columnas nuevas; las tablas nuevas (emisores, plantillas_pdf, totp_2fa, codigos_recuperacion) son necesarias para FR explícitos. |
+| II. Idioma y mercado | PASA | Todos los campos, mensajes y cálculos en COP/español colombiano. |
+| III. Cero alcance fantasma | PASA | Cada tabla/endpoint mapea a un FR numerado. |
+| IV. Verificable | PASA | quickstart.md documenta escenarios verificables por clic. |
+| V. Datos con respeto | PASA | 2FA guarda el secreto TOTP cifrado con clave del servidor, no en texto plano. Logos en base64 como ya existe. |

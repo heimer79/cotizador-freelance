@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-error": "#ffffff",
+          "secondary-container": "#6cf8bb",
+          "on-tertiary-container": "#d9d8ff",
+          "on-surface-variant": "#464555",
+          "on-background": "#131b2e",
+          "error": "#ba1a1a",
+          "surface-container-low": "#f2f3ff",
+          "on-secondary": "#ffffff",
+          "primary-fixed-dim": "#c3c0ff",
+          "tertiary-fixed": "#e1e0ff",
+          "on-secondary-fixed-variant": "#005236",
+          "surface-bright": "#faf8ff",
+          "background": "#faf8ff",
+          "inverse-surface": "#283044",
+          "surface-tint": "#4d44e3",
+          "tertiary": "#3130c0",
+          "on-primary": "#ffffff",
+          "outline": "#777587",
+          "surface": "#faf8ff",
+          "on-error-container": "#93000a",
+          "surface-dim": "#d2d9f4",
+          "surface-container": "#eaedff",
+          "on-surface": "#131b2e",
+          "on-secondary-container": "#00714d",
+          "on-tertiary": "#ffffff",
+          "on-secondary-fixed": "#002113",
+          "tertiary-fixed-dim": "#c0c1ff",
+          "inverse-primary": "#c3c0ff",
+          "surface-container-highest": "#dae2fd",
+          "inverse-on-surface": "#eef0ff",
+          "on-tertiary-fixed": "#07006c",
+          "surface-container-high": "#e2e7ff",
+          "on-primary-fixed-variant": "#3323cc",
+          "primary-container": "#4f46e5",
+          "secondary-fixed-dim": "#4edea3",
+          "on-primary-container": "#dad7ff",
+          "surface-variant": "#dae2fd",
+          "secondary": "#006c49",
+          "primary-fixed": "#e2dfff",
+          "outline-variant": "#c7c4d8",
+          "primary": "#3525cd",
+          "on-primary-fixed": "#0f0069",
+          "tertiary-container": "#4b4dd8",
+          "on-tertiary-fixed-variant": "#2f2ebe",
+          "secondary-fixed": "#6ffbbe",
+          "surface-container-lowest": "#ffffff",
+          "error-container": "#ffdad6"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "gutter": "1.25rem",
+          "space-sm": "0.5rem",
+          "margin-mobile": "1rem",
+          "margin": "2rem",
+          "gutter-mobile": "0.75rem",
+          "space-md": "1rem",
+          "space-xl": "2.5rem"
+        },
+        "fontFamily": {
+          "currency-display": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-md": [
+            "Plus Jakarta Sans"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "label-md": [
+            "Inter"
+          ],
+          "headline-xl-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "headline-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-xl": [
+            "Plus Jakarta Sans"
+          ],
+          "label-sm": [
+            "Inter"
+          ],
+          "body-md": [
+            "Inter"
+          ]
+        },
+        "fontSize": {
+          "currency-display": [
+            "28px",
+            {
+              "lineHeight": "34px",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-lg": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-md": [
+            "18px",
+            {
+              "lineHeight": "26px",
+              "fontWeight": "600"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl-mobile": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "fontWeight": "700"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "18px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-sm": [
+            "15px",
+            {
+              "lineHeight": "22px",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-xl": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "fontWeight": "700"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "fontWeight": "600"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 max-w-[1200px] mx-auto px-margin flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm"><img alt="Quotizador Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XxCjTwZVAIFIoCmqI0gjGPZ9V6r-iFfSP7pbunW9nuumhvCZs6EBd8F46VMtnT6q4nmvjBRJkaryegGrwfSC2TSMIaSKpjyVUYo7JiZu6T6Q8CB878TIOEU5DgmnZgmUDbdMCTeNwlR2Mxe1TedQe6Of9DvcpZcv3wa-UkEgTTZJGdBlgYghXTAUxwc9zQVSJFum94Jp4MuoAZUwPsgOkHmXnINYB80bpUtfVbA6sYR-zpLrfV5sHi9x8"/><span class="font-headline-md text-headline-md tracking-tight text-on-surface">Quotizador</span></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-on-surface font-headline-sm"><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="cotizador" href="#">Cotizador</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="mis-cotizaciones" href="#">Mis cotizaciones</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="clientes" href="#">Clientes</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="catalogo" href="#">Catálogo</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="perfil" href="#">Perfil</a><a class="px-space-sm py-space-xs rounded text-on-surface-variant font-body-md text-body-md hover:bg-surface-container hover:text-on-surface transition-colors" data-path="planes" href="#">Planes</a></nav></div><div class="flex items-center gap-space-sm"><a class="hidden sm:inline-flex items-center px-space-sm py-space-xs rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md hover:bg-secondary-fixed-dim hover:text-on-secondary-fixed transition-colors" data-path="apoyanos" href="#"><span class="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5"></span>Apóyanos</a><button aria-label="Ayuda y Soporte" class="p-space-xs text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-full transition-colors flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">help</span></button><a class="hidden md:inline-flex items-center gap-space-xs bg-primary-container text-on-primary font-headline-sm text-headline-sm px-space-md py-space-xs rounded-lg shadow-sm hover:bg-primary transition-colors active:scale-[0.98]" data-path="cotizador" href="#"><span class="material-symbols-outlined text-[18px]">add</span>Nueva Cotización</a><div class="flex items-center pl-space-xs"><img alt="Profile" class="w-8 h-8 rounded-full object-cover cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUtJNltzCMT27XvsoWnjYbbRmH16XwSSunBLlZ364TVtUHJhm_xB8yVAnT2y5mOdBPqkNyV7ub7K2_mJ164yQRCpu3TJ9L_GVBZIEkGcLMdqsMGB7Kc_-krE9dfn0ubc1zSk5cEFkrcP7a2bCl2GmNaFNx0lwex-A-I6Af_oZ2NOogxaC5pPLT_GJNYquySHRoS6w3LagsNnchj28dpANjwgotKyx0-eIRa3WlyUCteYwEpmZkrPmt"/></div></div></div></header><main class="w-full flex-1 pt-16 bg-surface"><div class="flex flex-col w-full">
+<div class="max-w-[1200px] w-full mx-auto px-margin py-space-lg flex flex-col gap-space-lg">
+<!-- Breadcrumb & Top Bar -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<nav class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+<a class="hover:text-primary transition-colors flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-[16px]">inventory_2</span>
+<span>Catálogo</span>
+</a>
+<span class="text-outline-variant font-medium">/</span>
+<span class="text-on-surface font-label-md text-label-md">Nuevo Concepto</span>
+</nav>
+<div class="flex items-center gap-space-sm flex-wrap">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Registrar Nuevo Servicio o Producto</h1>
+<span class="inline-flex items-center gap-1.5 px-space-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+            Normativa DIAN 2026
+          </span>
+</div>
+</div>
+<!-- Segmented Type Selector -->
+<div class="inline-flex p-1 bg-surface-container rounded-xl shadow-sm self-start md:self-auto">
+<button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm shadow-sm transition-all" id="btn-type-service" type="button">
+<span class="material-symbols-outlined text-[18px] text-primary">engineering</span>
+<span>Servicio Profesional / Consultoría</span>
+</button>
+<button class="flex items-center gap-space-xs px-space-md py-space-xs rounded-lg text-on-surface-variant font-headline-sm text-headline-sm hover:text-on-surface transition-all" id="btn-type-product" type="button">
+<span class="material-symbols-outlined text-[18px]">package_2</span>
+<span>Producto / Licencia / Entregable</span>
+</button>
+</div>
+</div>
+<!-- Main Workspace Split 7:5 -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Columna 1 (7 cols): Especificación del Concepto -->
+<div class="lg:col-span-7 flex flex-col gap-space-lg">
+<!-- Tarjeta Principal de Identificación -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">tune</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Especificación Operativa</h2>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Paso 1 de 2</span>
+</div>
+<!-- SKU / Ref Interna -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-md">
+<div class="sm:col-span-2 flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant flex items-center justify-between" for="sku-code">
+<span>Código SKU / Ref Interna</span>
+<span class="text-outline font-normal text-body-sm">Único en catálogo</span>
+</label>
+<div class="relative flex items-center">
+<input class="w-full h-11 px-space-md bg-surface-container-low rounded-lg font-headline-sm text-headline-sm text-on-surface focus:outline-none focus:bg-surface-container-lowest transition-all" id="sku-code" type="text" value="SRV-2026-08"/>
+<span class="material-symbols-outlined absolute right-3 text-outline-variant text-[20px]">qr_code_2</span>
+</div>
+</div>
+<div class="flex flex-col justify-end">
+<button class="h-11 px-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-primary font-headline-sm text-headline-sm flex items-center justify-center gap-1.5 transition-colors shadow-sm" id="btn-gen-sku" type="button">
+<span class="material-symbols-outlined text-[18px]">autorenew</span>
+<span>Auto-generar</span>
+</button>
+</div>
+</div>
+<!-- Nombre del Servicio -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant" for="item-name">Nombre Comercial del Concepto</label>
+<input class="w-full h-11 px-space-md bg-surface-container-low rounded-lg font-headline-md text-headline-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest transition-all" id="item-name" placeholder="Ej. Arquitectura Cloud AWS o Asesoría SARLAFT" type="text" value="Auditoría de Ciberseguridad &amp; Pentesting Web"/>
+</div>
+<!-- Categoría y Unidad de Medida -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant" for="category-select">Categoría Comercial</label>
+<div class="relative">
+<select class="w-full h-11 px-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:bg-surface-container-lowest transition-all" id="category-select">
+<option value="Desarrollo de Software">Desarrollo de Software</option>
+<option selected="" value="Auditoría y Ciberseguridad">Ciberseguridad &amp; Ethical Hacking</option>
+<option value="Diseño UX/UI">Diseño UX/UI &amp; Prototipado</option>
+<option value="Consultoría Legal &amp; SARLAFT">Consultoría Legal &amp; SARLAFT</option>
+<option value="Infraestructura Cloud">Infraestructura Cloud &amp; DevOps</option>
+<option value="Marketing Digital">Marketing Digital &amp; Growth</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant" for="billing-unit">Modalidad de Cobro</label>
+<div class="relative">
+<select class="w-full h-11 px-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:bg-surface-container-lowest transition-all" id="billing-unit">
+<option selected="" value="Proyecto Llave en Mano">Proyecto Llave en Mano</option>
+<option value="Por Hora">Tarifa por Hora</option>
+<option value="Por Sprint">Por Sprint (10 días hábiles)</option>
+<option value="Mensualidad recurrente / Fee">Mensualidad recurrente / Fee</option>
+<option value="Paquete cerrado">Paquete cerrado / Entregable</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none text-[20px]">schedule</span>
+</div>
+</div>
+</div>
+<!-- Descripción detallada con Mini-Toolbar -->
+<div class="flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-md text-label-md text-on-surface-variant" for="item-desc">Alcance Comercial para Cotización Oficial</label>
+<div class="flex items-center gap-1 bg-surface-container rounded-md px-1.5 py-0.5">
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">format_bold</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">format_list_bulleted</span>
+</button>
+<button class="p-1 rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">checklist</span>
+</button>
+</div>
+</div>
+<textarea class="w-full p-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:bg-surface-container-lowest transition-all leading-relaxed" id="item-desc" placeholder="Describe los entregables exactos, límites del servicio y cláusulas que se imprimirán en el PDF final..." rows="5">• Evaluación de vulnerabilidades OWASP Top 10 en ambientes productivos y staging.
+• Pruebas de penetración controladas (Blackbox / Greybox) sobre API REST y Frontend.
+• Informe ejecutivo con vector de ataque, nivel de criticidad (CVSS) y plan de remediación técnica.
+• Sesión de sustentación técnica de 2 horas con el equipo de ingeniería del cliente.</textarea>
+<div class="flex items-center justify-between font-body-sm text-body-sm text-outline">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-secondary">verified</span> Se incluirá de forma estructurada en la cláusula de alcance.
+              </span>
+<span id="char-counter">312 caracteres</span>
+</div>
+</div>
+</div>
+<!-- Tarjeta Visual / Documental de Apoyo -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col sm:flex-row gap-space-lg items-center">
+<div class="w-full sm:w-44 h-32 rounded-xl overflow-hidden relative flex-shrink-0 bg-surface-container-high">
+<img class="w-full h-full object-cover" data-alt="High tech minimal isometric rendering of digital security audit nodes, encrypted blockchain ledger and server rack with soft indigo atmospheric lighting and clean geometry" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTUKLnNtoFGm2BzQs-0s0oTtzhz815fZ-aBjZRCRgTtIDEfShUlY84kZtZI91qdAJgZy0SRvn9rhkGR1CD_TgSysr9Z506zqw_ivA4vMxK-mGOqvK9Tm3mKICpal-fi1R8H6O8GxsqzmsYcPr72cUmxiHOrv_zjyDmAMiMuJZerAGbN_UOhB_lFC1ZT9A4UDZyJFMubi6m3kRlnpQ29lSOBCd5wtcGIxKy0IsguDH-fi3WeFvWwzRO"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/60 to-transparent flex items-end p-2">
+<span class="font-label-sm text-label-sm text-on-error bg-inverse-surface/80 px-2 py-0.5 rounded backdrop-blur">Servicio DIAN</span>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[18px]">gavel</span>
+              Validación Tributaria DIAN Automatizada
+            </span>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Al guardar este concepto, el motor tributario verificará automáticamente las bases mínimas de retención aplicables según el Decreto 1625 y las tarifas UVT vigentes para 2026.
+            </p>
+</div>
+</div>
+</div>
+<!-- Columna 2 (5 cols): Estructura de Precios e Impuestos DIAN -->
+<div class="lg:col-span-5 flex flex-col gap-space-lg">
+<!-- Panel Fiscal y Tarifario -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">payments</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Estructura Económica &amp; DIAN</h2>
+</div>
+<span class="px-space-xs py-0.5 rounded bg-surface-container text-on-surface-variant font-label-sm text-label-sm">Moneda: COP</span>
+</div>
+<!-- Tarifa Base Sugerida COP -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant flex items-center justify-between" for="price-input">
+<span>Tarifa Base Sugerida (COP)</span>
+<span class="text-primary font-headline-sm text-headline-sm">Sin IVA incluido</span>
+</label>
+<div class="relative flex items-center">
+<span class="absolute left-3.5 font-headline-md text-headline-md text-on-surface-variant">$</span>
+<input class="w-full h-12 pl-8 pr-16 bg-surface-container-low rounded-lg font-currency-display text-currency-display text-on-surface tracking-tight focus:outline-none focus:bg-surface-container-lowest transition-all" id="price-input" type="text" value="3.500.000"/>
+<span class="absolute right-3.5 font-headline-sm text-headline-sm text-outline">COP</span>
+</div>
+</div>
+<!-- Tratamiento IVA DIAN -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant flex items-center justify-between" for="iva-select">
+<span>Régimen de IVA DIAN</span>
+<a class="text-tertiary font-body-sm text-body-sm hover:underline flex items-center gap-0.5" href="#">
+<span>E.T. Art. 476</span>
+<span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</label>
+<div class="relative">
+<select class="w-full h-11 px-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:bg-surface-container-lowest transition-all" id="iva-select">
+<option selected="" value="19">Gravado 19% General (Servicios Estándar)</option>
+<option value="0_exento">Exento Art. 476 E.T. (Servicios Digitales / Exportación)</option>
+<option value="0_excluido">Excluido 0% (Educación, Salud, Exceptuados)</option>
+<option value="5">Reducido 5% (Bienes e insumos agro/especiales)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- ReteFuente DIAN -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant" for="retefuente-select">Retención en la Fuente Sugerida</label>
+<div class="relative">
+<select class="w-full h-11 px-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:bg-surface-container-lowest transition-all" id="retefuente-select">
+<option selected="" value="11">11% - Honorarios Profesionales / Consultoría Calificada</option>
+<option value="4">4% - Servicios Técnicos y Operativos Generales</option>
+<option value="2.5">2.5% - Compras Generales / Licencias / Productos Físicos</option>
+<option value="0">0% - No aplica retención (Persona Natural no declarante)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- ReteICA Municipal / CIIU -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-md text-label-md text-on-surface-variant" for="reteica-select">ReteICA Sugerido (Actividad CIIU Bogotá / Nacional)</label>
+<div class="relative">
+<select class="w-full h-11 px-space-md bg-surface-container-low rounded-lg font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:bg-surface-container-lowest transition-all" id="reteica-select">
+<option selected="" value="9.66">CIIU 6201 - Programación y Sistemas (9.66 ‰)</option>
+<option value="11.04">CIIU 7020 - Consultoría en Gestión y Estrategia (11.04 ‰)</option>
+<option value="6.9">CIIU 7310 - Publicidad y Medios de Comunicación (6.9 ‰)</option>
+<option value="4.14">CIIU 4651 - Comercio y Distribución de Hardware (4.14 ‰)</option>
+<option value="0">0.00 ‰ - Exento de ICA territorial</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+</div>
+</div>
+<!-- Calculadora Interactiva de Margen -->
+<div class="mt-space-xs p-space-md bg-surface-container-low rounded-xl flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary text-[18px]">trending_up</span>
+                Análisis de Rentabilidad
+              </span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-label-md" id="margin-badge">65.7% Margen</span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Costo Operativo Estimado</span>
+<div class="relative">
+<span class="absolute left-2.5 top-2 text-on-surface-variant font-body-md text-body-md">$</span>
+<input class="w-full h-9 pl-6 pr-2 bg-surface-container-lowest rounded font-headline-sm text-headline-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary" id="cost-input" type="text" value="1.200.000"/>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Ganancia Bruta Neta</span>
+<div class="h-9 px-2 bg-surface-container-lowest rounded flex items-center font-headline-sm text-headline-sm text-secondary truncate">
+                  $ 2.300.000 COP
+                </div>
+</div>
+</div>
+<!-- Mini Sparkline visual SVG de rentabilidad -->
+<div class="w-full pt-1">
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden flex">
+<div class="h-full bg-secondary transition-all" style="width: 65.7%;"></div>
+<div class="h-full bg-outline-variant transition-all" style="width: 34.3%;"></div>
+</div>
+<div class="flex justify-between items-center text-[10px] text-on-surface-variant pt-1">
+<span>Costo: 34.3%</span>
+<span>Margen Neto: 65.7%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Vista Previa en Tiempo Real: Tarjeta de Cotización -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">visibility</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Previsualización de Cotización</h3>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">En PDF y Web</span>
+</div>
+<div class="p-space-md bg-surface-container-low rounded-xl flex flex-col gap-space-md shadow-sm">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-primary uppercase" id="preview-sku">SRV-2026-08</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface line-clamp-1" id="preview-title">Auditoría de Ciberseguridad &amp; Pentesting Web</h4>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="preview-unit">Modalidad: Proyecto Llave en Mano</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-label-md text-label-md whitespace-nowrap">Cant. 1</span>
+</div>
+<!-- Desglose Tributario de Previsualización -->
+<div class="flex flex-col gap-1.5 pt-space-xs">
+<div class="flex justify-between items-center font-body-sm text-body-sm text-on-surface-variant">
+<span>Subtotal Base:</span>
+<span class="font-headline-sm text-headline-sm text-on-surface" id="preview-subtotal">$ 3.500.000 COP</span>
+</div>
+<div class="flex justify-between items-center font-body-sm text-body-sm text-on-surface-variant">
+<span>+ IVA (19% Gravado):</span>
+<span class="text-on-surface" id="preview-iva">$ 665.000 COP</span>
+</div>
+<div class="flex justify-between items-center font-body-sm text-body-sm text-error">
+<span>- ReteFuente (11% Honorarios):</span>
+<span id="preview-retefuente">- $ 385.000 COP</span>
+</div>
+<div class="flex justify-between items-center font-body-sm text-body-sm text-error">
+<span>- ReteICA (9.66 ‰):</span>
+<span id="preview-reteica">- $ 33.810 COP</span>
+</div>
+</div>
+<!-- Total Hero Card dentro del preview -->
+<div class="p-space-md bg-primary-container text-on-primary rounded-xl flex items-center justify-between shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-primary-container uppercase">Total Neto Sugerido</span>
+<span class="font-currency-display text-currency-display text-on-primary leading-tight" id="preview-neto">$ 3.746.190</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-label-sm text-label-sm text-on-primary-container">Facturación DIAN</span>
+<span class="font-headline-sm text-headline-sm text-secondary-fixed">COP</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Barra de Acciones Final / Footer Dock -->
+<div class="w-full mt-space-md p-space-md bg-surface-container-lowest rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm text-on-surface-variant font-body-sm text-body-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span>Concepto listo para indexarse en tu tarifario oficial</span>
+</div>
+<div class="flex items-center gap-space-sm w-full sm:w-auto justify-end flex-wrap">
+<button class="px-space-md h-11 rounded-lg hover:bg-surface-container text-on-surface-variant font-headline-sm text-headline-sm transition-colors" id="btn-discard" type="button">
+          Descartar
+        </button>
+<button class="px-space-md h-11 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-primary font-headline-sm text-headline-sm flex items-center gap-1.5 transition-colors shadow-sm" id="btn-save-quote" type="button">
+<span class="material-symbols-outlined text-[18px]">add_task</span>
+<span>Guardar y Añadir a Cotización</span>
+</button>
+<button class="px-space-lg h-11 rounded-lg bg-primary-container hover:bg-primary text-on-primary font-headline-sm text-headline-sm flex items-center gap-1.5 transition-all shadow-sm active:scale-[0.98]" id="btn-save-catalog" type="button">
+<span class="material-symbols-outlined text-[18px]">save</span>
+<span>Guardar en Catálogo</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Referencias a elementos interactivos
+    const typeService = document.getElementById('btn-type-service');
+    const typeProduct = document.getElementById('btn-type-product');
+    const skuInput = document.getElementById('sku-code');
+    const btnGenSku = document.getElementById('btn-gen-sku');
+    const nameInput = document.getElementById('item-name');
+    const billingSelect = document.getElementById('billing-unit');
+    const priceInput = document.getElementById('price-input');
+    const costInput = document.getElementById('cost-input');
+    const ivaSelect = document.getElementById('iva-select');
+    const retefuenteSelect = document.getElementById('retefuente-select');
+    const reteicaSelect = document.getElementById('reteica-select');
+    const descTextarea = document.getElementById('item-desc');
+    const charCounter = document.getElementById('char-counter');
+
+    // Elementos de Previsualización
+    const previewSku = document.getElementById('preview-sku');
+    const previewTitle = document.getElementById('preview-title');
+    const previewUnit = document.getElementById('preview-unit');
+    const previewSubtotal = document.getElementById('preview-subtotal');
+    const previewIva = document.getElementById('preview-iva');
+    const previewRetefuente = document.getElementById('preview-retefuente');
+    const previewReteica = document.getElementById('preview-reteica');
+    const previewNeto = document.getElementById('preview-neto');
+    const marginBadge = document.getElementById('margin-badge');
+
+    // Toggle de tipo (Servicio vs Producto)
+    let currentType = 'service';
+    typeService.addEventListener('click', () => {
+      currentType = 'service';
+      typeService.className = 'flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm shadow-sm transition-all';
+      typeProduct.className = 'flex items-center gap-space-xs px-space-md py-space-xs rounded-lg text-on-surface-variant font-headline-sm text-headline-sm hover:text-on-surface transition-all';
+      if (!skuInput.value.startsWith('SRV')) {
+        skuInput.value = 'SRV-2026-' + Math.floor(10 + Math.random() * 90);
+        updateLivePreview();
+      }
+    });
+
+    typeProduct.addEventListener('click', () => {
+      currentType = 'product';
+      typeProduct.className = 'flex items-center gap-space-xs px-space-md py-space-xs rounded-lg bg-surface-container-lowest text-on-surface font-headline-sm text-headline-sm shadow-sm transition-all';
+      typeService.className = 'flex items-center gap-space-xs px-space-md py-space-xs rounded-lg text-on-surface-variant font-headline-sm text-headline-sm hover:text-on-surface transition-all';
+      skuInput.value = 'PRD-2026-' + Math.floor(10 + Math.random() * 90);
+      updateLivePreview();
+    });
+
+    // Generar SKU Aleatorio
+    btnGenSku.addEventListener('click', () => {
+      const prefix = currentType === 'service' ? 'SRV' : 'PRD';
+      const rand = Math.floor(100 + Math.random() * 900);
+      skuInput.value = prefix + '-2026-' + rand;
+      updateLivePreview();
+    });
+
+    // Formatear moneda colombiana
+    function parseCop(val) {
+      if (!val) return 0;
+      const clean = val.toString().replace(/[^0-9]/g, '');
+      return parseInt(clean, 10) || 0;
+    }
+
+    function formatCop(num) {
+      return num.toLocaleString('es-CO');
+    }
+
+    // Cálculo tributario reactivo
+    function updateLivePreview() {
+      const base = parseCop(priceInput.value);
+      const cost = parseCop(costInput.value);
+
+      // Sku & Título
+      previewSku.textContent = skuInput.value || 'SRV-TEMP';
+      previewTitle.textContent = nameInput.value || 'Servicio sin denominación';
+      previewUnit.textContent = 'Modalidad: ' + billingSelect.value;
+
+      // IVA
+      let ivaPct = 0;
+      if (ivaSelect.value === '19') ivaPct = 0.19;
+      if (ivaSelect.value === '5') ivaPct = 0.05;
+      const ivaAmount = Math.round(base * ivaPct);
+
+      // ReteFuente
+      const rfPct = parseFloat(retefuenteSelect.value) / 100 || 0;
+      const rfAmount = Math.round(base * rfPct);
+
+      // ReteICA
+      const icaMil = parseFloat(reteicaSelect.value) || 0;
+      const icaAmount = Math.round((base * icaMil) / 1000);
+
+      // Total Neto
+      const neto = (base + ivaAmount) - (rfAmount + icaAmount);
+
+      // Actualizar DOM
+      previewSubtotal.textContent = '$ ' + formatCop(base) + ' COP';
+      previewIva.textContent = '$ ' + formatCop(ivaAmount) + ' COP';
+      previewRetefuente.textContent = '- $ ' + formatCop(rfAmount) + ' COP';
+      previewReteica.textContent = '- $ ' + formatCop(icaAmount) + ' COP';
+      previewNeto.textContent = '$ ' + formatCop(neto);
+
+      // Rentabilidad
+      if (base > 0) {
+        const margin = (((base - cost) / base) * 100).toFixed(1);
+        marginBadge.textContent = margin + '% Margen';
+      }
+    }
+
+    // Event Listeners para cambios
+    [nameInput, billingSelect, ivaSelect, retefuenteSelect, reteicaSelect].forEach(el => {
+      el.addEventListener('change', updateLivePreview);
+      el.addEventListener('input', updateLivePreview);
+    });
+
+    priceInput.addEventListener('input', (e) => {
+      const numeric = parseCop(e.target.value);
+      e.target.value = formatCop(numeric);
+      updateLivePreview();
+    });
+
+    costInput.addEventListener('input', (e) => {
+      const numeric = parseCop(e.target.value);
+      e.target.value = formatCop(numeric);
+      updateLivePreview();
+    });
+
+    descTextarea.addEventListener('input', () => {
+      charCounter.textContent = descTextarea.value.length + ' caracteres';
+    });
+
+    // Inicializar cálculos
+    updateLivePreview();
+  })();
+</script></main><footer class="w-full bg-surface-container-low py-space-md shadow-[0_-1px_8px_rgba(0,0,0,0.02)]"><div class="max-w-[1200px] mx-auto px-margin flex flex-col md:flex-row items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><span class="font-headline-sm text-headline-sm text-on-surface">Quotizador Colombia</span><span>•</span><span>Facturación &amp; Cotización Fiscal Ágil</span></div><nav class="flex items-center flex-wrap justify-center gap-space-md" data-active-classes="text-on-surface font-label-md"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="politica-de-privacidad" href="#">Política de Privacidad</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="sarlaft" href="#">SARLAFT</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="terminos-de-uso" href="#">Términos de Uso</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="planes" href="#">Planes</a></nav></div></footer></body></html>

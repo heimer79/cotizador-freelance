@@ -204,6 +204,128 @@ async function crearEsquema() {
       await conn.query(`ALTER TABLE cotizaciones ADD COLUMN ultima_actividad DATETIME DEFAULT CURRENT_TIMESTAMP`);
     }
 
+    // T001: clientes - email y telefono
+    const [colsClienteEmail] = await conn.query(`SHOW COLUMNS FROM clientes LIKE 'email'`);
+    if (colsClienteEmail.length === 0) {
+      await conn.query(`ALTER TABLE clientes ADD COLUMN email VARCHAR(255) DEFAULT NULL`);
+      await conn.query(`ALTER TABLE clientes ADD COLUMN telefono VARCHAR(50) DEFAULT NULL`);
+    }
+
+    // T002: cotizaciones - campos de impuestos ampliados, emisor y cliente snapshot
+    const [colsCotEmisorId] = await conn.query(`SHOW COLUMNS FROM cotizaciones LIKE 'emisor_id'`);
+    if (colsCotEmisorId.length === 0) {
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN emisor_id INT DEFAULT NULL`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN emisor_tipo VARCHAR(30) DEFAULT NULL`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN iva_responsable TINYINT(1) NOT NULL DEFAULT 1`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN reteiva_activada TINYINT(1) NOT NULL DEFAULT 0`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN reteiva_porcentaje DECIMAL(5,2) DEFAULT 15.00`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN reteica_activada TINYINT(1) NOT NULL DEFAULT 0`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN reteica_porcentaje DECIMAL(5,2) DEFAULT NULL`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN compensar_retencion TINYINT(1) NOT NULL DEFAULT 0`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN cliente_email VARCHAR(255) DEFAULT NULL`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN cliente_telefono VARCHAR(50) DEFAULT NULL`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN cliente_logo_base64 LONGTEXT`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN plantilla_pdf VARCHAR(30) DEFAULT 'profesional'`);
+      await conn.query(`ALTER TABLE cotizaciones ADD COLUMN colores_pdf TEXT DEFAULT NULL`);
+    }
+
+    // T025 prereq: catalogo - descripcion y cantidad_defecto
+    const [colsCatDesc] = await conn.query(`SHOW COLUMNS FROM catalogo LIKE 'descripcion'`);
+    if (colsCatDesc.length === 0) {
+      await conn.query(`ALTER TABLE catalogo ADD COLUMN descripcion VARCHAR(500) DEFAULT NULL`);
+      await conn.query(`ALTER TABLE catalogo ADD COLUMN cantidad_defecto INT NOT NULL DEFAULT 1`);
+    }
+
+    // T003: perfil - tipo_emisor
+    const [colsPerfilTipo] = await conn.query(`SHOW COLUMNS FROM perfil LIKE 'tipo_emisor'`);
+    if (colsPerfilTipo.length === 0) {
+      await conn.query(`ALTER TABLE perfil ADD COLUMN tipo_emisor VARCHAR(30) NOT NULL DEFAULT 'persona_natural'`);
+    }
+
+    // T004: usuarios - totp_activo, plantilla_pdf_preferida, colores_pdf_preferidos
+    const [colsUsuariosTotp] = await conn.query(`SHOW COLUMNS FROM usuarios LIKE 'totp_activo'`);
+    if (colsUsuariosTotp.length === 0) {
+      await conn.query(`ALTER TABLE usuarios ADD COLUMN totp_activo TINYINT(1) NOT NULL DEFAULT 0`);
+      await conn.query(`ALTER TABLE usuarios ADD COLUMN plantilla_pdf_preferida VARCHAR(30) DEFAULT 'profesional'`);
+      await conn.query(`ALTER TABLE usuarios ADD COLUMN colores_pdf_preferidos TEXT DEFAULT NULL`);
+    }
+
+    // T005: tabla emisores
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS emisores (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        es_principal TINYINT(1) NOT NULL DEFAULT 0,
+        nombre VARCHAR(255) NOT NULL,
+        documento VARCHAR(50) DEFAULT NULL,
+        email VARCHAR(255) DEFAULT NULL,
+        telefono VARCHAR(50) DEFAULT NULL,
+        logo_base64 LONGTEXT,
+        tipo_emisor VARCHAR(30) NOT NULL DEFAULT 'persona_natural',
+        iva_responsable TINYINT(1) NOT NULL DEFAULT 0,
+        iva_porcentaje DECIMAL(5,2) NOT NULL DEFAULT 19.00,
+        retencion_porcentaje DECIMAL(5,2) DEFAULT NULL,
+        retencion_concepto VARCHAR(100) DEFAULT NULL,
+        reteiva_porcentaje DECIMAL(5,2) DEFAULT 15.00,
+        reteica_porcentaje DECIMAL(5,2) DEFAULT NULL,
+        reteica_municipio VARCHAR(100) DEFAULT NULL,
+        compensar_retencion TINYINT(1) NOT NULL DEFAULT 0,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_emisor_usuario (usuario_id),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // T006: tabla totp_2fa
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS totp_2fa (
+        usuario_id INT PRIMARY KEY,
+        secreto_cifrado VARCHAR(255) NOT NULL,
+        metodo VARCHAR(20) NOT NULL DEFAULT 'totp',
+        fecha_activacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    // T007: tabla codigos_recuperacion
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS codigos_recuperacion (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario_id INT NOT NULL,
+        codigo_hash VARCHAR(64) NOT NULL,
+        usado TINYINT(1) NOT NULL DEFAULT 0,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        KEY idx_recuperacion_usuario (usuario_id),
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
+    // T008: tabla plantillas_pdf
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS plantillas_pdf (
+        id VARCHAR(30) PRIMARY KEY,
+        nombre VARCHAR(100) NOT NULL,
+        descripcion VARCHAR(500) DEFAULT NULL,
+        solo_premium TINYINT(1) NOT NULL DEFAULT 0,
+        color_encabezado VARCHAR(7) NOT NULL,
+        color_acento VARCHAR(7) NOT NULL,
+        color_texto VARCHAR(7) NOT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
+
+    // T080: tabla enlaces_descarga
+    await conn.query(`
+      CREATE TABLE IF NOT EXISTS enlaces_descarga (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        cotizacion_id INT NOT NULL,
+        uuid VARCHAR(36) NOT NULL,
+        fecha_expiracion DATETIME NOT NULL,
+        fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY idx_enlace_uuid (uuid),
+        FOREIGN KEY (cotizacion_id) REFERENCES cotizaciones(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    `);
+
     await conn.query(`
       CREATE TABLE IF NOT EXISTS auth_proveedores (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -332,6 +454,25 @@ async function crearEsquema() {
 async function sembrarDatos() {
   const conn = await pool.getConnection();
   try {
+    // T008: Seed plantillas_pdf
+    const [plantillasExistentes] = await conn.query(`SELECT COUNT(*) AS cnt FROM plantillas_pdf`);
+    if (plantillasExistentes[0].cnt === 0) {
+      await conn.query(`
+        INSERT INTO plantillas_pdf (id, nombre, descripcion, solo_premium, color_encabezado, color_acento, color_texto) VALUES
+        ('profesional', 'Profesional', 'Diseño limpio y corporativo', 0, '#1a56db', '#3b82f6', '#1f2937'),
+        ('moderna', 'Moderna', 'Layout columnar con colores vivos', 1, '#059669', '#10b981', '#111827'),
+        ('ejecutiva', 'Ejecutiva', 'Diseño sobrio con tonos oscuros', 1, '#1e293b', '#475569', '#f8fafc')
+      `);
+    }
+
+    // T009: Poblar emisores iniciales desde perfil para usuarios sin emisor
+    await conn.query(`
+      INSERT IGNORE INTO emisores (usuario_id, es_principal, nombre, documento, tipo_emisor)
+      SELECT p.usuario_id, 1, COALESCE(p.nombre, 'Mi perfil'), p.nit, 'persona_natural'
+      FROM perfil p
+      WHERE NOT EXISTS (SELECT 1 FROM emisores e WHERE e.usuario_id = p.usuario_id AND e.es_principal = 1)
+    `);
+
     const [docs] = await conn.query(`SELECT COUNT(*) AS cnt FROM documentos_legales`);
     if (docs[0].cnt > 0) return;
 
@@ -425,6 +566,26 @@ async function sembrarDatos() {
 <p>Al vencer la suscripción sin renovación, el usuario entra en un período de gracia de 30 días con acceso de solo lectura. Transcurridos 90 días adicionales sin renovación, los datos de cotizaciones, clientes y grupos serán eliminados.</p>
 <h2>5. No Reembolso</h2>
 <p>Los pagos de suscripción no son reembolsables salvo error técnico comprobable.</p>`
+      },
+      // T048: Documento unificado para registro simplificado (FR-035)
+      {
+        tipo: 'unificado',
+        version: '1.0.0',
+        titulo: 'Términos de Uso y Política de Privacidad — PresupuestosPro',
+        contenido: `<h1>Términos de Uso y Política de Privacidad — PresupuestosPro</h1>
+<p>Al registrarte en PresupuestosPro aceptas los presentes Términos de Uso y la Política de Privacidad de forma conjunta.</p>
+<h2>1. Sobre el Servicio</h2>
+<p>PresupuestosPro es una plataforma colombiana para la generación de cotizaciones profesionales. El uso del servicio está sujeto al cumplimiento de este documento.</p>
+<h2>2. Datos Personales</h2>
+<p>Recopilamos únicamente los datos necesarios para prestar el servicio: nombre, correo electrónico y documento de identidad. Los datos se utilizan exclusivamente para la prestación del servicio y nunca se venden a terceros.</p>
+<h2>3. Uso Permitido</h2>
+<p>La plataforma está diseñada para la generación de cotizaciones de servicios profesionales lícitos. Queda prohibido su uso para fines ilegales o fraudulentos.</p>
+<h2>4. Limitación de Responsabilidad</h2>
+<p>PresupuestosPro no valida la exactitud de los datos ingresados por el usuario. La plataforma se provee "tal cual" y no garantiza resultados específicos.</p>
+<h2>5. Modificaciones</h2>
+<p>Podemos actualizar estos términos. Si los cambios son significativos, te notificaremos y solicitaremos nueva aceptación.</p>
+<h2>6. Contacto</h2>
+<p>Consultas o solicitudes de eliminación de datos: soporte@presupuestospro.co</p>`
       }
     ];
 

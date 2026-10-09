@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { clientes as apiClientes } from '../api.js';
 import DirectAdSlot from '../components/ads/DirectAdSlot.vue';
 
@@ -11,6 +11,26 @@ const error = ref('');
 const aviso = ref('');
 const editando = ref(null);
 const formulario = ref({ ...CLIENTE_VACIO });
+const busqueda = ref('');
+
+const listaFiltrada = computed(() => {
+  const q = busqueda.value.trim().toLowerCase();
+  if (!q) return lista.value;
+  return lista.value.filter((c) =>
+    c.nombre.toLowerCase().includes(q) ||
+    (c.documento || '').toLowerCase().includes(q)
+  );
+});
+
+const statsClientes = computed(() => ({
+  retenedores: lista.value.filter((c) => c.agenteRetenedor).length,
+  juridicas: lista.value.filter((c) => c.tipo === 'persona_juridica').length
+}));
+
+function iniciales(nombre) {
+  if (!nombre) return '?';
+  return nombre.split(' ').map((p) => p[0]).join('').toUpperCase().slice(0, 2);
+}
 
 async function cargar() {
   try {
@@ -91,10 +111,13 @@ onMounted(cargar);
 </script>
 
 <template>
-  <section class="page-container">
-    <div class="cabecera-seccion">
-      <h2>Clientes</h2>
-      <span class="nota">{{ lista.length }} registrados</span>
+  <section class="page-container page-container--wide">
+    <div class="page-header">
+      <div>
+        <p class="page-eyebrow">Directorio tributario</p>
+        <h2>Directorio de clientes</h2>
+        <p class="page-header__sub">Gestión centralizada de tus clientes y perfiles de retención en la fuente.</p>
+      </div>
     </div>
 
     <DirectAdSlot espacio-id="adsense-clientes" />
@@ -102,7 +125,82 @@ onMounted(cargar);
     <p v-if="error" class="error" role="alert">{{ error }}</p>
     <p v-if="aviso" class="exito" role="status">{{ aviso }}</p>
 
-    <div class="grid-2" style="margin-bottom: 24px">
+    <div class="grid-4" style="margin-bottom: 20px">
+      <div class="stat-card">
+        <div class="stat-card-label">Total registrados</div>
+        <div class="stat-card-value num-tabular">{{ lista.length }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Agentes retenedores</div>
+        <div class="stat-card-value num-tabular">{{ statsClientes.retenedores }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Personas jurídicas</div>
+        <div class="stat-card-value num-tabular">{{ statsClientes.juridicas }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Personas naturales</div>
+        <div class="stat-card-value num-tabular">{{ lista.length - statsClientes.juridicas }}</div>
+      </div>
+    </div>
+
+    <div class="list-form-split">
+      <!-- Lista -->
+      <div class="card">
+        <div class="card-header" style="justify-content: space-between">
+          <div style="display: flex; align-items: center; gap: 8px">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="#6B7280" stroke-width="1.4"/><path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#6B7280" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Mis clientes
+          </div>
+          <div class="search-input" style="max-width: 260px">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <input v-model="busqueda" type="search" placeholder="Buscar por nombre o NIT…">
+          </div>
+        </div>
+        <div v-if="lista.length === 0" class="card-body">
+          <p class="nota" style="margin: 0">Aún no tienes clientes registrados.</p>
+        </div>
+        <div v-else-if="listaFiltrada.length === 0" class="card-body">
+          <p class="nota" style="margin: 0">No hay clientes que coincidan con la búsqueda.</p>
+        </div>
+        <table v-else class="lineas">
+          <thead>
+            <tr>
+              <th>Cliente / Razón social</th>
+              <th>Tipo</th>
+              <th>Documento</th>
+              <th style="text-align: right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="cliente in listaFiltrada" :key="cliente.id">
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px">
+                  <img v-if="cliente.logoBase64" :src="cliente.logoBase64" alt="" style="width: 34px; height: 34px; object-fit: contain; border-radius: var(--radio-sm); border: 1px solid var(--color-borde)">
+                  <span v-else class="avatar-chip">{{ iniciales(cliente.nombre) }}</span>
+                  <div>
+                    <div style="font-weight: 600">{{ cliente.nombre }}</div>
+                    <div v-if="cliente.contacto" style="font-size: 12px; color: var(--color-texto-secundario)">{{ cliente.contacto }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="pill" :class="cliente.agenteRetenedor ? 'emitida' : 'neutro'">
+                  {{ cliente.tipo === 'persona_juridica' ? 'Jurídica' : 'Natural' }}{{ cliente.agenteRetenedor ? ' · Retenedor' : '' }}
+                </span>
+              </td>
+              <td style="color: var(--color-texto-secundario)" class="num-tabular">{{ cliente.documento || '—' }}</td>
+              <td style="text-align: right">
+                <div class="acciones-linea">
+                  <button class="btn btn-accent btn-sm" @click="editar(cliente)">Editar</button>
+                  <button class="btn btn-danger btn-sm" @click="eliminar(cliente.id)">Eliminar</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <!-- Formulario -->
       <div class="card">
         <div class="card-header">
@@ -153,52 +251,6 @@ onMounted(cargar);
             <button v-if="editando" class="btn btn-secondary" type="button" @click="nuevoFormulario">Cancelar</button>
           </div>
         </form>
-      </div>
-
-      <!-- Lista -->
-      <div class="card">
-        <div class="card-header">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="#6B7280" stroke-width="1.4"/><path d="M3 14c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="#6B7280" stroke-width="1.4" stroke-linecap="round"/></svg>
-          Mis clientes
-        </div>
-        <div v-if="lista.length === 0" class="card-body">
-          <p class="nota" style="margin: 0">Aún no tienes clientes registrados.</p>
-        </div>
-        <table v-else class="lineas">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Tipo</th>
-              <th>Documento</th>
-              <th style="text-align: right">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="cliente in lista" :key="cliente.id">
-              <td>
-                <div style="display: flex; align-items: center; gap: 8px">
-                  <img v-if="cliente.logoBase64" :src="cliente.logoBase64" alt="" style="width: 28px; height: 28px; object-fit: contain; border-radius: 4px; border: 1px solid var(--color-borde)">
-                  <div>
-                    <div style="font-weight: 600">{{ cliente.nombre }}</div>
-                    <div v-if="cliente.contacto" style="font-size: 12px; color: var(--color-texto-secundario)">{{ cliente.contacto }}</div>
-                  </div>
-                </div>
-              </td>
-              <td>
-                <span class="badge" :class="{ emitida: cliente.agenteRetenedor }">
-                  {{ cliente.tipo === 'persona_juridica' ? 'Jurídica' : 'Natural' }}
-                </span>
-              </td>
-              <td style="color: var(--color-texto-secundario)">{{ cliente.documento || '—' }}</td>
-              <td style="text-align: right">
-                <div class="acciones-linea">
-                  <button class="btn btn-accent btn-sm" @click="editar(cliente)">Editar</button>
-                  <button class="btn btn-danger btn-sm" @click="eliminar(cliente.id)">Eliminar</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </section>

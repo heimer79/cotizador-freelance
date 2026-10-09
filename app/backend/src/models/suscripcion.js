@@ -38,6 +38,29 @@ async function cancelarRenovacion(usuarioId) {
   );
 }
 
+// Otorga o revoca premium manualmente desde el panel de administración, sin pasar por una
+// pasarela de pago. Al otorgar, crea una suscripción 'activa' para que procesarTransiciones()
+// no revierta el tipo_cuenta en el siguiente ciclo.
+async function establecerCuentaManual(usuarioId, tipoCuenta) {
+  await db.run(
+    `UPDATE suscripciones SET estado = 'cancelada' WHERE usuario_id = ? AND estado = 'activa'`,
+    [usuarioId]
+  );
+
+  if (tipoCuenta === 'premium') {
+    const inicio = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const vencimiento = fechaVencimiento();
+    await db.run(
+      `INSERT INTO suscripciones (usuario_id, fecha_inicio, fecha_vencimiento, estado, modalidad, pasarela)
+       VALUES (?, ?, ?, 'activa', 'manual', 'admin')`,
+      [usuarioId, inicio, vencimiento]
+    );
+    await db.run(`UPDATE usuarios SET tipo_cuenta = 'premium' WHERE id = ?`, [usuarioId]);
+  } else {
+    await db.run(`UPDATE usuarios SET tipo_cuenta = 'gratuita' WHERE id = ?`, [usuarioId]);
+  }
+}
+
 async function procesarTransiciones() {
   const ahora = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
@@ -90,4 +113,4 @@ async function procesarTransiciones() {
   }
 }
 
-module.exports = { crear, obtenerEstado, verificarVigencia, cancelarRenovacion, procesarTransiciones };
+module.exports = { crear, obtenerEstado, verificarVigencia, cancelarRenovacion, procesarTransiciones, establecerCuentaManual };

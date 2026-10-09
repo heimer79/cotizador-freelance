@@ -25,6 +25,7 @@ async function peticion(url, opciones = {}) {
   if (!respuesta.ok) {
     const error = new Error(datos.error || 'Error desconocido');
     error.status = respuesta.status;
+    error.requiere2fa = datos.requiere2fa;
     throw error;
   }
 
@@ -42,13 +43,20 @@ export const auth = {
   reenviarVerificacion: () => peticion('/api/auth/reenviar-verificacion', { method: 'POST' }),
   olvide: (email) => peticion('/api/auth/olvide', enviar('POST', { email })),
   restablecer: (token, password) => peticion('/api/auth/restablecer', enviar('POST', { token, password })),
-  establecerPassword: (password) => peticion('/api/auth/establecer-password', enviar('POST', { password }))
+  establecerPassword: (password) => peticion('/api/auth/establecer-password', enviar('POST', { password })),
+  activar2fa: () => peticion('/api/auth/2fa/activar', { method: 'POST' }),
+  verificar2fa: (codigo) => peticion('/api/auth/2fa/verificar', enviar('POST', { codigo })),
+  desactivar2fa: () => peticion('/api/auth/2fa', { method: 'DELETE' })
 };
 
 export const perfil = {
   obtener: () => peticion('/api/perfil'),
   guardar: (datos) => peticion('/api/perfil', enviar('PUT', datos)),
-  actividad: () => peticion('/api/perfil/actividad')
+  actividad: () => peticion('/api/perfil/actividad'),
+  emisores: () => peticion('/api/perfil/emisores'),
+  crearEmisor: (datos) => peticion('/api/perfil/emisores', enviar('POST', datos)),
+  actualizarEmisor: (id, datos) => peticion(`/api/perfil/emisores/${id}`, enviar('PUT', datos)),
+  eliminarEmisor: (id) => peticion(`/api/perfil/emisores/${id}`, { method: 'DELETE' })
 };
 
 export const clientes = {
@@ -106,6 +114,7 @@ export const admin = {
   suspenderUsuario: (id) => peticion(`/api/admin/usuarios/${id}/suspender`, { method: 'PATCH' }),
   reactivarUsuario: (id) => peticion(`/api/admin/usuarios/${id}/reactivar`, { method: 'PATCH' }),
   cambiarRol: (id, rol) => peticion(`/api/admin/usuarios/${id}/rol`, enviar('PATCH', { rol })),
+  cambiarCuenta: (id, tipoCuenta) => peticion(`/api/admin/usuarios/${id}/cuenta`, enviar('PATCH', { tipoCuenta })),
   notificaciones: (pagina = 1) => peticion(`/api/admin/notificaciones?pagina=${pagina}`),
   conteoNotificaciones: () => peticion('/api/admin/notificaciones/conteo'),
   marcarNotificacion: (id) => peticion(`/api/admin/notificaciones/${id}`, { method: 'PATCH' }),
@@ -125,4 +134,8 @@ export const grupos = {
 
 export const compartir = {
   crearEnlace: (datos) => peticion('/api/cotizaciones/compartir', enviar('POST', datos))
+};
+
+export const plantillasPdf = {
+  listar: () => peticion('/api/plantillas-pdf')
 };

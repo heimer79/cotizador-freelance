@@ -1,6 +1,12 @@
 const express = require('express');
 const { siguienteNumero } = require('../numeracion');
-const { calcularCotizacion, validarRetencion, TARIFAS_IVA } = require('../calculo');
+const { calcularCotizacion, calcularTotales, validarRetencion, TARIFAS_IVA } = require('../calculo');
+
+// T060: Basic HTML stripping to prevent XSS in free-text fields (FR-043)
+function sanitizarTexto(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/<[^>]*>/g, '').trim();
+}
 
 const VIGENCIA_DIAS = 30;
 
@@ -20,11 +26,17 @@ async function obtenerLineas(db, cotizacionId) {
 
 async function construirCotizacion(db, fila) {
   const lineas = await obtenerLineas(db, fila.id);
-  const totales = calcularCotizacion({
+  const totales = calcularTotales({
     lineas,
     ivaTarifa: fila.iva_tarifa,
+    ivaResponsable: fila.iva_responsable !== undefined ? !!fila.iva_responsable : true,
     retencionActivada: !!fila.retencion_activada,
-    retencionPorcentaje: fila.retencion_porcentaje || 0
+    retencionPorcentaje: fila.retencion_porcentaje || 0,
+    reteivaActivada: !!fila.reteiva_activada,
+    reteivaPorcentaje: fila.reteiva_porcentaje || 15,
+    reteicaActivada: !!fila.reteica_activada,
+    reteicaPorcentaje: fila.reteica_porcentaje || 0,
+    compensarRetencion: !!fila.compensar_retencion
   });
 
   return {
@@ -39,9 +51,14 @@ async function construirCotizacion(db, fila) {
       documento: fila.cliente_documento,
       contacto: fila.cliente_contacto,
       tipo: fila.cliente_tipo,
-      agenteRetenedor: !!fila.cliente_agente_retenedor
+      agenteRetenedor: !!fila.cliente_agente_retenedor,
+      email: fila.cliente_email || '',
+      telefono: fila.cliente_telefono || '',
+      logoBase64: fila.cliente_logo_base64 || ''
     },
     emisor: {
+      id: fila.emisor_id || null,
+      tipo: fila.emisor_tipo || null,
       nombre: fila.emisor_nombre,
       documento: fila.emisor_documento,
       contacto: fila.emisor_contacto,
@@ -49,11 +66,23 @@ async function construirCotizacion(db, fila) {
       logoBase64: fila.emisor_logo_base64
     },
     ivaTarifa: fila.iva_tarifa,
+    ivaResponsable: fila.iva_responsable !== undefined ? !!fila.iva_responsable : true,
     retencion: {
       activada: !!fila.retencion_activada,
       concepto: fila.retencion_concepto,
       porcentaje: fila.retencion_porcentaje
     },
+    reteiva: {
+      activada: !!fila.reteiva_activada,
+      porcentaje: fila.reteiva_porcentaje || 15
+    },
+    reteica: {
+      activada: !!fila.reteica_activada,
+      porcentaje: fila.reteica_porcentaje || null
+    },
+    compensarRetencion: !!fila.compensar_retencion,
+    plantillaPdf: fila.plantilla_pdf || 'profesional',
+    coloresPdf: fila.colores_pdf ? JSON.parse(fila.colores_pdf) : null,
     lineas,
     totales
   };
@@ -148,7 +177,7 @@ function crearRutasCotizaciones(db) {
         estado: completa.estado,
         fechaEmision: completa.fechaEmision,
         cliente: { nombre: completa.cliente.nombre, tipo: completa.cliente.tipo },
-        total: completa.totales.total
+        total: completa.totales.totalNeto
       });
     }
     res.json(resultados);
@@ -181,16 +210,31 @@ function crearRutasCotizaciones(db) {
       }
     }
 
+    const reteiva = req.body.reteiva || {};
+    const reteica = req.body.reteica || {};
+    const plantillaPdf = req.body.plantillaPdf || 'profesional';
+    const coloresPdf = req.body.coloresPdf ? JSON.stringify(req.body.coloresPdf) : null;
+    let emisorId = req.body.emisorId || null;
+    // T073: non-premium users can only use their principal emitter (EC-7)
+    if (emisorId && req.usuario.tipoCuenta !== 'premium' && req.usuario.rol !== 'admin') {
+      const emisorFila = await db.get('SELECT es_principal FROM emisores WHERE id = ? AND usuario_id = ?', [emisorId, req.usuario.id]);
+      if (!emisorFila || !emisorFila.es_principal) emisorId = null;
+    }
+
     const cotizacionId = await db.transaction(async (tx) => {
       const numero = await siguienteNumero(tx, req.usuario.id, ahora);
       const resultado = await tx.run(
         `INSERT INTO cotizaciones (
           usuario_id, numero, estado, fecha_emision, fecha_vigencia,
           cliente_id, cliente_nombre, cliente_documento, cliente_contacto, cliente_tipo, cliente_agente_retenedor,
+          cliente_email, cliente_telefono, cliente_logo_base64,
+          emisor_id, emisor_tipo,
           emisor_nombre, emisor_documento, emisor_contacto, emisor_regimen, emisor_logo_base64,
-          iva_tarifa, retencion_activada, retencion_concepto, retencion_porcentaje,
+          iva_tarifa, iva_responsable, retencion_activada, retencion_concepto, retencion_porcentaje,
+          reteiva_activada, reteiva_porcentaje, reteica_activada, reteica_porcentaje, compensar_retencion,
+          plantilla_pdf, colores_pdf,
           temporal, ultima_actividad
-        ) VALUES (?, ?, 'borrador', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+        ) VALUES (?, ?, 'borrador', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [
           req.usuario.id,
           numero,
@@ -202,11 +246,24 @@ function crearRutasCotizaciones(db) {
           cliente.contacto,
           cliente.tipo,
           cliente.agente_retenedor,
+          cliente.email || null,
+          cliente.telefono || null,
+          cliente.logo_base64 || null,
+          emisorId,
+          null,
           ...Object.values(emisor),
           fiscal.valor.ivaTarifa,
+          req.body.ivaResponsable !== undefined ? (req.body.ivaResponsable ? 1 : 0) : 1,
           fiscal.valor.retencionActivada,
           fiscal.valor.retencionConcepto,
           fiscal.valor.retencionPorcentaje,
+          reteiva.activada ? 1 : 0,
+          reteiva.porcentaje || 15,
+          reteica.activada ? 1 : 0,
+          reteica.porcentaje || null,
+          req.body.compensarRetencion ? 1 : 0,
+          plantillaPdf,
+          coloresPdf,
           0
         ]
       );
@@ -237,10 +294,23 @@ function crearRutasCotizaciones(db) {
     if (fiscal.error) return res.status(422).json({ error: fiscal.error });
 
     const emisor = await datosEmisor(db, req.usuario.id);
+    const reteivaPut = req.body.reteiva || {};
+    const reteicaPut = req.body.reteica || {};
+    const plantillaPdfPut = req.body.plantillaPdf !== undefined ? req.body.plantillaPdf : (fila.plantilla_pdf || 'profesional');
+    const coloresPdfPut = req.body.coloresPdf !== undefined ? JSON.stringify(req.body.coloresPdf) : fila.colores_pdf;
+    const emisorIdPut = req.body.emisorId !== undefined ? req.body.emisorId : fila.emisor_id;
+
     await db.run(
       `UPDATE cotizaciones SET
         cliente_id = ?, cliente_nombre = ?, cliente_documento = ?, cliente_contacto = ?, cliente_tipo = ?, cliente_agente_retenedor = ?,
-        iva_tarifa = ?, retencion_activada = ?, retencion_concepto = ?, retencion_porcentaje = ?,
+        cliente_email = ?, cliente_telefono = ?, cliente_logo_base64 = ?,
+        emisor_id = ?,
+        iva_tarifa = ?, iva_responsable = ?,
+        retencion_activada = ?, retencion_concepto = ?, retencion_porcentaje = ?,
+        reteiva_activada = ?, reteiva_porcentaje = ?,
+        reteica_activada = ?, reteica_porcentaje = ?,
+        compensar_retencion = ?,
+        plantilla_pdf = ?, colores_pdf = ?,
         emisor_nombre = ?, emisor_documento = ?, emisor_contacto = ?, emisor_regimen = ?, emisor_logo_base64 = ?
        WHERE id = ?`,
       [
@@ -250,10 +320,22 @@ function crearRutasCotizaciones(db) {
         cliente.contacto,
         cliente.tipo,
         cliente.agente_retenedor,
+        cliente.email || fila.cliente_email || null,
+        cliente.telefono || fila.cliente_telefono || null,
+        cliente.logo_base64 || fila.cliente_logo_base64 || null,
+        emisorIdPut,
         fiscal.valor.ivaTarifa,
+        req.body.ivaResponsable !== undefined ? (req.body.ivaResponsable ? 1 : 0) : fila.iva_responsable,
         fiscal.valor.retencionActivada,
         fiscal.valor.retencionConcepto,
         fiscal.valor.retencionPorcentaje,
+        reteivaPut.activada !== undefined ? (reteivaPut.activada ? 1 : 0) : fila.reteiva_activada,
+        reteivaPut.porcentaje || fila.reteiva_porcentaje || 15,
+        reteicaPut.activada !== undefined ? (reteicaPut.activada ? 1 : 0) : fila.reteica_activada,
+        reteicaPut.porcentaje !== undefined ? reteicaPut.porcentaje : fila.reteica_porcentaje,
+        req.body.compensarRetencion !== undefined ? (req.body.compensarRetencion ? 1 : 0) : fila.compensar_retencion,
+        plantillaPdfPut,
+        coloresPdfPut,
         ...Object.values(emisor),
         fila.id
       ]
@@ -350,7 +432,81 @@ function crearRutasCotizaciones(db) {
     res.status(204).end();
   });
 
+  // T068: DELETE /api/cotizaciones/:id — owner-only, permanent (FR-046, FR-047)
+  router.delete('/:id', async (req, res) => {
+    const fila = await obtenerCotizacion(db, req.params.id, req.usuario.id);
+    if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
+    await db.run('DELETE FROM cotizaciones WHERE id = ?', [fila.id]);
+    res.json({ ok: true });
+  });
+
+  // T045: POST /api/cotizaciones/:id/compartir — genera enlace temporal (FR-031)
+  router.post('/:id/compartir', async (req, res) => {
+    const fila = await obtenerCotizacion(db, req.params.id, req.usuario.id);
+    if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
+
+    if (req.body && req.body.generarEnlace) {
+      const { v4: uuidv4 } = require('uuid');
+      const uuid = uuidv4();
+      const expiracion = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      await db.run(
+        `INSERT INTO enlaces_descarga (cotizacion_id, uuid, fecha_expiracion) VALUES (?, ?, ?)`,
+        [fila.id, uuid, expiracion.toISOString().slice(0, 19).replace('T', ' ')]
+      );
+      const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+      return res.json({
+        enlace: `${baseUrl}/api/compartir/descargar/${uuid}`,
+        expira: expiracion.toISOString()
+      });
+    }
+
+    res.json({ ok: true });
+  });
+
+  // T046: GET /api/compartir/descargar/:uuid — public endpoint (FR-031)
+  // Note: mounted separately in server.js at /api/compartir/descargar/:uuid
+
+  // T038: GET /api/plantillas-pdf — list available templates (FR-024)
+  // Note: mounted as a separate route, see below
+
   return router;
 }
 
-module.exports = crearRutasCotizaciones;
+// T038: Separate router for plantillas-pdf listing (FR-024)
+function crearRutasPlantillasPdf(db) {
+  const router = require('express').Router();
+  router.get('/', async (req, res) => {
+    const filas = await db.all('SELECT * FROM plantillas_pdf ORDER BY solo_premium ASC, id ASC');
+    res.json(filas.map(f => ({
+      id: f.id,
+      nombre: f.nombre,
+      descripcion: f.descripcion || '',
+      soloPremium: !!f.solo_premium,
+      colores: { encabezado: f.color_encabezado, acento: f.color_acento, texto: f.color_texto }
+    })));
+  });
+  return router;
+}
+
+// T046: Separate router for public PDF download via temporal link
+function crearRutasCompartirDescarga(db) {
+  const router = require('express').Router();
+  router.get('/:uuid', async (req, res) => {
+    const enlace = await db.get('SELECT * FROM enlaces_descarga WHERE uuid = ?', [req.params.uuid]);
+    if (!enlace) return res.status(404).json({ error: 'Enlace no encontrado o expirado' });
+    if (new Date(enlace.fecha_expiracion) < new Date()) {
+      return res.status(410).json({ error: 'El enlace ha expirado' });
+    }
+    // Return the quote data as JSON; the client generates the PDF
+    const fila = await db.get('SELECT * FROM cotizaciones WHERE id = ?', [enlace.cotizacion_id]);
+    if (!fila) return res.status(404).json({ error: 'Cotización no encontrada' });
+    const lineas = await db.all(
+      'SELECT descripcion, cantidad, precio_unitario AS precioUnitario, origen, servicio_id AS servicioId FROM lineas_cotizacion WHERE cotizacion_id = ? ORDER BY id',
+      [fila.id]
+    );
+    res.json({ fila, lineas });
+  });
+  return router;
+}
+
+module.exports = { crearRutasCotizaciones, crearRutasPlantillasPdf, crearRutasCompartirDescarga };

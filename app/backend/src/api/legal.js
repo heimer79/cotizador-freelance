@@ -4,6 +4,17 @@ const { obtenerActivos, obtenerPorTipo, verificarAceptacion, registrarAceptacion
 function crearRutasLegal(requiereSesion) {
   const router = express.Router();
 
+  // T049: Endpoint público para documento unificado (FR-035)
+  router.get('/unificado', async (req, res) => {
+    try {
+      const doc = await obtenerPorTipo('unificado');
+      if (!doc) return res.status(404).json({ error: 'Documento unificado no disponible' });
+      res.json({ documento: doc });
+    } catch (e) {
+      res.status(500).json({ error: 'Error al obtener documento' });
+    }
+  });
+
   router.get('/documentos', async (req, res) => {
     try {
       const docs = await obtenerActivos();

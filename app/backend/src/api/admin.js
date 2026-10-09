@@ -1,6 +1,7 @@
 const express = require('express');
 const { obtenerSeccion, establecerSeccion } = require('../models/configuracion-plataforma');
 const { listar: listarNotificaciones, contarNoLeidas, marcarLeida } = require('../models/notificacion');
+const { establecerCuentaManual } = require('../models/suscripcion');
 
 const TABLAS_AUTORIZADAS = new Set([
   'usuarios', 'suscripciones', 'configuracion_plataforma', 'documentos_legales',
@@ -73,6 +74,15 @@ function crearRutasAdmin(db, soloAdminMw) {
       }
     }
     await db.run('UPDATE usuarios SET rol = ? WHERE id = ?', [rol, req.params.id]);
+    res.json({ ok: true });
+  });
+
+  router.patch('/usuarios/:id/cuenta', async (req, res) => {
+    const { tipoCuenta } = req.body;
+    if (!['gratuita', 'premium'].includes(tipoCuenta)) {
+      return res.status(400).json({ error: 'Tipo de cuenta inválido' });
+    }
+    await establecerCuentaManual(req.params.id, tipoCuenta);
     res.json({ ok: true });
   });
 

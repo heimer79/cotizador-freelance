@@ -16,13 +16,17 @@ const datos = ref({ nombreCompleto: '', email: '', tipoDocumento: 'CC', numeroDo
 const nuevaPassword = ref('');
 const mostrarPassword = ref(false);
 
+// T059: 2FA verification step
+const requiere2fa = ref(false);
+const codigo2fa = ref('');
+
 const titulos = {
   login: 'Inicia sesión para continuar',
   registro: 'Crea tu cuenta gratis',
   olvide: 'Recuperar contraseña',
   restablecer: 'Nueva contraseña'
 };
-const titulo = computed(() => titulos[modo.value]);
+const titulo = computed(() => requiere2fa.value ? 'Verificación 2FA' : titulos[modo.value]);
 
 function cambiarModo(nuevo) {
   error.value = '';
@@ -36,8 +40,18 @@ async function enviar() {
   enviando.value = true;
   try {
     if (modo.value === 'login') {
-      const r = await auth.login({ email: datos.value.email, password: datos.value.password });
-      emit('autenticado', r.usuario);
+      try {
+        const r = await auth.login({ email: datos.value.email, password: datos.value.password, codigo2fa: codigo2fa.value || undefined });
+        emit('autenticado', r.usuario);
+      } catch (e) {
+        if (e.requiere2fa || (e.response?.data?.requiere2fa)) {
+          requiere2fa.value = true;
+          error.value = '';
+          enviando.value = false;
+          return;
+        }
+        throw e;
+      }
     } else if (modo.value === 'registro') {
       if (!datos.value.aceptaTerminos) {
         error.value = 'Debes aceptar la Política de Privacidad y los Términos de Uso para registrarte.';
@@ -88,8 +102,22 @@ function cerrarOverlay(e) {
       <p v-if="error" class="error" role="alert" style="text-align: center; margin: 12px 0">{{ error }}</p>
       <p v-if="aviso" class="exito" style="text-align: center; margin: 12px 0">{{ aviso }}</p>
 
+      <!-- T059: 2FA step -->
+      <template v-if="requiere2fa">
+        <p style="font-size: 14px; margin: 12px 0; color: var(--color-texto-secundario); text-align: center">
+          Tu cuenta tiene verificación en dos pasos. Ingresa el código de tu app autenticadora.
+        </p>
+        <form class="formulario" @submit.prevent="enviar" style="margin: 12px 0">
+          <input v-model="codigo2fa" type="text" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos" autocomplete="one-time-code" style="letter-spacing: 0.3em; text-align: center; font-size: 1.1rem" required>
+          <button class="btn btn-primary" type="submit" :disabled="enviando" style="width: 100%">{{ enviando ? 'Verificando…' : 'Verificar' }}</button>
+        </form>
+        <p style="font-size: 12px; text-align: center; margin: 0">
+          <a href="#" style="color: var(--color-texto-secundario)" @click.prevent="requiere2fa = false; codigo2fa = ''">Volver</a>
+        </p>
+      </template>
+
       <!-- Login -->
-      <form v-if="modo === 'login'" class="formulario" @submit.prevent="enviar" style="margin-bottom: 16px">
+      <form v-else-if="modo === 'login'" class="formulario" @submit.prevent="enviar" style="margin-bottom: 16px">
         <div>
           <label class="field-label">Correo electrónico</label>
           <input v-model="datos.email" type="email" placeholder="tu@correo.com" autocomplete="email" required>
@@ -152,10 +180,8 @@ function cerrarOverlay(e) {
         <label style="display:flex; align-items:flex-start; gap:8px; font-size:13px; cursor:pointer">
           <input type="checkbox" v-model="datos.aceptaTerminos" style="margin-top:2px; flex-shrink:0" required>
           <span>
-            Acepto la
-            <a href="/legal/privacidad" target="_blank" style="color:var(--color-primario)">Política de Privacidad</a>
-            y los
-            <a href="/legal/terminos_uso" target="_blank" style="color:var(--color-primario)">Términos de Uso</a>
+            He leído y acepto los
+            <a href="/legal/unificado" target="_blank" style="color:var(--color-primario)">Términos de Uso y Política de Privacidad</a>
           </span>
         </label>
         <button class="btn btn-primary" type="submit" :disabled="enviando" style="width: 100%">Crear cuenta</button>

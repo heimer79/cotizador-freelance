@@ -37,6 +37,14 @@ async function cambiarRol(id, rolActual) {
   } catch (e) { error.value = e.message; }
 }
 
+async function cambiarCuenta(id, tipoActual) {
+  const nuevoTipo = tipoActual === 'premium' ? 'gratuita' : 'premium';
+  try {
+    await admin.cambiarCuenta(id, nuevoTipo);
+    await cargar();
+  } catch (e) { error.value = e.message; }
+}
+
 onMounted(cargar);
 </script>
 
@@ -74,6 +82,9 @@ onMounted(cargar);
                 <button v-else class="btn btn-secondary btn-sm" @click="reactivar(u.id)">Reactivar</button>
                 <button class="btn btn-secondary btn-sm" @click="cambiarRol(u.id, u.rol)">
                   {{ u.rol === 'admin' ? 'Quitar admin' : 'Hacer admin' }}
+                </button>
+                <button class="btn btn-secondary btn-sm" @click="cambiarCuenta(u.id, u.tipo_cuenta)">
+                  {{ u.tipo_cuenta === 'premium' ? 'Quitar premium' : 'Hacer premium' }}
                 </button>
               </td>
             </tr>
