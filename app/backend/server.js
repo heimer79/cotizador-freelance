@@ -35,6 +35,7 @@ const { limpiarExpirados } = require('./src/models/enlace-temporal');
 
 function crearApp(db, opciones = {}) {
   const app = express();
+  app.set('trust proxy', 1);
   const correo = opciones.correo || new EmailService();
   const requiereSesion = crearMiddlewareSesionExtendido(db);
   const requiereAceptacionLegal = crearMiddlewareRequiereAceptacionLegal(db);
