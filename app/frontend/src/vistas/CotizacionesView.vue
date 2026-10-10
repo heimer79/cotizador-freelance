@@ -676,7 +676,7 @@ watch(() => props.modo, (nuevoModo) => {
     <!-- LOCAL EDITOR: cotizador sin login -->
     <template v-if="!vistaLista && !actual && !creando">
       <!-- SEO intro section (FR-038, SC-012) -->
-      <section class="seo-intro" aria-label="Acerca de PresupuestosPro">
+      <section class="seo-intro" aria-label="Acerca de Quotizador">
         <div class="seo-intro__badges">
           <span class="seo-badge seo-badge--dian">
             <span class="seo-badge__dot" aria-hidden="true"></span>
@@ -694,7 +694,7 @@ watch(() => props.modo, (nuevoModo) => {
 
         <h1 class="seo-intro__titulo">Cotizaciones profesionales para independientes y empresas en Colombia</h1>
         <p class="seo-intro__desc">
-          <strong>PresupuestosPro</strong> es la plataforma fiscal de alta precisión diseñada para freelancers, agencias y PyMEs. Genera <em>presupuestos comerciales</em> con discriminación matemática exacta de IVA, retención en la fuente y reteICA territorial según tarifas oficiales. Descarga el PDF al instante y compártelo por WhatsApp con tu cliente.
+          <strong>Quotizador</strong> es la plataforma fiscal de alta precisión diseñada para freelancers, agencias y PyMEs. Genera <em>presupuestos comerciales</em> con discriminación matemática exacta de IVA, retención en la fuente y reteICA territorial según tarifas oficiales. Descarga el PDF al instante y compártelo por WhatsApp con tu cliente.
         </p>
 
         <ul class="seo-intro__features" aria-label="Beneficios principales">

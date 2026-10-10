@@ -44,7 +44,7 @@ async function aceptar() {
         Actualización de términos legales
       </h2>
       <p style="margin: 0 0 16px; font-size: 14px; color: var(--color-texto-secundario)">
-        Para continuar usando PresupuestosPro debes aceptar los siguientes documentos actualizados:
+        Para continuar usando Quotizador debes aceptar los siguientes documentos actualizados:
       </p>
 
       <ul style="list-style: none; padding: 0; margin: 0 0 16px; display: flex; flex-direction: column; gap: 12px">
