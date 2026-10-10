@@ -54,7 +54,7 @@ function crearRutasDonaciones(db) {
 
       const preferencia = await pref.create({
         body: {
-          items: [{ title: 'Donación a PresupuestosPro', quantity: 1, unit_price: donacion.monto, currency_id: 'COP' }],
+          items: [{ title: 'Donación a Quotizador', quantity: 1, unit_price: donacion.monto, currency_id: 'COP' }],
           external_reference: donacion.referencia_pasarela,
           back_urls: { success: urlRetorno, failure: urlRetorno, pending: urlRetorno },
           notification_url: `${appUrl}/api/donaciones/webhook`

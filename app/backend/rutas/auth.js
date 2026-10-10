@@ -46,7 +46,7 @@ function escapar(texto) {
 function correoVerificacion(nombre, token) {
   const enlace = `${urlApp()}/?verificar=${token}`;
   return {
-    asunto: 'Confirma tu correo en PresupuestosPro',
+    asunto: 'Confirma tu correo en Quotizador',
     texto: `Hola ${nombre}, confirma tu correo para empezar a crear cotizaciones: ${enlace}\n\nEl enlace vence en 24 horas.`,
     html: `<p>Hola ${escapar(nombre)},</p><p>Confirma tu correo para empezar a crear cotizaciones:</p><p><a href="${enlace}">Confirmar mi correo</a></p><p>El enlace vence en 24 horas.</p>`
   };
@@ -55,7 +55,7 @@ function correoVerificacion(nombre, token) {
 function correoRestablecer(nombre, token) {
   const enlace = `${urlApp()}/?restablecer=${token}`;
   return {
-    asunto: 'Restablece tu contraseña de PresupuestosPro',
+    asunto: 'Restablece tu contraseña de Quotizador',
     texto: `Hola ${nombre}, usa este enlace para crear una nueva contraseña: ${enlace}\n\nEl enlace vence en 1 hora. Si no lo pediste, ignora este correo.`,
     html: `<p>Hola ${escapar(nombre)},</p><p>Usa este enlace para crear una nueva contraseña:</p><p><a href="${enlace}">Restablecer contraseña</a></p><p>El enlace vence en 1 hora. Si no lo pediste, ignora este correo.</p>`
   };
@@ -331,7 +331,7 @@ function crearRutasAuth(db, correo) {
       const secretObj = new Secret();
       const secretBase32 = secretObj.base32;
 
-      const totp = new TOTP({ issuer: 'PresupuestosPro', label: usuario.email, secret: secretObj });
+      const totp = new TOTP({ issuer: 'Quotizador', label: usuario.email, secret: secretObj });
       const otpUri = totp.toString();
       const qrDataUrl = await qrcode.toDataURL(otpUri);
 

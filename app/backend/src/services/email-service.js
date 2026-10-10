@@ -10,7 +10,7 @@ function escapar(texto) {
 class EmailService {
   constructor({
     apiKey = process.env.RESEND_API_KEY,
-    remitente = process.env.EMAIL_REMITENTE || 'PresupuestosPro <no-responder@presupuestospro.co>',
+    remitente = process.env.EMAIL_REMITENTE || 'Quotizador <no-responder@quotizador.com>',
   } = {}) {
     this.remitente = remitente;
     this.resend = apiKey ? new Resend(apiKey) : null;
@@ -66,7 +66,7 @@ class EmailService {
     const texto = [
       `Hola ${nombre},`,
       '',
-      'Gracias por apoyar PresupuestosPro. Recibimos tu donación voluntaria:',
+      'Gracias por apoyar Quotizador. Recibimos tu donación voluntaria:',
       `Monto: ${montoFormateado}`,
       `Fecha: ${fechaFormateada}`,
       `Referencia: ${referencia}`,
@@ -76,7 +76,7 @@ class EmailService {
 
     return this.enviar({
       para,
-      asunto: 'Gracias por tu donación a PresupuestosPro',
+      asunto: 'Gracias por tu donación a Quotizador',
       texto,
       html: texto.split('\n').map((linea) => `<p>${escapar(linea) || '&nbsp;'}</p>`).join(''),
     });

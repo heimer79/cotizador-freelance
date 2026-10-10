@@ -130,7 +130,7 @@ async function tareasPeriodicas(db, correoService) {
     for (const u of proximas) {
       await correoService.enviar({
         para: u.email,
-        asunto: 'Tu suscripción Premium vence pronto — PresupuestosPro',
+        asunto: 'Tu suscripción Premium vence pronto — Quotizador',
         texto: `Hola ${u.nombre_completo}, tu suscripción Premium vence el ${new Date(u.fecha_vencimiento).toLocaleDateString('es-CO')}. Renueva desde tu perfil.`,
         html: `<p>Hola ${u.nombre_completo},</p><p>Tu suscripción Premium vence el <strong>${new Date(u.fecha_vencimiento).toLocaleDateString('es-CO')}</strong>. <a href="${process.env.APP_URL || 'http://localhost:3000'}">Renueva desde tu perfil</a>.</p>`
       }).catch(() => {});
@@ -145,7 +145,7 @@ async function iniciar() {
   const app = crearApp(db, { correo: correoService });
   const puerto = process.env.PORT || 3000;
   app.listen(puerto, () => {
-    console.log(`PresupuestosPro escuchando en el puerto ${puerto}`);
+    console.log(`Quotizador escuchando en el puerto ${puerto}`);
   });
   // Ejecutar tareas periódicas al inicio y cada 6 horas
   tareasPeriodicas(db, correoService).catch(() => {});

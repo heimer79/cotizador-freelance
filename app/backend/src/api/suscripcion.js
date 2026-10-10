@@ -29,7 +29,7 @@ function crearRutasSuscripcion(db, requiereSesion, verificarPremiumMw, correo) {
       const appUrl = process.env.APP_URL || 'http://localhost:3000';
       const preferencia = await pref.create({
         body: {
-          items: [{ title: 'PresupuestosPro Premium (1 año)', quantity: 1, unit_price: 20, currency_id: 'USD' }],
+          items: [{ title: 'Quotizador Premium (1 año)', quantity: 1, unit_price: 20, currency_id: 'USD' }],
           back_urls: {
             success: `${appUrl}/?suscripcion=ok`,
             failure: `${appUrl}/?suscripcion=error`,
@@ -77,7 +77,7 @@ function crearRutasSuscripcion(db, requiereSesion, verificarPremiumMw, correo) {
           if (usuario && correo) {
             await correo.enviar({
               para: usuario.email,
-              asunto: 'Tu suscripción Premium está activa — PresupuestosPro',
+              asunto: 'Tu suscripción Premium está activa — Quotizador',
               texto: `Hola ${usuario.nombre_completo}, tu suscripción Premium está activa por 1 año. Gracias por tu apoyo.`,
               html: `<p>Hola ${usuario.nombre_completo},</p><p>Tu suscripción Premium está activa por 1 año. Gracias por tu apoyo.</p>`
             }).catch(() => {});

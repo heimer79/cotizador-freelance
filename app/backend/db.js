@@ -571,21 +571,21 @@ async function sembrarDatos() {
       {
         tipo: 'unificado',
         version: '1.0.0',
-        titulo: 'Términos de Uso y Política de Privacidad — PresupuestosPro',
-        contenido: `<h1>Términos de Uso y Política de Privacidad — PresupuestosPro</h1>
-<p>Al registrarte en PresupuestosPro aceptas los presentes Términos de Uso y la Política de Privacidad de forma conjunta.</p>
+        titulo: 'Términos de Uso y Política de Privacidad — Quotizador',
+        contenido: `<h1>Términos de Uso y Política de Privacidad — Quotizador</h1>
+<p>Al registrarte en Quotizador aceptas los presentes Términos de Uso y la Política de Privacidad de forma conjunta.</p>
 <h2>1. Sobre el Servicio</h2>
-<p>PresupuestosPro es una plataforma colombiana para la generación de cotizaciones profesionales. El uso del servicio está sujeto al cumplimiento de este documento.</p>
+<p>Quotizador es una plataforma colombiana para la generación de cotizaciones profesionales. El uso del servicio está sujeto al cumplimiento de este documento.</p>
 <h2>2. Datos Personales</h2>
 <p>Recopilamos únicamente los datos necesarios para prestar el servicio: nombre, correo electrónico y documento de identidad. Los datos se utilizan exclusivamente para la prestación del servicio y nunca se venden a terceros.</p>
 <h2>3. Uso Permitido</h2>
 <p>La plataforma está diseñada para la generación de cotizaciones de servicios profesionales lícitos. Queda prohibido su uso para fines ilegales o fraudulentos.</p>
 <h2>4. Limitación de Responsabilidad</h2>
-<p>PresupuestosPro no valida la exactitud de los datos ingresados por el usuario. La plataforma se provee "tal cual" y no garantiza resultados específicos.</p>
+<p>Quotizador no valida la exactitud de los datos ingresados por el usuario. La plataforma se provee "tal cual" y no garantiza resultados específicos.</p>
 <h2>5. Modificaciones</h2>
 <p>Podemos actualizar estos términos. Si los cambios son significativos, te notificaremos y solicitaremos nueva aceptación.</p>
 <h2>6. Contacto</h2>
-<p>Consultas o solicitudes de eliminación de datos: soporte@presupuestospro.co</p>`
+<p>Consultas o solicitudes de eliminación de datos: soporte@quotizador.co</p>`
       }
     ];
 

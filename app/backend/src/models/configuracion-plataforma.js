@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { db } = require('../../db');
 
-const CLAVE_CIFRADO = process.env.CONFIG_ENCRYPTION_KEY || 'presupuestospro-default-key-32ch';
+const CLAVE_CIFRADO = process.env.CONFIG_ENCRYPTION_KEY || 'quotizador-default-key-32ch';
 if (!process.env.CONFIG_ENCRYPTION_KEY) {
   console.warn('[SEGURIDAD] CONFIG_ENCRYPTION_KEY no está definida. Se usa clave por defecto — configúrala en producción.');
 }
