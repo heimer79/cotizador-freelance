@@ -17,7 +17,7 @@ const { cifrar, descifrar } = require('../src/models/configuracion-plataforma');
 
 const limitadorLogin = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Demasiados intentos. Espera 15 minutos antes de intentar de nuevo.' }
