@@ -7,7 +7,14 @@ async function peticion(url, opciones = {}) {
   if (respuesta.status === 204) return null;
 
   const texto = await respuesta.text();
-  if (!texto) return null;
+  if (!texto) {
+    if (!respuesta.ok) {
+      const err = new Error(`Error del servidor (${respuesta.status})`);
+      err.status = respuesta.status;
+      throw err;
+    }
+    return null;
+  }
 
   let datos;
   try {
